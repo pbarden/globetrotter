@@ -17,8 +17,9 @@ const blobColors = [
   '#00ffff', // Cyan/Sky Blue/Aqua
 ]
 
-// Content for each face of the cube (6 points)
+// Content in a 4x4 matrix (16 points)
 const contentPoints = [
+  // Row 0
   {
     id: 0,
     icon: '🚀',
@@ -51,6 +52,7 @@ const contentPoints = [
     paragraph: 'Optimized for speed and efficiency without compromising quality.',
     rotation: { x: 0, y: -Math.PI / 2 }
   },
+  // Row 1
   {
     id: 4,
     icon: '🌟',
@@ -66,6 +68,88 @@ const contentPoints = [
     subheading: 'Next Generation',
     paragraph: 'Building tomorrow\'s solutions with today\'s innovations.',
     rotation: { x: -Math.PI / 2, y: 0 }
+  },
+  {
+    id: 6,
+    icon: '🎯',
+    heading: 'Precision',
+    subheading: 'Pixel Perfect',
+    paragraph: 'Attention to detail in every aspect of design and development.',
+    rotation: { x: 0, y: 0 }
+  },
+  {
+    id: 7,
+    icon: '🌈',
+    heading: 'Diversity',
+    subheading: 'Inclusive Design',
+    paragraph: 'Creating experiences that welcome and engage everyone.',
+    rotation: { x: Math.PI, y: 0 }
+  },
+  // Row 2
+  {
+    id: 8,
+    icon: '🔥',
+    heading: 'Passion',
+    subheading: 'Driven by Purpose',
+    paragraph: 'Fueled by enthusiasm and dedication to excellence.',
+    rotation: { x: 0, y: Math.PI / 2 }
+  },
+  {
+    id: 9,
+    icon: '🌍',
+    heading: 'Global',
+    subheading: 'Worldwide Reach',
+    paragraph: 'Connecting people and ideas across the world.',
+    rotation: { x: 0, y: -Math.PI / 2 }
+  },
+  {
+    id: 10,
+    icon: '🎭',
+    heading: 'Experience',
+    subheading: 'User Focused',
+    paragraph: 'Designing memorable interactions that resonate.',
+    rotation: { x: Math.PI / 2, y: 0 }
+  },
+  {
+    id: 11,
+    icon: '🏆',
+    heading: 'Achievement',
+    subheading: 'Award Winning',
+    paragraph: 'Recognized for outstanding work and innovation.',
+    rotation: { x: -Math.PI / 2, y: 0 }
+  },
+  // Row 3
+  {
+    id: 12,
+    icon: '🧠',
+    heading: 'Intelligence',
+    subheading: 'Smart Solutions',
+    paragraph: 'Leveraging AI and data to create intelligent experiences.',
+    rotation: { x: 0, y: 0 }
+  },
+  {
+    id: 13,
+    icon: '💎',
+    heading: 'Premium',
+    subheading: 'Luxury Design',
+    paragraph: 'Crafting high-end experiences with sophistication.',
+    rotation: { x: Math.PI, y: 0 }
+  },
+  {
+    id: 14,
+    icon: '🚦',
+    heading: 'Direction',
+    subheading: 'Clear Vision',
+    paragraph: 'Guiding projects with strategic thinking and clarity.',
+    rotation: { x: 0, y: Math.PI / 2 }
+  },
+  {
+    id: 15,
+    icon: '🎪',
+    heading: 'Entertainment',
+    subheading: 'Engaging Content',
+    paragraph: 'Creating delightful experiences that captivate audiences.',
+    rotation: { x: 0, y: -Math.PI / 2 }
   }
 ]
 
@@ -137,30 +221,38 @@ function App() {
         let flyOutDir = ''
         let flyInDirection = ''
 
+        // 4x4 matrix navigation
+        const currentRow = Math.floor(currentPoint / 4)
+        const currentCol = currentPoint % 4
+
         // Determine direction and switch point
         if (Math.abs(scrollAccumulator.current.x) > Math.abs(scrollAccumulator.current.y)) {
-          // Vertical scrolling
+          // Vertical scrolling (moves between rows, same column)
           if (scrollAccumulator.current.x > 0) {
-            // Scrolling down - current flies out bottom, new comes from top
-            nextPoint = (currentPoint + 1) % contentPoints.length
+            // Scrolling down - move to next row
+            const nextRow = (currentRow + 1) % 4
+            nextPoint = nextRow * 4 + currentCol
             flyOutDir = 'fly-out-bottom'
             flyInDirection = 'fly-from-top'
           } else {
-            // Scrolling up - current flies out top, new comes from bottom
-            nextPoint = (currentPoint - 1 + contentPoints.length) % contentPoints.length
+            // Scrolling up - move to previous row
+            const nextRow = (currentRow - 1 + 4) % 4
+            nextPoint = nextRow * 4 + currentCol
             flyOutDir = 'fly-out-top'
             flyInDirection = 'fly-from-bottom'
           }
         } else {
-          // Horizontal scrolling
+          // Horizontal scrolling (moves between columns, same row)
           if (scrollAccumulator.current.y > 0) {
-            // Scrolling left - current flies out left, new comes from right
-            nextPoint = (currentPoint + 2) % contentPoints.length
+            // Scrolling left - move to next column
+            const nextCol = (currentCol + 1) % 4
+            nextPoint = currentRow * 4 + nextCol
             flyOutDir = 'fly-out-left'
             flyInDirection = 'fly-from-right'
           } else {
-            // Scrolling right - current flies out right, new comes from left
-            nextPoint = (currentPoint - 2 + contentPoints.length) % contentPoints.length
+            // Scrolling right - move to previous column
+            const nextCol = (currentCol - 1 + 4) % 4
+            nextPoint = currentRow * 4 + nextCol
             flyOutDir = 'fly-out-right'
             flyInDirection = 'fly-from-left'
           }
