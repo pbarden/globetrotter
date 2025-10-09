@@ -7,14 +7,18 @@ import { StringBackground } from './components/StringBackground'
 import { LoadingScreen } from './components/LoadingScreen'
 import './App.css'
 
-// Blob colors for light source
+// Unified color system - matches ContentCard color schemes
 const blobColors = [
-  '#ffaa00', // Gold/Orange/Yellow
-  '#ff00aa', // Magenta/Pink/Purple
+  '#ffd700', // Gold/Orange/Yellow
+  '#ff00ff', // Magenta/Pink/Purple
   '#00ff88', // Green/Mint/Lime
   '#ff6b6b', // Red/Crimson/Pink
-  '#8844ff', // Purple/Violet/Lavender
+  '#b388ff', // Purple/Violet/Lavender
   '#00ffff', // Cyan/Sky Blue/Aqua
+  '#ff9500', // Orange/Tangerine
+  '#00ff00', // Bright Green/Neon
+  '#ff1493', // Hot Pink/Deep Pink
+  '#9370db', // Medium Purple/Blue Violet
 ]
 
 // Content in a 4x4 matrix (16 points)
@@ -22,134 +26,150 @@ const contentPoints = [
   // Row 0
   {
     id: 0,
-    icon: '🚀',
+    iconName: 'Rocket',
     heading: 'Innovation',
     subheading: 'Pushing Boundaries',
     paragraph: 'Exploring new frontiers in design and technology with cutting-edge solutions.',
-    rotation: { x: 0, y: 0 }
+    rotation: { x: 0, y: 0 },
+    colorIndex: 0
   },
   {
     id: 1,
-    icon: '💡',
+    iconName: 'Lightbulb',
     heading: 'Creativity',
     subheading: 'Inspired Design',
     paragraph: 'Crafting unique experiences that blend aesthetics with functionality.',
-    rotation: { x: Math.PI, y: 0 }
+    rotation: { x: Math.PI, y: 0 },
+    colorIndex: 1
   },
   {
     id: 2,
-    icon: '🎨',
+    iconName: 'Palette',
     heading: 'Artistry',
     subheading: 'Visual Excellence',
     paragraph: 'Creating stunning visuals that capture attention and inspire imagination.',
-    rotation: { x: 0, y: Math.PI / 2 }
+    rotation: { x: 0, y: Math.PI / 2 },
+    colorIndex: 2
   },
   {
     id: 3,
-    icon: '⚡',
+    iconName: 'Zap',
     heading: 'Performance',
     subheading: 'Lightning Fast',
     paragraph: 'Optimized for speed and efficiency without compromising quality.',
-    rotation: { x: 0, y: -Math.PI / 2 }
+    rotation: { x: 0, y: -Math.PI / 2 },
+    colorIndex: 3
   },
   // Row 1
   {
     id: 4,
-    icon: '🌟',
+    iconName: 'Star',
     heading: 'Excellence',
     subheading: 'Quality First',
     paragraph: 'Committed to delivering exceptional results in every project.',
-    rotation: { x: Math.PI / 2, y: 0 }
+    rotation: { x: Math.PI / 2, y: 0 },
+    colorIndex: 4
   },
   {
     id: 5,
-    icon: '🔮',
+    iconName: 'Sparkles',
     heading: 'Future',
     subheading: 'Next Generation',
     paragraph: 'Building tomorrow\'s solutions with today\'s innovations.',
-    rotation: { x: -Math.PI / 2, y: 0 }
+    rotation: { x: -Math.PI / 2, y: 0 },
+    colorIndex: 5
   },
   {
     id: 6,
-    icon: '🎯',
+    iconName: 'Target',
     heading: 'Precision',
     subheading: 'Pixel Perfect',
     paragraph: 'Attention to detail in every aspect of design and development.',
-    rotation: { x: 0, y: 0 }
+    rotation: { x: 0, y: 0 },
+    colorIndex: 6
   },
   {
     id: 7,
-    icon: '🌈',
+    iconName: 'Users',
     heading: 'Diversity',
     subheading: 'Inclusive Design',
     paragraph: 'Creating experiences that welcome and engage everyone.',
-    rotation: { x: Math.PI, y: 0 }
+    rotation: { x: Math.PI, y: 0 },
+    colorIndex: 7
   },
   // Row 2
   {
     id: 8,
-    icon: '🔥',
+    iconName: 'Flame',
     heading: 'Passion',
     subheading: 'Driven by Purpose',
     paragraph: 'Fueled by enthusiasm and dedication to excellence.',
-    rotation: { x: 0, y: Math.PI / 2 }
+    rotation: { x: 0, y: Math.PI / 2 },
+    colorIndex: 8
   },
   {
     id: 9,
-    icon: '🌍',
+    iconName: 'Globe',
     heading: 'Global',
     subheading: 'Worldwide Reach',
     paragraph: 'Connecting people and ideas across the world.',
-    rotation: { x: 0, y: -Math.PI / 2 }
+    rotation: { x: 0, y: -Math.PI / 2 },
+    colorIndex: 9
   },
   {
     id: 10,
-    icon: '🎭',
+    iconName: 'Layers',
     heading: 'Experience',
     subheading: 'User Focused',
     paragraph: 'Designing memorable interactions that resonate.',
-    rotation: { x: Math.PI / 2, y: 0 }
+    rotation: { x: Math.PI / 2, y: 0 },
+    colorIndex: 0
   },
   {
     id: 11,
-    icon: '🏆',
+    iconName: 'Trophy',
     heading: 'Achievement',
     subheading: 'Award Winning',
     paragraph: 'Recognized for outstanding work and innovation.',
-    rotation: { x: -Math.PI / 2, y: 0 }
+    rotation: { x: -Math.PI / 2, y: 0 },
+    colorIndex: 1
   },
   // Row 3
   {
     id: 12,
-    icon: '🧠',
+    iconName: 'Brain',
     heading: 'Intelligence',
     subheading: 'Smart Solutions',
     paragraph: 'Leveraging AI and data to create intelligent experiences.',
-    rotation: { x: 0, y: 0 }
+    rotation: { x: 0, y: 0 },
+    colorIndex: 2
   },
   {
     id: 13,
-    icon: '💎',
+    iconName: 'Gem',
     heading: 'Premium',
     subheading: 'Luxury Design',
     paragraph: 'Crafting high-end experiences with sophistication.',
-    rotation: { x: Math.PI, y: 0 }
+    rotation: { x: Math.PI, y: 0 },
+    colorIndex: 3
   },
   {
     id: 14,
-    icon: '🚦',
+    iconName: 'Navigation',
     heading: 'Direction',
     subheading: 'Clear Vision',
     paragraph: 'Guiding projects with strategic thinking and clarity.',
-    rotation: { x: 0, y: Math.PI / 2 }
+    rotation: { x: 0, y: Math.PI / 2 },
+    colorIndex: 4
   },
   {
     id: 15,
-    icon: '🎪',
+    iconName: 'PartyPopper',
     heading: 'Entertainment',
     subheading: 'Engaging Content',
     paragraph: 'Creating delightful experiences that captivate audiences.',
-    rotation: { x: 0, y: -Math.PI / 2 }
+    rotation: { x: 0, y: -Math.PI / 2 },
+    colorIndex: 5
   }
 ]
 
@@ -162,9 +182,11 @@ function App() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [flyOutDirection, setFlyOutDirection] = useState('')
   const [randomSeed, setRandomSeed] = useState(Math.random() * 1000)
-  const [colorIndex, setColorIndex] = useState(Math.floor(Math.random() * 6))
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
+
+  // Get current color index from content point
+  const currentColorIndex = contentPoints[currentPoint].colorIndex
 
   // Calculate blob position for light source (matches BlobLasso calculation)
   const getBlobLightPosition = (contentId) => {
@@ -272,14 +294,8 @@ function App() {
           setAnimationDirection(flyInDirection)
           setAnimationKey(prev => prev + 1)
           setFlyOutDirection('')
-          // Randomize positions and colors on each scroll
+          // Randomize positions on each scroll
           setRandomSeed(Math.random() * 1000)
-          // Pick a new color that's different from the current one
-          setColorIndex(prevIndex => {
-            let newIndex = Math.floor(Math.random() * 5) // 0-4
-            if (newIndex >= prevIndex) newIndex++ // Skip current index
-            return newIndex
-          })
 
           // Allow new transitions after fly-in completes
           setTimeout(() => {
@@ -330,7 +346,7 @@ function App() {
             <pointLight
               position={getBlobLightPosition(currentPoint)}
               intensity={8}
-              color={blobColors[colorIndex]}
+              color={blobColors[currentColorIndex]}
               distance={50}
               decay={0.8}
             />
@@ -343,7 +359,7 @@ function App() {
           content={contentPoints[currentPoint]}
           isActive={!isLoading}
           randomSeed={randomSeed}
-          colorIndex={colorIndex}
+          colorIndex={currentColorIndex}
         />
 
         {/* Blob Lasso */}
@@ -351,7 +367,7 @@ function App() {
           content={contentPoints[currentPoint]}
           isActive={!isLoading}
           randomSeed={randomSeed}
-          colorIndex={colorIndex}
+          colorIndex={currentColorIndex}
         />
 
         {/* Content Cards */}
@@ -361,6 +377,7 @@ function App() {
           isActive={!isLoading}
           needsReorientation={needsReorientation()}
           animationDirection={flyOutDirection || animationDirection}
+          colorIndex={currentColorIndex}
         />
 
         {/* Scroll hint */}

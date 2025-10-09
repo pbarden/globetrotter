@@ -1,13 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import './StringBackground.css'
 
 export function StringBackground({ content, isActive, randomSeed, colorIndex }) {
   const stringRef1 = useRef()
   const stringRef2 = useRef()
+  const animationRef = useRef()
+  const startTimeRef = useRef(0)
+  const colorTransitionRef = useRef(1)
   const [colorTransition, setColorTransition] = useState(1)
   const [previousColors, setPreviousColors] = useState(null)
 
-  // Generate unique colors, position, and rotation for each point
+  // Unified color system - matches App.jsx and ContentCard
   const stringColors = [
     ['#ffd700', '#ff8c00', '#ffaa00'], // Gold/Orange/Yellow
     ['#ff00ff', '#ff00aa', '#aa00ff'], // Magenta/Pink/Purple
@@ -15,6 +18,10 @@ export function StringBackground({ content, isActive, randomSeed, colorIndex }) 
     ['#ff6b6b', '#ff3333', '#ff9999'], // Red/Crimson/Pink
     ['#b388ff', '#8844ff', '#cc99ff'], // Purple/Violet/Lavender
     ['#00ffff', '#00ccff', '#66ffff'], // Cyan/Sky Blue/Aqua
+    ['#ff9500', '#ff6b00', '#ffb84d'], // Orange/Tangerine
+    ['#00ff00', '#00cc00', '#66ff66'], // Bright Green/Neon
+    ['#ff1493', '#ff007f', '#ff69b4'], // Hot Pink/Deep Pink
+    ['#9370db', '#8a2be2', '#ba55d3'], // Medium Purple/Blue Violet
   ]
 
   // Generate random positions that spread across the screen
@@ -47,25 +54,16 @@ export function StringBackground({ content, isActive, randomSeed, colorIndex }) 
   const scale2X = 0.6 + (Math.cos(seed1 * 2.1) * 0.4)
   const scale2Y = 0.6 + (Math.sin(seed2 * 1.9) * 0.4)
 
-  const colors = stringColors[colorIndex % stringColors.length]
+  const colors = useMemo(() => stringColors[colorIndex % stringColors.length], [colorIndex])
 
   // Trigger color transition when content changes
   useEffect(() => {
     if (previousColors && JSON.stringify(previousColors) !== JSON.stringify(colors)) {
+      colorTransitionRef.current = 0
       setColorTransition(0)
     }
     setPreviousColors(colors)
   }, [content.id, colors])
-
-  // Animate color transition
-  useEffect(() => {
-    if (colorTransition < 1) {
-      const transitionInterval = setInterval(() => {
-        setColorTransition(prev => Math.min(prev + 0.015, 1)) // Slow fade over ~2 seconds
-      }, 16)
-      return () => clearInterval(transitionInterval)
-    }
-  }, [colorTransition])
 
   // Interpolate between old and new colors
   const interpolateColor = (color1, color2, factor) => {
@@ -84,22 +82,46 @@ export function StringBackground({ content, isActive, randomSeed, colorIndex }) 
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
   }
 
-  const currentColors = previousColors && colorTransition < 1
-    ? colors.map((color, i) => interpolateColor(previousColors[i], color, colorTransition))
-    : colors
+  const currentColors = useMemo(() => {
+    if (previousColors && colorTransition < 1) {
+      return colors.map((color, i) => interpolateColor(previousColors[i], color, colorTransition))
+    }
+    return colors
+  }, [previousColors, colorTransition, colors])
 
   useEffect(() => {
-    if (isActive && stringRef1.current && stringRef2.current) {
-      const animateStrings = () => {
-        const time = Date.now() * 0.001
-        const path1 = generateStringPath(time)
-        const path2 = generateStringPath(time + 1.5) // Offset timing for variation
-        stringRef1.current.setAttribute('d', path1)
-        stringRef2.current.setAttribute('d', path2)
-        requestAnimationFrame(animateStrings)
+    if (!isActive || !stringRef1.current || !stringRef2.current) return
+
+    startTimeRef.current = performance.now() / 1000
+
+    const animateStrings = (timestamp) => {
+      if (!stringRef1.current || !stringRef2.current) return
+
+      const currentTime = timestamp / 1000
+      const elapsed = currentTime - startTimeRef.current
+
+      // Smooth color transition
+      if (colorTransitionRef.current < 1) {
+        colorTransitionRef.current = Math.min(colorTransitionRef.current + 0.02, 1)
+        setColorTransition(colorTransitionRef.current)
       }
-      const animation = requestAnimationFrame(animateStrings)
-      return () => cancelAnimationFrame(animation)
+
+      // Generate and update string paths
+      const path1 = generateStringPath(elapsed)
+      const path2 = generateStringPath(elapsed + 1.5)
+
+      stringRef1.current.setAttribute('d', path1)
+      stringRef2.current.setAttribute('d', path2)
+
+      animationRef.current = requestAnimationFrame(animateStrings)
+    }
+
+    animationRef.current = requestAnimationFrame(animateStrings)
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
     }
   }, [isActive])
 
@@ -110,36 +132,41 @@ export function StringBackground({ content, isActive, randomSeed, colorIndex }) 
     const radiusY = 180 // Long height
     const centerX = 200
     const centerY = 200
+    const speed = 0.8 // Faster animation speed
 
-    let path = 'M '
+    const pathParts = ['M ']
 
-    for (let i = 0; i <= points; i++) {
+    // Pre-calculate first point
+    const firstAngle = 0
+    const firstNoise = Math.sin(time * speed) * 15
+    const firstRx = radiusX + firstNoise
+    const firstRy = radiusY + firstNoise * 2
+    const firstX = centerX + Math.cos(firstAngle) * firstRx
+    const firstY = centerY + Math.sin(firstAngle) * firstRy
+    pathParts.push(`${firstX.toFixed(2)},${firstY.toFixed(2)} `)
+
+    let prevX = firstX
+    let prevY = firstY
+
+    for (let i = 1; i <= points; i++) {
       const angle = (i / points) * Math.PI * 2
-      const noise = Math.sin(time * 0.5 + i) * 15
+      const noise = Math.sin(time * speed + i) * 15
       const rx = radiusX + noise
       const ry = radiusY + noise * 2
       const x = centerX + Math.cos(angle) * rx
       const y = centerY + Math.sin(angle) * ry
 
-      if (i === 0) {
-        path += `${x},${y} `
-      } else {
-        const prevAngle = ((i - 1) / points) * Math.PI * 2
-        const prevNoise = Math.sin(time * 0.5 + (i - 1)) * 15
-        const prevRx = radiusX + prevNoise
-        const prevRy = radiusY + prevNoise * 2
-        const prevX = centerX + Math.cos(prevAngle) * prevRx
-        const prevY = centerY + Math.sin(prevAngle) * prevRy
+      const cpX = (prevX + x) / 2 + Math.sin(time * 0.5 + i) * 10
+      const cpY = (prevY + y) / 2 + Math.cos(time * 0.5 + i) * 10
 
-        const cpX = (prevX + x) / 2 + Math.sin(time * 0.3 + i) * 10
-        const cpY = (prevY + y) / 2 + Math.cos(time * 0.3 + i) * 10
+      pathParts.push(`Q ${cpX.toFixed(2)},${cpY.toFixed(2)} ${x.toFixed(2)},${y.toFixed(2)} `)
 
-        path += `Q ${cpX},${cpY} ${x},${y} `
-      }
+      prevX = x
+      prevY = y
     }
 
-    path += 'Z'
-    return path
+    pathParts.push('Z')
+    return pathParts.join('')
   }
 
   return (

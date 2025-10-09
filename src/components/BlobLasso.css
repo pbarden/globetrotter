@@ -9,4 +9,11 @@
   pointer-events: none;
   z-index: 5;
   transition: transform 1s cubic-bezier(0.25, 0.8, 0.5, 1);
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.blob-lasso path {
+  will-change: d;
 }
