@@ -8,12 +8,12 @@ import './App.css'
 
 // Blob colors for light source
 const blobColors = [
-  '#ff8c00', // Gold/Orange
-  '#00ffff', // Magenta/Cyan
-  '#0088ff', // Green/Blue
-  '#ffd93d', // Red/Yellow
-  '#64b5f6', // Purple/Blue
-  '#ffaa00', // Pink/Orange
+  '#ffaa00', // Gold/Orange/Yellow
+  '#ff00aa', // Magenta/Pink/Purple
+  '#00ff88', // Green/Mint/Lime
+  '#ff6b6b', // Red/Crimson/Pink
+  '#8844ff', // Purple/Violet/Lavender
+  '#00ffff', // Cyan/Sky Blue/Aqua
 ]
 
 // Content for each face of the cube (6 points)

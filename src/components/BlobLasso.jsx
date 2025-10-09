@@ -3,17 +3,18 @@ import './BlobLasso.css'
 
 export function BlobLasso({ content, isActive }) {
   const blobRef = useRef()
+  const blobRef2 = useRef()
   const [colorTransition, setColorTransition] = useState(1)
   const [previousColors, setPreviousColors] = useState(null)
 
   // Generate unique colors, position, and rotation for each point
   const blobColors = [
-    ['#ffd700', '#ff8c00', '#ffd700'], // Gold/Orange
-    ['#ff00ff', '#00ffff', '#ff00ff'], // Magenta/Cyan
-    ['#00ff88', '#0088ff', '#00ff88'], // Green/Blue
-    ['#ff6b6b', '#ffd93d', '#ff6b6b'], // Red/Yellow
-    ['#b388ff', '#64b5f6', '#b388ff'], // Purple/Blue
-    ['#ff6f91', '#ffaa00', '#ff6f91'], // Pink/Orange
+    ['#ffd700', '#ff8c00', '#ffaa00'], // Gold/Orange/Yellow
+    ['#ff00ff', '#ff00aa', '#aa00ff'], // Magenta/Pink/Purple
+    ['#00ff88', '#00ffaa', '#88ff00'], // Green/Mint/Lime
+    ['#ff6b6b', '#ff3333', '#ff9999'], // Red/Crimson/Pink
+    ['#b388ff', '#8844ff', '#cc99ff'], // Purple/Violet/Lavender
+    ['#00ffff', '#00ccff', '#66ffff'], // Cyan/Sky Blue/Aqua
   ]
 
   // Generate random positions that move around the screen
@@ -35,6 +36,16 @@ export function BlobLasso({ content, isActive }) {
   // Different modals get different squash amounts/directions to simulate rotation
   const scaleX = 0.7 + (Math.sin(seed1 * 1.5) * 0.3)
   const scaleY = 0.7 + (Math.cos(seed2 * 1.5) * 0.3)
+
+  // Second blob for depth - slightly offset position, rotation, and scale
+  const blob2Position = {
+    x: blobPosition.x + (Math.cos(seed1 * 2.1) * 40),
+    y: blobPosition.y + (Math.sin(seed2 * 1.7) * 50)
+  }
+  const blob2Rotation = blobRotation + (Math.cos(seed3) * 60 + 30)
+  const blob2Scale = blobScale * (0.7 + Math.sin(seed2 * 2.3) * 0.3)
+  const scale2X = 0.6 + (Math.cos(seed1 * 2.1) * 0.4)
+  const scale2Y = 0.6 + (Math.sin(seed2 * 1.9) * 0.4)
 
   const colors = blobColors[content.id % blobColors.length]
 
@@ -78,11 +89,13 @@ export function BlobLasso({ content, isActive }) {
     : colors
 
   useEffect(() => {
-    if (isActive && blobRef.current) {
+    if (isActive && blobRef.current && blobRef2.current) {
       const animateBlob = () => {
         const time = Date.now() * 0.001
         const path = generateBlobPath(time)
+        const path2 = generateBlobPath(time + 1.5) // Offset timing for variation
         blobRef.current.setAttribute('d', path)
+        blobRef2.current.setAttribute('d', path2)
         requestAnimationFrame(animateBlob)
       }
       const animation = requestAnimationFrame(animateBlob)
@@ -126,35 +139,73 @@ export function BlobLasso({ content, isActive }) {
   }
 
   return (
-    <svg
-      className="blob-lasso"
-      viewBox="0 0 400 400"
-      style={{
-        transform: `translate(calc(-50% + ${blobPosition.x}px), calc(-50% + ${blobPosition.y}px)) rotate(${blobRotation}deg) scale(${blobScale}) scaleX(${scaleX}) scaleY(${scaleY})`
-      }}
-    >
-      <defs>
-        <filter id={`glow-${content.id}`}>
-          <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
-          <feMerge>
-            <feMergeNode in="coloredBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-        <linearGradient id={`gradient-${content.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={currentColors[0]} />
-          <stop offset="50%" stopColor={currentColors[1]} />
-          <stop offset="100%" stopColor={currentColors[2]} />
-        </linearGradient>
-      </defs>
-      <path
-        ref={blobRef}
-        d={generateBlobPath(0)}
-        fill="none"
-        stroke={`url(#gradient-${content.id})`}
-        strokeWidth="3"
-        filter={`url(#glow-${content.id})`}
-      />
-    </svg>
+    <>
+      {/* Second blob for depth - behind the main blob */}
+      <svg
+        className="blob-lasso"
+        viewBox="0 0 400 400"
+        style={{
+          transform: `translate(calc(-50% + ${blob2Position.x}px), calc(-50% + ${blob2Position.y}px)) rotate(${blob2Rotation}deg) scale(${blob2Scale}) scaleX(${scale2X}) scaleY(${scale2Y})`,
+          opacity: 0.5,
+          zIndex: 0
+        }}
+      >
+        <defs>
+          <filter id={`glow2-${content.id}`}>
+            <feGaussianBlur stdDeviation="10" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <linearGradient id={`gradient2-${content.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={currentColors[2]} />
+            <stop offset="50%" stopColor={currentColors[0]} />
+            <stop offset="100%" stopColor={currentColors[1]} />
+          </linearGradient>
+        </defs>
+        <path
+          ref={blobRef2}
+          d={generateBlobPath(1.5)}
+          fill="none"
+          stroke={`url(#gradient2-${content.id})`}
+          strokeWidth="2.5"
+          filter={`url(#glow2-${content.id})`}
+        />
+      </svg>
+
+      {/* Main blob */}
+      <svg
+        className="blob-lasso"
+        viewBox="0 0 400 400"
+        style={{
+          transform: `translate(calc(-50% + ${blobPosition.x}px), calc(-50% + ${blobPosition.y}px)) rotate(${blobRotation}deg) scale(${blobScale}) scaleX(${scaleX}) scaleY(${scaleY})`,
+          zIndex: 1
+        }}
+      >
+        <defs>
+          <filter id={`glow-${content.id}`}>
+            <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <linearGradient id={`gradient-${content.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={currentColors[0]} />
+            <stop offset="50%" stopColor={currentColors[1]} />
+            <stop offset="100%" stopColor={currentColors[2]} />
+          </linearGradient>
+        </defs>
+        <path
+          ref={blobRef}
+          d={generateBlobPath(0)}
+          fill="none"
+          stroke={`url(#gradient-${content.id})`}
+          strokeWidth="3"
+          filter={`url(#glow-${content.id})`}
+        />
+      </svg>
+    </>
   )
 }
