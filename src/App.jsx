@@ -77,15 +77,16 @@ function App() {
   const [animationKey, setAnimationKey] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [flyOutDirection, setFlyOutDirection] = useState('')
+  const [randomSeed, setRandomSeed] = useState(Math.random() * 1000)
+  const [colorIndex, setColorIndex] = useState(Math.floor(Math.random() * 6))
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
-  const randomSeed = useRef(Math.random() * 1000)
 
   // Calculate blob position for light source (matches BlobLasso calculation)
   const getBlobLightPosition = (contentId) => {
-    const seed1 = contentId * 3.7 + randomSeed.current
-    const seed2 = contentId * 7.3 + randomSeed.current * 1.3
-    const seed3 = contentId * 11.1 + randomSeed.current * 0.7
+    const seed1 = contentId * 3.7 + randomSeed
+    const seed2 = contentId * 7.3 + randomSeed * 1.3
+    const seed3 = contentId * 11.1 + randomSeed * 0.7
 
     // Get screen position in pixels (same as BlobLasso)
     const screenX = (Math.sin(seed1) * 45 + Math.cos(seed2) * 35 + Math.sin(seed3) * 25) * (window.innerWidth / 100)
@@ -179,6 +180,14 @@ function App() {
           setAnimationDirection(flyInDirection)
           setAnimationKey(prev => prev + 1)
           setFlyOutDirection('')
+          // Randomize positions and colors on each scroll
+          setRandomSeed(Math.random() * 1000)
+          // Pick a new color that's different from the current one
+          setColorIndex(prevIndex => {
+            let newIndex = Math.floor(Math.random() * 5) // 0-4
+            if (newIndex >= prevIndex) newIndex++ // Skip current index
+            return newIndex
+          })
 
           // Allow new transitions after fly-in completes
           setTimeout(() => {
@@ -229,7 +238,7 @@ function App() {
             <pointLight
               position={getBlobLightPosition(currentPoint)}
               intensity={8}
-              color={blobColors[currentPoint]}
+              color={blobColors[colorIndex]}
               distance={50}
               decay={0.8}
             />
@@ -241,14 +250,16 @@ function App() {
         <StringBackground
           content={contentPoints[currentPoint]}
           isActive={!isLoading}
-          randomSeed={randomSeed.current}
+          randomSeed={randomSeed}
+          colorIndex={colorIndex}
         />
 
         {/* Blob Lasso */}
         <BlobLasso
           content={contentPoints[currentPoint]}
           isActive={!isLoading}
-          randomSeed={randomSeed.current}
+          randomSeed={randomSeed}
+          colorIndex={colorIndex}
         />
 
         {/* Content Cards */}

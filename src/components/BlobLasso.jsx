@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './BlobLasso.css'
 
-export function BlobLasso({ content, isActive, randomSeed }) {
+export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
   const blobRef = useRef()
   const blobRef2 = useRef()
   const [colorTransition, setColorTransition] = useState(1)
@@ -47,7 +47,7 @@ export function BlobLasso({ content, isActive, randomSeed }) {
   const scale2X = 0.6 + (Math.cos(seed1 * 2.1) * 0.4)
   const scale2Y = 0.6 + (Math.sin(seed2 * 1.9) * 0.4)
 
-  const colors = blobColors[content.id % blobColors.length]
+  const colors = blobColors[colorIndex % blobColors.length]
 
   // Trigger color transition when content changes
   useEffect(() => {

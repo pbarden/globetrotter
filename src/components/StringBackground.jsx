@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './StringBackground.css'
 
-export function StringBackground({ content, isActive, randomSeed }) {
+export function StringBackground({ content, isActive, randomSeed, colorIndex }) {
   const stringRef1 = useRef()
   const stringRef2 = useRef()
   const [colorTransition, setColorTransition] = useState(1)
@@ -47,7 +47,7 @@ export function StringBackground({ content, isActive, randomSeed }) {
   const scale2X = 0.6 + (Math.cos(seed1 * 2.1) * 0.4)
   const scale2Y = 0.6 + (Math.sin(seed2 * 1.9) * 0.4)
 
-  const colors = stringColors[content.id % stringColors.length]
+  const colors = stringColors[colorIndex % stringColors.length]
 
   // Trigger color transition when content changes
   useEffect(() => {
