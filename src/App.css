@@ -1,0 +1,81 @@
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 100%);
+  perspective: 1200px;
+  perspective-origin: center center;
+}
+
+.globe-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: rgba(176, 176, 208, 0.6);
+  font-size: 0.9rem;
+  animation: fadeInOut 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.scroll-indicator {
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  letter-spacing: 1rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content-card {
+    width: 90%;
+    max-width: 320px;
+  }
+
+  .scroll-hint {
+    font-size: 0.8rem;
+  }
+}
+
+/* Performance optimizations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app-container,
+.globe-canvas,
+.content-card,
+.blob-outline {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
