@@ -17,14 +17,14 @@ export function BlobLasso({ content, isActive }) {
     ['#00ffff', '#00ccff', '#66ffff'], // Cyan/Sky Blue/Aqua
   ]
 
-  // Generate random positions that move around the screen
+  // Generate random positions that spread across the screen
   const seed1 = content.id * 3.7
   const seed2 = content.id * 7.3
   const seed3 = content.id * 11.1
 
   const blobPosition = {
-    x: (Math.sin(seed1) * 50 + Math.cos(seed2) * 35 + Math.sin(seed3) * 25) * (window.innerWidth / 100),
-    y: (Math.cos(seed1) * 45 + Math.sin(seed2) * 30 + Math.cos(seed3) * 25) * (window.innerHeight / 100)
+    x: (Math.sin(seed1) * 45 + Math.cos(seed2) * 35 + Math.sin(seed3) * 25) * (window.innerWidth / 100),
+    y: (Math.cos(seed1) * 42 + Math.sin(seed2) * 32 + Math.cos(seed3) * 28) * (window.innerHeight / 100)
   }
 
   const blobRotation = (Math.sin(seed1) * 120 + Math.cos(seed2) * 80 + content.id * 30) % 360
@@ -37,10 +37,10 @@ export function BlobLasso({ content, isActive }) {
   const scaleX = 0.7 + (Math.sin(seed1 * 1.5) * 0.3)
   const scaleY = 0.7 + (Math.cos(seed2 * 1.5) * 0.3)
 
-  // Second blob for depth - slightly offset position, rotation, and scale
+  // Second blob for depth - more independent position
   const blob2Position = {
-    x: blobPosition.x + (Math.cos(seed1 * 2.1) * 40),
-    y: blobPosition.y + (Math.sin(seed2 * 1.7) * 50)
+    x: (Math.sin(seed2 * 1.3) * 48 + Math.cos(seed3 * 0.9) * 38 + Math.sin(seed1 * 1.7) * 22) * (window.innerWidth / 100),
+    y: (Math.cos(seed3 * 1.1) * 45 + Math.sin(seed1 * 1.5) * 35 + Math.cos(seed2 * 0.8) * 25) * (window.innerHeight / 100)
   }
   const blob2Rotation = blobRotation + (Math.cos(seed3) * 60 + 30)
   const blob2Scale = blobScale * (0.7 + Math.sin(seed2 * 2.3) * 0.3)

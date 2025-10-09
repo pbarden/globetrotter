@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { Globe } from './components/Globe'
 import { ContentCard } from './components/ContentCard'
 import { BlobLasso } from './components/BlobLasso'
+import { StringBackground } from './components/StringBackground'
 import { LoadingScreen } from './components/LoadingScreen'
 import './App.css'
 
@@ -86,8 +87,8 @@ function App() {
     const seed3 = contentId * 11.1
 
     // Get screen position in pixels (same as BlobLasso)
-    const screenX = (Math.sin(seed1) * 50 + Math.cos(seed2) * 35 + Math.sin(seed3) * 25) * (window.innerWidth / 100)
-    const screenY = (Math.cos(seed1) * 45 + Math.sin(seed2) * 30 + Math.cos(seed3) * 25) * (window.innerHeight / 100)
+    const screenX = (Math.sin(seed1) * 45 + Math.cos(seed2) * 35 + Math.sin(seed3) * 25) * (window.innerWidth / 100)
+    const screenY = (Math.cos(seed1) * 42 + Math.sin(seed2) * 32 + Math.cos(seed3) * 28) * (window.innerHeight / 100)
 
     // Convert to normalized coordinates (-1 to 1) for 3D space
     const normalizedX = (screenX / window.innerWidth) * 8
@@ -234,6 +235,12 @@ function App() {
             <Globe targetRotation={targetRotation} />
           </Suspense>
         </Canvas>
+
+        {/* String Background */}
+        <StringBackground
+          content={contentPoints[currentPoint]}
+          isActive={!isLoading}
+        />
 
         {/* Blob Lasso */}
         <BlobLasso
