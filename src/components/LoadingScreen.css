@@ -53,30 +53,7 @@
   height: 100%;
   border: 2px solid #6a5acd;
   background: rgba(26, 26, 46, 0.3);
-}
-
-.cube-face.front {
-  transform: translateZ(75px);
-}
-
-.cube-face.back {
-  transform: translateZ(-75px) rotateY(180deg);
-}
-
-.cube-face.left {
-  transform: translateX(-75px) rotateY(-90deg);
-}
-
-.cube-face.right {
-  transform: translateX(75px) rotateY(90deg);
-}
-
-.cube-face.top {
-  transform: translateY(-75px) rotateX(90deg);
-}
-
-.cube-face.bottom {
-  transform: translateY(75px) rotateX(-90deg);
+  transition: transform 0.1s linear;
 }
 
 .loading-title {

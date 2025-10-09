@@ -4,11 +4,27 @@ import * as THREE from 'three'
 
 export function Globe({ rotation, targetRotation }) {
   const meshRef = useRef()
+  const materialRef = useRef()
   const edgesRef = useRef()
+  const timeRef = useRef(0)
+  const rotationVelocity = useRef(0)
 
-  // Create icosahedron geometry for low-poly look
-  const geometry = useMemo(() => {
-    return new THREE.IcosahedronGeometry(2.5, 2)
+  // Create icosahedron geometry with random hue offsets for each vertex
+  const { geometry, hueOffsets } = useMemo(() => {
+    const geo = new THREE.IcosahedronGeometry(2.5, 2)
+    const offsets = []
+    const colors = []
+
+    // Assign random hue offsets to each vertex for rainbow crystal effect
+    for (let i = 0; i < geo.attributes.position.count; i++) {
+      offsets.push(Math.random() * 360)
+      // Initialize with a color
+      colors.push(1, 1, 1)
+    }
+
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
+
+    return { geometry: geo, hueOffsets: offsets }
   }, [])
 
   // Create edges geometry for wireframe
@@ -16,36 +32,72 @@ export function Globe({ rotation, targetRotation }) {
     return new THREE.EdgesGeometry(geometry, 15)
   }, [geometry])
 
-  // Animate rotation smoothly towards target
-  useFrame(() => {
+  // Animate rotation and colors
+  useFrame((state, delta) => {
+    // Calculate rotation velocity
     if (meshRef.current && targetRotation) {
-      meshRef.current.rotation.x += (targetRotation.x - meshRef.current.rotation.x) * 0.05
-      meshRef.current.rotation.y += (targetRotation.y - meshRef.current.rotation.y) * 0.05
+      const currentRotX = meshRef.current.rotation.x
+      const currentRotY = meshRef.current.rotation.y
+
+      const deltaX = targetRotation.x - currentRotX
+      const deltaY = targetRotation.y - currentRotY
+      rotationVelocity.current = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+
+      meshRef.current.rotation.x += deltaX * 0.05
+      meshRef.current.rotation.y += deltaY * 0.05
     }
 
     if (edgesRef.current && targetRotation) {
       edgesRef.current.rotation.x += (targetRotation.x - edgesRef.current.rotation.x) * 0.05
       edgesRef.current.rotation.y += (targetRotation.y - edgesRef.current.rotation.y) * 0.05
     }
+
+    // Update time for color cycling
+    const isRotating = Math.abs(rotationVelocity.current) > 0.01
+    const timeSpeed = isRotating ? 2.0 : 0.3 // Speed up color changes during rotation
+    timeRef.current += delta * timeSpeed
+
+    // Update vertex colors with rainbow cycling
+    if (geometry.attributes.color) {
+      const colors = geometry.attributes.color.array
+      const color = new THREE.Color()
+
+      for (let i = 0; i < hueOffsets.length; i++) {
+        const hue = (hueOffsets[i] + timeRef.current * 30) % 360
+        const saturation = 0.9 + Math.sin(timeRef.current + i) * 0.1 // Very saturated rainbow
+        const lightness = 0.65 + Math.sin(timeRef.current * 0.5 + i * 0.5) * 0.2
+
+        color.setHSL(hue / 360, saturation, lightness)
+        colors[i * 3] = color.r
+        colors[i * 3 + 1] = color.g
+        colors[i * 3 + 2] = color.b
+      }
+
+      geometry.attributes.color.needsUpdate = true
+    }
   })
 
   return (
     <group>
-      {/* Low-poly shaded mesh */}
+      {/* Crystal mesh with rainbow refraction */}
       <mesh ref={meshRef} geometry={geometry}>
         <meshPhongMaterial
-          color="#DAA520"
-          emissive="#8B6914"
-          emissiveIntensity={0.2}
+          ref={materialRef}
+          color="#b8d4ff"
+          emissive="#cce5ff"
+          emissiveIntensity={0.08}
           flatShading={true}
-          shininess={80}
-          specular="#FFD700"
+          shininess={150}
+          specular="#e0f0ff"
+          vertexColors={true}
+          transparent={true}
+          opacity={0.4}
         />
       </mesh>
 
       {/* Wireframe overlay */}
       <lineSegments ref={edgesRef} geometry={edges}>
-        <lineBasicMaterial color="#B8860B" linewidth={1} />
+        <lineBasicMaterial color="#aaccff" linewidth={1} opacity={0.2} transparent={true} />
       </lineSegments>
     </group>
   )

@@ -24,15 +24,15 @@ export function LoadingScreen({ onLoadComplete }) {
       <div className="loading-content">
         <div className="loading-globe">
           <div className="wireframe-cube">
-            <div className="cube-face front"></div>
-            <div className="cube-face back"></div>
-            <div className="cube-face left"></div>
-            <div className="cube-face right"></div>
-            <div className="cube-face top"></div>
-            <div className="cube-face bottom"></div>
+            <div className="cube-face front" style={{ transform: `translateZ(${75 + progress * 0.5}px)` }}></div>
+            <div className="cube-face back" style={{ transform: `translateZ(-${75 + progress * 0.5}px) rotateY(180deg)` }}></div>
+            <div className="cube-face left" style={{ transform: `translateX(-${75 + progress * 0.5}px) rotateY(-90deg)` }}></div>
+            <div className="cube-face right" style={{ transform: `translateX(${75 + progress * 0.5}px) rotateY(90deg)` }}></div>
+            <div className="cube-face top" style={{ transform: `translateY(-${75 + progress * 0.5}px) rotateX(90deg)` }}></div>
+            <div className="cube-face bottom" style={{ transform: `translateY(${75 + progress * 0.5}px) rotateX(-90deg)` }}></div>
           </div>
         </div>
-        <h1 className="loading-title">GLOBE SITE</h1>
+        <h1 className="loading-title">moon man digital</h1>
         <div className="loading-bar">
           <div className="loading-progress" style={{ width: `${progress}%` }}></div>
         </div>

@@ -1,8 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './BlobLasso.css'
 
 export function BlobLasso({ content, isActive }) {
   const blobRef = useRef()
+  const [colorTransition, setColorTransition] = useState(1)
+  const [previousColors, setPreviousColors] = useState(null)
 
   // Generate unique colors, position, and rotation for each point
   const blobColors = [
@@ -35,6 +37,45 @@ export function BlobLasso({ content, isActive }) {
   const scaleY = 0.7 + (Math.cos(seed2 * 1.5) * 0.3)
 
   const colors = blobColors[content.id % blobColors.length]
+
+  // Trigger color transition when content changes
+  useEffect(() => {
+    if (previousColors && JSON.stringify(previousColors) !== JSON.stringify(colors)) {
+      setColorTransition(0)
+    }
+    setPreviousColors(colors)
+  }, [content.id, colors])
+
+  // Animate color transition
+  useEffect(() => {
+    if (colorTransition < 1) {
+      const transitionInterval = setInterval(() => {
+        setColorTransition(prev => Math.min(prev + 0.015, 1)) // Slow fade over ~2 seconds
+      }, 16)
+      return () => clearInterval(transitionInterval)
+    }
+  }, [colorTransition])
+
+  // Interpolate between old and new colors
+  const interpolateColor = (color1, color2, factor) => {
+    if (!color1) return color2
+    const r1 = parseInt(color1.slice(1, 3), 16)
+    const g1 = parseInt(color1.slice(3, 5), 16)
+    const b1 = parseInt(color1.slice(5, 7), 16)
+    const r2 = parseInt(color2.slice(1, 3), 16)
+    const g2 = parseInt(color2.slice(3, 5), 16)
+    const b2 = parseInt(color2.slice(5, 7), 16)
+
+    const r = Math.round(r1 + (r2 - r1) * factor)
+    const g = Math.round(g1 + (g2 - g1) * factor)
+    const b = Math.round(b1 + (b2 - b1) * factor)
+
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+  }
+
+  const currentColors = previousColors && colorTransition < 1
+    ? colors.map((color, i) => interpolateColor(previousColors[i], color, colorTransition))
+    : colors
 
   useEffect(() => {
     if (isActive && blobRef.current) {
@@ -101,9 +142,9 @@ export function BlobLasso({ content, isActive }) {
           </feMerge>
         </filter>
         <linearGradient id={`gradient-${content.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={colors[0]} />
-          <stop offset="50%" stopColor={colors[1]} />
-          <stop offset="100%" stopColor={colors[2]} />
+          <stop offset="0%" stopColor={currentColors[0]} />
+          <stop offset="50%" stopColor={currentColors[1]} />
+          <stop offset="100%" stopColor={currentColors[2]} />
         </linearGradient>
       </defs>
       <path

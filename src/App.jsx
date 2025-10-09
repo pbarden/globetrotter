@@ -6,6 +6,16 @@ import { BlobLasso } from './components/BlobLasso'
 import { LoadingScreen } from './components/LoadingScreen'
 import './App.css'
 
+// Blob colors for light source
+const blobColors = [
+  '#ff8c00', // Gold/Orange
+  '#00ffff', // Magenta/Cyan
+  '#0088ff', // Green/Blue
+  '#ffd93d', // Red/Yellow
+  '#64b5f6', // Purple/Blue
+  '#ffaa00', // Pink/Orange
+]
+
 // Content for each face of the cube (6 points)
 const contentPoints = [
   {
@@ -66,8 +76,30 @@ function App() {
   const [animationKey, setAnimationKey] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [flyOutDirection, setFlyOutDirection] = useState('')
+  const [lightColor, setLightColor] = useState(blobColors[0])
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
+
+  // Calculate blob position for light source (matches BlobLasso calculation)
+  const getBlobLightPosition = (contentId) => {
+    const seed1 = contentId * 3.7
+    const seed2 = contentId * 7.3
+    const seed3 = contentId * 11.1
+
+    // Get screen position in pixels (same as BlobLasso)
+    const screenX = (Math.sin(seed1) * 50 + Math.cos(seed2) * 35 + Math.sin(seed3) * 25) * (window.innerWidth / 100)
+    const screenY = (Math.cos(seed1) * 45 + Math.sin(seed2) * 30 + Math.cos(seed3) * 25) * (window.innerHeight / 100)
+
+    // Convert to normalized coordinates (-1 to 1) for 3D space
+    const normalizedX = (screenX / window.innerWidth) * 8
+    const normalizedY = -(screenY / window.innerHeight) * 6
+
+    // Position light in front of globe to cast light on it
+    const blobScale = 0.5 + (Math.sin(seed1 + seed2) * 0.5 + 0.5)
+    const lightDistance = 5 + blobScale * 2
+
+    return [normalizedX, normalizedY, lightDistance]
+  }
 
   useEffect(() => {
     if (isLoading) return
@@ -147,6 +179,9 @@ function App() {
           setAnimationKey(prev => prev + 1)
           setFlyOutDirection('')
 
+          // Smoothly transition light color
+          setLightColor(blobColors[nextPoint])
+
           // Allow new transitions after fly-in completes
           setTimeout(() => {
             setIsTransitioning(false)
@@ -188,10 +223,18 @@ function App() {
           className="globe-canvas"
         >
           <Suspense fallback={null}>
-            <ambientLight intensity={0.4} />
-            <pointLight position={[10, 10, 10]} intensity={1.5} color="#ffffff" />
-            <pointLight position={[-5, -5, 5]} intensity={0.8} color="#ff8c00" />
-            <pointLight position={[0, 8, 0]} intensity={0.6} color="#ffd700" />
+            <ambientLight intensity={0.3} />
+            <pointLight position={[10, 10, 10]} intensity={1.2} color="#ffffff" />
+            <pointLight position={[-5, -5, 5]} intensity={0.6} color="#ff8c00" />
+            <pointLight position={[0, 8, 0]} intensity={0.4} color="#ffd700" />
+            {/* Dynamic blob color light source - follows blob position */}
+            <pointLight
+              position={getBlobLightPosition(currentPoint)}
+              intensity={8}
+              color={lightColor}
+              distance={50}
+              decay={0.8}
+            />
             <Globe targetRotation={targetRotation} />
           </Suspense>
         </Canvas>
