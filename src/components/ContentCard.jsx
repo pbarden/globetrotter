@@ -68,25 +68,7 @@ export function ContentCard({ content, isActive, needsReorientation, animationDi
           </div>
         </div>
 
-        {/* Row 3 - Paragraph */}
-        <div className="grid-item paragraph-area">
-          <div className="paragraph-box floating-card">
-            <p className="card-paragraph">{content.paragraph}</p>
-          </div>
-        </div>
-
-        {/* Row 4 - Image + Info boxes */}
-        <div className="grid-item image-area">
-          <div className="image-box floating-card">
-            <div className="placeholder-image" style={{
-              background: `linear-gradient(135deg, ${currentScheme.primary}22 0%, ${currentScheme.secondary}22 100%)`,
-              border: `1px solid ${currentScheme.primary}44`
-            }}>
-              <Icons.Sparkles size={32} strokeWidth={1.5} style={{ color: currentScheme.primary, opacity: 0.6 }} />
-            </div>
-          </div>
-        </div>
-
+        {/* Row 3 - Info boxes */}
         <div className="grid-item info-box-1-area">
           <div className="info-box floating-card">
             <div className="info-label">Status</div>
@@ -101,7 +83,79 @@ export function ContentCard({ content, isActive, needsReorientation, animationDi
           </div>
         </div>
 
-        {/* Row 5 - Buttons */}
+        <div className="grid-item info-box-3-area">
+          <div className="info-box floating-card">
+            <div className="info-label">Level</div>
+            <div className="info-value">Pro</div>
+          </div>
+        </div>
+
+        {/* Row 4 - Five images in their own 9-column grid */}
+        <div className="images-row-container">
+          <div className="image-area-1">
+            <div className="image-box floating-card">
+              <div className="placeholder-image" style={{
+                background: `linear-gradient(135deg, ${currentScheme.primary}22 0%, ${currentScheme.secondary}22 100%)`,
+                border: `1px solid ${currentScheme.primary}44`
+              }}>
+                <Icons.Sparkles size={24} strokeWidth={1.5} style={{ color: currentScheme.primary, opacity: 0.6 }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="image-area-2">
+            <div className="image-box floating-card">
+              <div className="placeholder-image" style={{
+                background: `linear-gradient(135deg, ${currentScheme.primary}22 0%, ${currentScheme.secondary}22 100%)`,
+                border: `1px solid ${currentScheme.primary}44`
+              }}>
+                <Icons.Zap size={24} strokeWidth={1.5} style={{ color: currentScheme.primary, opacity: 0.6 }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="image-area-3">
+            <div className="image-box floating-card">
+              <div className="placeholder-image" style={{
+                background: `linear-gradient(135deg, ${currentScheme.primary}22 0%, ${currentScheme.secondary}22 100%)`,
+                border: `1px solid ${currentScheme.primary}44`
+              }}>
+                <Icons.Star size={24} strokeWidth={1.5} style={{ color: currentScheme.primary, opacity: 0.6 }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="image-area-4">
+            <div className="image-box floating-card">
+              <div className="placeholder-image" style={{
+                background: `linear-gradient(135deg, ${currentScheme.primary}22 0%, ${currentScheme.secondary}22 100%)`,
+                border: `1px solid ${currentScheme.primary}44`
+              }}>
+                <Icons.Trophy size={24} strokeWidth={1.5} style={{ color: currentScheme.primary, opacity: 0.6 }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="image-area-5">
+            <div className="image-box floating-card">
+              <div className="placeholder-image" style={{
+                background: `linear-gradient(135deg, ${currentScheme.primary}22 0%, ${currentScheme.secondary}22 100%)`,
+                border: `1px solid ${currentScheme.primary}44`
+              }}>
+                <Icons.Flame size={24} strokeWidth={1.5} style={{ color: currentScheme.primary, opacity: 0.6 }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 5-6 - Paragraph */}
+        <div className="grid-item paragraph-area">
+          <div className="paragraph-box floating-card">
+            <p className="card-paragraph">{content.paragraph}</p>
+          </div>
+        </div>
+
+        {/* Row 8 - Buttons */}
         <div className="grid-item secondary-button-area">
           <button
             className="tech-button secondary-button"
