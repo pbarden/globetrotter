@@ -76,7 +76,6 @@ function App() {
   const [animationKey, setAnimationKey] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [flyOutDirection, setFlyOutDirection] = useState('')
-  const [lightColor, setLightColor] = useState(blobColors[0])
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
 
@@ -139,25 +138,25 @@ function App() {
         if (Math.abs(scrollAccumulator.current.x) > Math.abs(scrollAccumulator.current.y)) {
           // Vertical scrolling
           if (scrollAccumulator.current.x > 0) {
-            // Scrolling down - next point comes from bottom
+            // Scrolling down - current flies out bottom, new comes from top
             nextPoint = (currentPoint + 1) % contentPoints.length
-            flyOutDir = 'fly-out-top'
-            flyInDirection = 'fly-from-bottom'
-          } else {
-            // Scrolling up - next point comes from top
-            nextPoint = (currentPoint - 1 + contentPoints.length) % contentPoints.length
             flyOutDir = 'fly-out-bottom'
             flyInDirection = 'fly-from-top'
+          } else {
+            // Scrolling up - current flies out top, new comes from bottom
+            nextPoint = (currentPoint - 1 + contentPoints.length) % contentPoints.length
+            flyOutDir = 'fly-out-top'
+            flyInDirection = 'fly-from-bottom'
           }
         } else {
           // Horizontal scrolling
           if (scrollAccumulator.current.y > 0) {
-            // Scrolling right - next point comes from right
+            // Scrolling left - current flies out left, new comes from right
             nextPoint = (currentPoint + 2) % contentPoints.length
             flyOutDir = 'fly-out-left'
             flyInDirection = 'fly-from-right'
           } else {
-            // Scrolling left - next point comes from left
+            // Scrolling right - current flies out right, new comes from left
             nextPoint = (currentPoint - 2 + contentPoints.length) % contentPoints.length
             flyOutDir = 'fly-out-right'
             flyInDirection = 'fly-from-left'
@@ -178,9 +177,6 @@ function App() {
           setAnimationDirection(flyInDirection)
           setAnimationKey(prev => prev + 1)
           setFlyOutDirection('')
-
-          // Smoothly transition light color
-          setLightColor(blobColors[nextPoint])
 
           // Allow new transitions after fly-in completes
           setTimeout(() => {
@@ -231,7 +227,7 @@ function App() {
             <pointLight
               position={getBlobLightPosition(currentPoint)}
               intensity={8}
-              color={lightColor}
+              color={blobColors[currentPoint]}
               distance={50}
               decay={0.8}
             />
