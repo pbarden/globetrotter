@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './StringBackground.css'
 
-export function StringBackground({ content, isActive }) {
+export function StringBackground({ content, isActive, randomSeed }) {
   const stringRef1 = useRef()
   const stringRef2 = useRef()
   const [colorTransition, setColorTransition] = useState(1)
@@ -18,9 +18,9 @@ export function StringBackground({ content, isActive }) {
   ]
 
   // Generate random positions that spread across the screen
-  const seed1 = content.id * 3.7
-  const seed2 = content.id * 7.3
-  const seed3 = content.id * 11.1
+  const seed1 = content.id * 3.7 + randomSeed * 1.5
+  const seed2 = content.id * 7.3 + randomSeed * 0.9
+  const seed3 = content.id * 11.1 + randomSeed * 1.2
 
   // String 1 position - independent from blobs
   const string1Position = {

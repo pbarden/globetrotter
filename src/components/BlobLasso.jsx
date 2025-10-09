@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './BlobLasso.css'
 
-export function BlobLasso({ content, isActive }) {
+export function BlobLasso({ content, isActive, randomSeed }) {
   const blobRef = useRef()
   const blobRef2 = useRef()
   const [colorTransition, setColorTransition] = useState(1)
@@ -18,9 +18,9 @@ export function BlobLasso({ content, isActive }) {
   ]
 
   // Generate random positions that spread across the screen
-  const seed1 = content.id * 3.7
-  const seed2 = content.id * 7.3
-  const seed3 = content.id * 11.1
+  const seed1 = content.id * 3.7 + randomSeed
+  const seed2 = content.id * 7.3 + randomSeed * 1.3
+  const seed3 = content.id * 11.1 + randomSeed * 0.7
 
   const blobPosition = {
     x: (Math.sin(seed1) * 45 + Math.cos(seed2) * 35 + Math.sin(seed3) * 25) * (window.innerWidth / 100),

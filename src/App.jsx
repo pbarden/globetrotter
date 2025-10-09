@@ -79,12 +79,13 @@ function App() {
   const [flyOutDirection, setFlyOutDirection] = useState('')
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
+  const randomSeed = useRef(Math.random() * 1000)
 
   // Calculate blob position for light source (matches BlobLasso calculation)
   const getBlobLightPosition = (contentId) => {
-    const seed1 = contentId * 3.7
-    const seed2 = contentId * 7.3
-    const seed3 = contentId * 11.1
+    const seed1 = contentId * 3.7 + randomSeed.current
+    const seed2 = contentId * 7.3 + randomSeed.current * 1.3
+    const seed3 = contentId * 11.1 + randomSeed.current * 0.7
 
     // Get screen position in pixels (same as BlobLasso)
     const screenX = (Math.sin(seed1) * 45 + Math.cos(seed2) * 35 + Math.sin(seed3) * 25) * (window.innerWidth / 100)
@@ -240,12 +241,14 @@ function App() {
         <StringBackground
           content={contentPoints[currentPoint]}
           isActive={!isLoading}
+          randomSeed={randomSeed.current}
         />
 
         {/* Blob Lasso */}
         <BlobLasso
           content={contentPoints[currentPoint]}
           isActive={!isLoading}
+          randomSeed={randomSeed.current}
         />
 
         {/* Content Cards */}
