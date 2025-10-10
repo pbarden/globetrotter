@@ -11,6 +11,7 @@ export function Globe({ rotation, targetRotation }) {
   const rotationVelocity = useRef(0)
   const [entryAnimation, setEntryAnimation] = useState(0)
   const hasEnteredRef = useRef(false)
+  const idleRotationRef = useRef({ x: 0, y: 0 })
 
   // Create icosahedron geometry with random hue offsets for each vertex
   const { geometry, hueOffsets } = useMemo(() => {
@@ -65,22 +66,39 @@ export function Globe({ rotation, targetRotation }) {
       groupRef.current.position.y = -10 + (10 * easedProgress)
     }
 
-    // Calculate rotation velocity
-    if (meshRef.current && targetRotation) {
+    // Idle rotation - slow continuous spin
+    idleRotationRef.current.y += delta * 0.15 // Slow Y-axis rotation
+    idleRotationRef.current.x += delta * 0.05 // Very slow X-axis rotation
+
+    // Calculate rotation velocity and apply target rotation + idle rotation
+    const effectiveTarget = targetRotation || { x: 0, y: 0 }
+    if (meshRef.current) {
       const currentRotX = meshRef.current.rotation.x
       const currentRotY = meshRef.current.rotation.y
 
-      const deltaX = targetRotation.x - currentRotX
-      const deltaY = targetRotation.y - currentRotY
+      // Target rotation with idle rotation added
+      const targetWithIdle = {
+        x: effectiveTarget.x + idleRotationRef.current.x,
+        y: effectiveTarget.y + idleRotationRef.current.y
+      }
+
+      const deltaX = targetWithIdle.x - currentRotX
+      const deltaY = targetWithIdle.y - currentRotY
       rotationVelocity.current = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
 
       meshRef.current.rotation.x += deltaX * 0.05
       meshRef.current.rotation.y += deltaY * 0.05
     }
 
-    if (edgesRef.current && targetRotation) {
-      edgesRef.current.rotation.x += (targetRotation.x - edgesRef.current.rotation.x) * 0.05
-      edgesRef.current.rotation.y += (targetRotation.y - edgesRef.current.rotation.y) * 0.05
+    if (edgesRef.current) {
+      // Apply same idle rotation to wireframe
+      const targetWithIdle = {
+        x: effectiveTarget.x + idleRotationRef.current.x,
+        y: effectiveTarget.y + idleRotationRef.current.y
+      }
+
+      edgesRef.current.rotation.x += (targetWithIdle.x - edgesRef.current.rotation.x) * 0.05
+      edgesRef.current.rotation.y += (targetWithIdle.y - edgesRef.current.rotation.y) * 0.05
     }
 
     // Update time for color cycling

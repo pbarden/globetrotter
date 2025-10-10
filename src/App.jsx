@@ -176,7 +176,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [hasShownFirstContent, setHasShownFirstContent] = useState(false)
   const [currentPoint, setCurrentPoint] = useState(0)
-  const [targetRotation, setTargetRotation] = useState({ x: 0, y: 0 })
+  const [targetRotation, setTargetRotation] = useState(null)
   const [animationDirection, setAnimationDirection] = useState('')
   const [animationKey, setAnimationKey] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -290,7 +290,8 @@ function App() {
         // Stage 2: Wait for fly-out to complete, then switch content and fly-in
         setTimeout(() => {
           setCurrentPoint(nextPoint)
-          setTargetRotation(contentPoints[nextPoint].rotation)
+          const newRotation = contentPoints[nextPoint].rotation
+          setTargetRotation({ x: newRotation.x, y: newRotation.y })
           setAnimationDirection(flyInDirection)
           setAnimationKey(prev => prev + 1)
           setFlyOutDirection('')
@@ -312,10 +313,17 @@ function App() {
   // Initialize rotation and first card animation
   useEffect(() => {
     if (!isLoading && !hasShownFirstContent) {
-      setTargetRotation(contentPoints[0].rotation)
+      setIsTransitioning(true) // Block scrolling during initial animation
+      const initialRotation = contentPoints[0].rotation
+      setTargetRotation({ x: initialRotation.x, y: initialRotation.y })
       setAnimationDirection('fly-from-bottom')
       setAnimationKey(prev => prev + 1)
       setHasShownFirstContent(true)
+
+      // Allow scrolling after initial fly-in completes
+      setTimeout(() => {
+        setIsTransitioning(false)
+      }, 650) // Match the fly-in animation duration
     }
   }, [isLoading, hasShownFirstContent])
 
