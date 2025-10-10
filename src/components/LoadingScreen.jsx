@@ -3,20 +3,56 @@ import './LoadingScreen.css'
 
 export function LoadingScreen({ onLoadComplete }) {
   const [progress, setProgress] = useState(0)
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    let progressInterval
+    let loadingComplete = false
+
+    const checkResources = async () => {
+      // Wait for critical resources
+      const promises = []
+
+      // Wait for document ready
+      if (document.readyState !== 'complete') {
+        promises.push(new Promise(resolve => {
+          window.addEventListener('load', resolve, { once: true })
+        }))
+      }
+
+      // Wait for fonts to load
+      if (document.fonts) {
+        promises.push(document.fonts.ready)
+      }
+
+      // Simulate minimum loading time to show animation
+      promises.push(new Promise(resolve => setTimeout(resolve, 1500)))
+
+      await Promise.all(promises)
+      loadingComplete = true
+    }
+
+    // Start resource checking
+    checkResources()
+
+    // Progress animation
+    progressInterval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
+        if (loadingComplete && prev >= 100) {
+          clearInterval(progressInterval)
+          setIsReady(true)
           setTimeout(() => onLoadComplete(), 500)
           return 100
         }
-        return prev + 2
+        // Slow down progress near 100 if resources aren't ready
+        const increment = (loadingComplete || prev < 90) ? 2 : 0.5
+        return Math.min(prev + increment, loadingComplete ? 100 : 95)
       })
     }, 30)
 
-    return () => clearInterval(interval)
+    return () => {
+      if (progressInterval) clearInterval(progressInterval)
+    }
   }, [onLoadComplete])
 
   return (

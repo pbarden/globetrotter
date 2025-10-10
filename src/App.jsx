@@ -174,6 +174,7 @@ const contentPoints = [
 
 function App() {
   const [isLoading, setIsLoading] = useState(true)
+  const [hasShownFirstContent, setHasShownFirstContent] = useState(false)
   const [currentPoint, setCurrentPoint] = useState(0)
   const [targetRotation, setTargetRotation] = useState({ x: 0, y: 0 })
   const [animationDirection, setAnimationDirection] = useState('')
@@ -310,12 +311,13 @@ function App() {
 
   // Initialize rotation and first card animation
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && !hasShownFirstContent) {
       setTargetRotation(contentPoints[0].rotation)
       setAnimationDirection('fly-from-bottom')
       setAnimationKey(prev => prev + 1)
+      setHasShownFirstContent(true)
     }
-  }, [isLoading])
+  }, [isLoading, hasShownFirstContent])
 
   // Determine if card needs reorientation (when it would be upside down or sideways)
   const needsReorientation = () => {
@@ -354,25 +356,27 @@ function App() {
         </Canvas>
 
         {/* Blob Lasso */}
-        <BlobLasso
-          content={contentPoints[currentPoint]}
-          isActive={!isLoading}
-          randomSeed={randomSeed}
-          colorIndex={currentColorIndex}
-        />
+        {!isLoading && (
+          <BlobLasso
+            content={contentPoints[currentPoint]}
+            isActive={true}
+            randomSeed={randomSeed}
+            colorIndex={currentColorIndex}
+          />
+        )}
 
         {/* Content Cards */}
         <ContentCard
           key={animationKey}
           content={contentPoints[currentPoint]}
-          isActive={!isLoading}
+          isActive={!isLoading && hasShownFirstContent}
           needsReorientation={needsReorientation()}
           animationDirection={flyOutDirection || animationDirection}
           colorIndex={currentColorIndex}
         />
 
         {/* Scroll hint */}
-        {!isLoading && (
+        {!isLoading && hasShownFirstContent && (
           <div className="scroll-hint">
             <p>Scroll or swipe to explore</p>
             <div className="scroll-indicator">↕ ↔</div>
