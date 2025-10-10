@@ -3,7 +3,6 @@ import { Canvas } from '@react-three/fiber'
 import { Globe } from './components/Globe'
 import { ContentCard } from './components/ContentCard'
 import { BlobLasso } from './components/BlobLasso'
-import { StringBackground } from './components/StringBackground'
 import { LoadingScreen } from './components/LoadingScreen'
 import './App.css'
 
@@ -353,14 +352,6 @@ function App() {
             <Globe targetRotation={targetRotation} />
           </Suspense>
         </Canvas>
-
-        {/* String Background */}
-        <StringBackground
-          content={contentPoints[currentPoint]}
-          isActive={!isLoading}
-          randomSeed={randomSeed}
-          colorIndex={currentColorIndex}
-        />
 
         {/* Blob Lasso */}
         <BlobLasso

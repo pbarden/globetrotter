@@ -4,6 +4,7 @@ import './BlobLasso.css'
 export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
   const blobRef = useRef()
   const blobRef2 = useRef()
+  const blobRef3 = useRef()
   const animationRef = useRef()
   const startTimeRef = useRef(0)
   const colorTransitionRef = useRef(1)
@@ -30,8 +31,8 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
   const seed3 = content.id * 11.1 + randomSeed * 0.7
 
   const blobPosition = {
-    x: (Math.sin(seed1) * 45 + Math.cos(seed2) * 35 + Math.sin(seed3) * 25) * (window.innerWidth / 100),
-    y: (Math.cos(seed1) * 42 + Math.sin(seed2) * 32 + Math.cos(seed3) * 28) * (window.innerHeight / 100)
+    x: (Math.sin(seed1) * 20 + Math.cos(seed2) * 15 + Math.sin(seed3) * 10 + Math.sign(Math.sin(seed1)) * 15) * (window.innerWidth / 100),
+    y: (Math.cos(seed1) * 20 + Math.sin(seed2) * 15 + Math.cos(seed3) * 10 + Math.sign(Math.cos(seed1)) * 15) * (window.innerHeight / 100)
   }
 
   const blobRotation = (Math.sin(seed1) * 120 + Math.cos(seed2) * 80 + content.id * 30) % 360
@@ -46,13 +47,23 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
 
   // Second blob for depth - more independent position
   const blob2Position = {
-    x: (Math.sin(seed2 * 1.3) * 48 + Math.cos(seed3 * 0.9) * 38 + Math.sin(seed1 * 1.7) * 22) * (window.innerWidth / 100),
-    y: (Math.cos(seed3 * 1.1) * 45 + Math.sin(seed1 * 1.5) * 35 + Math.cos(seed2 * 0.8) * 25) * (window.innerHeight / 100)
+    x: (Math.sin(seed2 * 1.3) * 22 + Math.cos(seed3 * 0.9) * 17 + Math.sin(seed1 * 1.7) * 10 + Math.sign(Math.sin(seed2 * 1.3)) * 8) * (window.innerWidth / 100),
+    y: (Math.cos(seed3 * 1.1) * 20 + Math.sin(seed1 * 1.5) * 15 + Math.cos(seed2 * 0.8) * 12 + Math.sign(Math.cos(seed3 * 1.1)) * 8) * (window.innerHeight / 100)
   }
   const blob2Rotation = blobRotation + (Math.cos(seed3) * 60 + 30)
   const blob2Scale = blobScale * (0.7 + Math.sin(seed2 * 2.3) * 0.3)
   const scale2X = 0.6 + (Math.cos(seed1 * 2.1) * 0.4)
   const scale2Y = 0.6 + (Math.sin(seed2 * 1.9) * 0.4)
+
+  // Third blob for additional depth
+  const blob3Position = {
+    x: (Math.cos(seed3 * 1.4) * 21 + Math.sin(seed1 * 1.1) * 16 + Math.cos(seed2 * 1.6) * 11 + Math.sign(Math.cos(seed3 * 1.4)) * 8) * (window.innerWidth / 100),
+    y: (Math.sin(seed2 * 1.2) * 19 + Math.cos(seed3 * 1.4) * 16 + Math.sin(seed1 * 0.9) * 13 + Math.sign(Math.sin(seed2 * 1.2)) * 8) * (window.innerHeight / 100)
+  }
+  const blob3Rotation = blobRotation + (Math.sin(seed1) * 70 + 60)
+  const blob3Scale = blobScale * (0.6 + Math.cos(seed3 * 2.1) * 0.3)
+  const scale3X = 0.65 + (Math.sin(seed2 * 2.2) * 0.35)
+  const scale3Y = 0.65 + (Math.cos(seed3 * 2.0) * 0.35)
 
   const colors = useMemo(() => blobColors[colorIndex % blobColors.length], [colorIndex])
 
@@ -90,13 +101,13 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
   }, [previousColors, colorTransition, colors])
 
   useEffect(() => {
-    if (!isActive || !blobRef.current || !blobRef2.current) return
+    if (!isActive || !blobRef.current || !blobRef2.current || !blobRef3.current) return
 
     let lastTime = 0
     startTimeRef.current = performance.now() / 1000
 
     const animateBlob = (timestamp) => {
-      if (!blobRef.current || !blobRef2.current) return
+      if (!blobRef.current || !blobRef2.current || !blobRef3.current) return
 
       const currentTime = timestamp / 1000
       const elapsed = currentTime - startTimeRef.current
@@ -110,9 +121,11 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
       // Generate and update blob paths with higher frequency for smoothness
       const path = generateBlobPath(elapsed)
       const path2 = generateBlobPath(elapsed + 1.5)
+      const path3 = generateBlobPath(elapsed + 2.8)
 
       blobRef.current.setAttribute('d', path)
       blobRef2.current.setAttribute('d', path2)
+      blobRef3.current.setAttribute('d', path3)
 
       animationRef.current = requestAnimationFrame(animateBlob)
     }
@@ -168,6 +181,40 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
 
   return (
     <>
+      {/* Third blob for depth - furthest back */}
+      <svg
+        className="blob-lasso"
+        viewBox="0 0 400 400"
+        style={{
+          transform: `translate(calc(-50% + ${blob3Position.x}px), calc(-50% + ${blob3Position.y}px)) rotate(${blob3Rotation}deg) scale(${blob3Scale}) scaleX(${scale3X}) scaleY(${scale3Y})`,
+          opacity: 0.4,
+          zIndex: -1
+        }}
+      >
+        <defs>
+          <filter id={`glow3-${content.id}`}>
+            <feGaussianBlur stdDeviation="12" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <linearGradient id={`gradient3-${content.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={currentColors[1]} />
+            <stop offset="50%" stopColor={currentColors[2]} />
+            <stop offset="100%" stopColor={currentColors[0]} />
+          </linearGradient>
+        </defs>
+        <path
+          ref={blobRef3}
+          d={generateBlobPath(2.8)}
+          fill="none"
+          stroke={`url(#gradient3-${content.id})`}
+          strokeWidth="2"
+          filter={`url(#glow3-${content.id})`}
+        />
+      </svg>
+
       {/* Second blob for depth - behind the main blob */}
       <svg
         className="blob-lasso"
