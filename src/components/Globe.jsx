@@ -12,6 +12,7 @@ export function Globe({ rotation, targetRotation }) {
   const [entryAnimation, setEntryAnimation] = useState(0)
   const hasEnteredRef = useRef(false)
   const idleRotationRef = useRef({ x: 0, y: 0 })
+  const lastColorUpdateTime = useRef(0)
 
   // Create icosahedron geometry with random hue offsets for each vertex
   const { geometry, hueOffsets } = useMemo(() => {
@@ -35,6 +36,9 @@ export function Globe({ rotation, targetRotation }) {
   const edges = useMemo(() => {
     return new THREE.EdgesGeometry(geometry, 15)
   }, [geometry])
+
+  // Create reusable color object for vertex updates (Optimization #10)
+  const color = useMemo(() => new THREE.Color(), [])
 
   // Start entry animation on mount
   useEffect(() => {
@@ -106,10 +110,13 @@ export function Globe({ rotation, targetRotation }) {
     const timeSpeed = isRotating ? 2.0 : 0.3 // Speed up color changes during rotation
     timeRef.current += delta * timeSpeed
 
-    // Update vertex colors with rainbow cycling
-    if (geometry.attributes.color) {
+    // Update vertex colors with rainbow cycling (Optimizations #1 & #10: Throttled updates + reusable color object)
+    const now = state.clock.elapsedTime
+    const shouldUpdateColors = now - lastColorUpdateTime.current > 0.016 // ~60fps throttle
+
+    if (shouldUpdateColors && geometry.attributes.color) {
+      lastColorUpdateTime.current = now
       const colors = geometry.attributes.color.array
-      const color = new THREE.Color()
 
       for (let i = 0; i < hueOffsets.length; i++) {
         const hue = (hueOffsets[i] + timeRef.current * 30) % 360

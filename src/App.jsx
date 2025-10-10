@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Suspense } from 'react'
+import { useState, useEffect, useRef, useMemo, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Globe } from './components/Globe'
 import { ContentCard } from './components/ContentCard'
@@ -209,6 +209,12 @@ function App() {
     return [normalizedX, normalizedY, lightDistance]
   }
 
+  // Optimization #3: Memoize blob light position to prevent recalculation on every render
+  const blobLightPosition = useMemo(
+    () => getBlobLightPosition(currentPoint),
+    [currentPoint, randomSeed]
+  )
+
   useEffect(() => {
     if (isLoading) return
 
@@ -353,7 +359,7 @@ function App() {
             <pointLight position={[0, 8, 0]} intensity={0.4} color="#ffd700" />
             {/* Dynamic blob color light source - follows blob position */}
             <pointLight
-              position={getBlobLightPosition(currentPoint)}
+              position={blobLightPosition}
               intensity={8}
               color={blobColors[currentColorIndex]}
               distance={50}

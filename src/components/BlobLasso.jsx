@@ -112,9 +112,9 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
       const currentTime = timestamp / 1000
       const elapsed = currentTime - startTimeRef.current
 
-      // Smooth color transition
+      // Smooth color transition - slow fade over ~3 seconds
       if (colorTransitionRef.current < 1) {
-        colorTransitionRef.current = Math.min(colorTransitionRef.current + 0.02, 1)
+        colorTransitionRef.current = Math.min(colorTransitionRef.current + 0.005, 1)
         setColorTransition(colorTransitionRef.current)
       }
 
@@ -146,7 +146,9 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
     const centerY = 200
     const speed = 0.8 // Faster animation speed
 
-    const pathParts = ['M ']
+    // Optimization #2: Pre-allocate array (1 M command + 8 Q commands + 1 Z)
+    const pathParts = new Array(points + 2)
+    let idx = 0
 
     // Pre-calculate first point
     const firstAngle = 0
@@ -154,7 +156,7 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
     const firstR = radius + firstNoise
     const firstX = centerX + Math.cos(firstAngle) * firstR
     const firstY = centerY + Math.sin(firstAngle) * firstR
-    pathParts.push(`${firstX.toFixed(2)},${firstY.toFixed(2)} `)
+    pathParts[idx++] = `M ${firstX.toFixed(1)},${firstY.toFixed(1)}`
 
     let prevX = firstX
     let prevY = firstY
@@ -169,13 +171,13 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
       const cpX = (prevX + x) / 2 + Math.sin(time * 0.5 + i) * 15
       const cpY = (prevY + y) / 2 + Math.cos(time * 0.5 + i) * 15
 
-      pathParts.push(`Q ${cpX.toFixed(2)},${cpY.toFixed(2)} ${x.toFixed(2)},${y.toFixed(2)} `)
+      pathParts[idx++] = ` Q ${cpX.toFixed(1)},${cpY.toFixed(1)} ${x.toFixed(1)},${y.toFixed(1)}`
 
       prevX = x
       prevY = y
     }
 
-    pathParts.push('Z')
+    pathParts[idx] = ' Z'
     return pathParts.join('')
   }
 
