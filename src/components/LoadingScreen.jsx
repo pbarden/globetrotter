@@ -216,6 +216,7 @@ function LoadingScreenComponent({ onLoadComplete }) {
     let progressAnimationId
     let loadingComplete = false
     let lastProgressUpdate = 0
+    let shouldContinue = true
 
     const checkResources = async () => {
       // Wait for critical resources
@@ -226,11 +227,6 @@ function LoadingScreenComponent({ onLoadComplete }) {
         promises.push(new Promise(resolve => {
           window.addEventListener('load', resolve, { once: true })
         }))
-      }
-
-      // Wait for fonts to load
-      if (document.fonts) {
-        promises.push(document.fonts.ready)
       }
 
       // Simulate minimum loading time to show animation
@@ -253,6 +249,7 @@ function LoadingScreenComponent({ onLoadComplete }) {
           if (loadingComplete && prev >= 100) {
             setIsReady(true)
             setTimeout(() => onLoadComplete(), 500)
+            shouldContinue = false
             return 100
           }
           // Slow down progress near 100 if resources aren't ready
@@ -262,7 +259,7 @@ function LoadingScreenComponent({ onLoadComplete }) {
       }
 
       // Continue animation if not complete
-      if (!loadingComplete || progress < 100) {
+      if (shouldContinue) {
         progressAnimationId = requestAnimationFrame(animateProgress)
       }
     }
@@ -272,7 +269,7 @@ function LoadingScreenComponent({ onLoadComplete }) {
     return () => {
       if (progressAnimationId) cancelAnimationFrame(progressAnimationId)
     }
-  }, [onLoadComplete, progress])
+  }, [onLoadComplete])
 
   return (
     <div className={`loading-screen ${progress === 100 ? 'fade-out' : ''}`}>
