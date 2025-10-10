@@ -18,22 +18,28 @@
 }
 
 .scroll-hint {
-  position: absolute;
+  position: fixed;
   bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   text-align: center;
   color: rgba(176, 176, 208, 0.6);
   font-size: 0.9rem;
   animation: fadeInOut 3s ease-in-out infinite;
   pointer-events: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 200;
 }
 
 .scroll-indicator {
   margin-top: 0.5rem;
   font-size: 1.5rem;
-  letter-spacing: 1rem;
   animation: pulse 2s ease-in-out infinite;
+  letter-spacing: 0;
 }
 
 @keyframes fadeInOut {

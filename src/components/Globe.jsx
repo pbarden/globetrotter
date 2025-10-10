@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, useState, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -6,8 +6,11 @@ export function Globe({ rotation, targetRotation }) {
   const meshRef = useRef()
   const materialRef = useRef()
   const edgesRef = useRef()
+  const groupRef = useRef()
   const timeRef = useRef(0)
   const rotationVelocity = useRef(0)
+  const [entryAnimation, setEntryAnimation] = useState(0)
+  const hasEnteredRef = useRef(false)
 
   // Create icosahedron geometry with random hue offsets for each vertex
   const { geometry, hueOffsets } = useMemo(() => {
@@ -32,8 +35,36 @@ export function Globe({ rotation, targetRotation }) {
     return new THREE.EdgesGeometry(geometry, 15)
   }, [geometry])
 
+  // Start entry animation on mount
+  useEffect(() => {
+    if (!hasEnteredRef.current) {
+      hasEnteredRef.current = true
+    }
+  }, [])
+
   // Animate rotation and colors
   useFrame((state, delta) => {
+    // Entry animation with bounce
+    if (entryAnimation < 1 && groupRef.current) {
+      const newProgress = Math.min(entryAnimation + delta * 0.8, 1)
+      setEntryAnimation(newProgress)
+
+      // Easing function with bounce (elastic ease-out)
+      const t = newProgress
+      let easedProgress
+      if (t < 0.5) {
+        // First half: ease out with overshoot
+        easedProgress = 1 - Math.pow(1 - 2 * t, 3) / 2
+      } else {
+        // Second half: settle with small bounce
+        const t2 = (t - 0.5) * 2
+        easedProgress = 1 + Math.sin(t2 * Math.PI * 2) * 0.05 * (1 - t2)
+      }
+
+      // Move from bottom (y = -10) to center (y = 0)
+      groupRef.current.position.y = -10 + (10 * easedProgress)
+    }
+
     // Calculate rotation velocity
     if (meshRef.current && targetRotation) {
       const currentRotX = meshRef.current.rotation.x
@@ -78,7 +109,7 @@ export function Globe({ rotation, targetRotation }) {
   })
 
   return (
-    <group>
+    <group ref={groupRef}>
       {/* Crystal mesh with rainbow refraction */}
       <mesh ref={meshRef} geometry={geometry}>
         <meshPhongMaterial
