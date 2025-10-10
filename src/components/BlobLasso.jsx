@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo, memo } from 'react'
 import './BlobLasso.css'
 
-export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
+function BlobLassoComponent({ content, isActive, randomSeed, colorIndex }) {
   const blobRef = useRef()
   const blobRef2 = useRef()
   const blobRef3 = useRef()
@@ -30,46 +30,47 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
   const seed2 = content.id * 7.3 + randomSeed * 1.3
   const seed3 = content.id * 11.1 + randomSeed * 0.7
 
+  // Round to 1 decimal place to reduce precision and improve performance
   const blobPosition = {
-    x: (Math.sin(seed1) * 20 + Math.cos(seed2) * 15 + Math.sin(seed3) * 10 + Math.sign(Math.sin(seed1)) * 15) * (window.innerWidth / 100),
-    y: (Math.cos(seed1) * 20 + Math.sin(seed2) * 15 + Math.cos(seed3) * 10 + Math.sign(Math.cos(seed1)) * 15) * (window.innerHeight / 100)
+    x: Math.round((Math.sin(seed1) * 20 + Math.cos(seed2) * 15 + Math.sin(seed3) * 10 + Math.sign(Math.sin(seed1)) * 15) * (window.innerWidth / 100) * 10) / 10,
+    y: Math.round((Math.cos(seed1) * 20 + Math.sin(seed2) * 15 + Math.cos(seed3) * 10 + Math.sign(Math.cos(seed1)) * 15) * (window.innerHeight / 100) * 10) / 10
   }
 
-  const blobRotation = (Math.sin(seed1) * 120 + Math.cos(seed2) * 80 + content.id * 30) % 360
+  const blobRotation = Math.round((Math.sin(seed1) * 120 + Math.cos(seed2) * 80 + content.id * 30) % 360)
 
   // Generate random scale between 0.5 and 1.5 (±50%)
-  const blobScale = 0.5 + (Math.sin(seed1 + seed2) * 0.5 + 0.5)
+  const blobScale = Math.round((0.5 + (Math.sin(seed1 + seed2) * 0.5 + 0.5)) * 100) / 100
 
   // Generate pseudo-3D squash effect (oval shapes) based on position
   // Different modals get different squash amounts/directions to simulate rotation
-  const scaleX = 0.7 + (Math.sin(seed1 * 1.5) * 0.3)
-  const scaleY = 0.7 + (Math.cos(seed2 * 1.5) * 0.3)
+  const scaleX = Math.round((0.7 + (Math.sin(seed1 * 1.5) * 0.3)) * 100) / 100
+  const scaleY = Math.round((0.7 + (Math.cos(seed2 * 1.5) * 0.3)) * 100) / 100
 
   // Second blob for depth - more independent position
   const blob2Position = {
-    x: (Math.sin(seed2 * 1.3) * 22 + Math.cos(seed3 * 0.9) * 17 + Math.sin(seed1 * 1.7) * 10 + Math.sign(Math.sin(seed2 * 1.3)) * 8) * (window.innerWidth / 100),
-    y: (Math.cos(seed3 * 1.1) * 20 + Math.sin(seed1 * 1.5) * 15 + Math.cos(seed2 * 0.8) * 12 + Math.sign(Math.cos(seed3 * 1.1)) * 8) * (window.innerHeight / 100)
+    x: Math.round((Math.sin(seed2 * 1.3) * 22 + Math.cos(seed3 * 0.9) * 17 + Math.sin(seed1 * 1.7) * 10 + Math.sign(Math.sin(seed2 * 1.3)) * 8) * (window.innerWidth / 100) * 10) / 10,
+    y: Math.round((Math.cos(seed3 * 1.1) * 20 + Math.sin(seed1 * 1.5) * 15 + Math.cos(seed2 * 0.8) * 12 + Math.sign(Math.cos(seed3 * 1.1)) * 8) * (window.innerHeight / 100) * 10) / 10
   }
-  const blob2Rotation = blobRotation + (Math.cos(seed3) * 60 + 30)
-  const blob2Scale = blobScale * (0.7 + Math.sin(seed2 * 2.3) * 0.3)
-  const scale2X = 0.6 + (Math.cos(seed1 * 2.1) * 0.4)
-  const scale2Y = 0.6 + (Math.sin(seed2 * 1.9) * 0.4)
+  const blob2Rotation = Math.round(blobRotation + (Math.cos(seed3) * 60 + 30))
+  const blob2Scale = Math.round(blobScale * (0.7 + Math.sin(seed2 * 2.3) * 0.3) * 100) / 100
+  const scale2X = Math.round((0.6 + (Math.cos(seed1 * 2.1) * 0.4)) * 100) / 100
+  const scale2Y = Math.round((0.6 + (Math.sin(seed2 * 1.9) * 0.4)) * 100) / 100
 
   // Third blob for additional depth
   const blob3Position = {
-    x: (Math.cos(seed3 * 1.4) * 21 + Math.sin(seed1 * 1.1) * 16 + Math.cos(seed2 * 1.6) * 11 + Math.sign(Math.cos(seed3 * 1.4)) * 8) * (window.innerWidth / 100),
-    y: (Math.sin(seed2 * 1.2) * 19 + Math.cos(seed3 * 1.4) * 16 + Math.sin(seed1 * 0.9) * 13 + Math.sign(Math.sin(seed2 * 1.2)) * 8) * (window.innerHeight / 100)
+    x: Math.round((Math.cos(seed3 * 1.4) * 21 + Math.sin(seed1 * 1.1) * 16 + Math.cos(seed2 * 1.6) * 11 + Math.sign(Math.cos(seed3 * 1.4)) * 8) * (window.innerWidth / 100) * 10) / 10,
+    y: Math.round((Math.sin(seed2 * 1.2) * 19 + Math.cos(seed3 * 1.4) * 16 + Math.sin(seed1 * 0.9) * 13 + Math.sign(Math.sin(seed2 * 1.2)) * 8) * (window.innerHeight / 100) * 10) / 10
   }
-  const blob3Rotation = blobRotation + (Math.sin(seed1) * 70 + 60)
-  const blob3Scale = blobScale * (0.6 + Math.cos(seed3 * 2.1) * 0.3)
-  const scale3X = 0.65 + (Math.sin(seed2 * 2.2) * 0.35)
-  const scale3Y = 0.65 + (Math.cos(seed3 * 2.0) * 0.35)
+  const blob3Rotation = Math.round(blobRotation + (Math.sin(seed1) * 70 + 60))
+  const blob3Scale = Math.round(blobScale * (0.6 + Math.cos(seed3 * 2.1) * 0.3) * 100) / 100
+  const scale3X = Math.round((0.65 + (Math.sin(seed2 * 2.2) * 0.35)) * 100) / 100
+  const scale3Y = Math.round((0.65 + (Math.cos(seed3 * 2.0) * 0.35)) * 100) / 100
 
   const colors = useMemo(() => blobColors[colorIndex % blobColors.length], [colorIndex])
 
   // Trigger color transition when content changes
   useEffect(() => {
-    if (previousColors && JSON.stringify(previousColors) !== JSON.stringify(colors)) {
+    if (previousColors && !previousColors.every((color, i) => color === colors[i])) {
       colorTransitionRef.current = 0
       setColorTransition(0)
     }
@@ -104,6 +105,7 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
     if (!isActive || !blobRef.current || !blobRef2.current || !blobRef3.current) return
 
     let lastTime = 0
+    let lastUpdateTime = 0
     startTimeRef.current = performance.now() / 1000
 
     const animateBlob = (timestamp) => {
@@ -112,13 +114,21 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
       const currentTime = timestamp / 1000
       const elapsed = currentTime - startTimeRef.current
 
+      // Throttle to 30fps (~33ms between updates)
+      const deltaTime = timestamp - lastUpdateTime
+      if (deltaTime < 33) {
+        animationRef.current = requestAnimationFrame(animateBlob)
+        return
+      }
+      lastUpdateTime = timestamp
+
       // Smooth color transition - slow fade over ~3 seconds
       if (colorTransitionRef.current < 1) {
         colorTransitionRef.current = Math.min(colorTransitionRef.current + 0.005, 1)
         setColorTransition(colorTransitionRef.current)
       }
 
-      // Generate and update blob paths with higher frequency for smoothness
+      // Generate and update blob paths
       const path = generateBlobPath(elapsed)
       const path2 = generateBlobPath(elapsed + 1.5)
       const path3 = generateBlobPath(elapsed + 2.8)
@@ -286,3 +296,5 @@ export function BlobLasso({ content, isActive, randomSeed, colorIndex }) {
     </>
   )
 }
+
+export const BlobLasso = memo(BlobLassoComponent)

@@ -1,8 +1,8 @@
-import { useRef, useMemo, useState, useEffect } from 'react'
+import { useRef, useMemo, useState, useEffect, memo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-export function Globe({ rotation, targetRotation }) {
+function GlobeComponent({ rotation, targetRotation }) {
   const meshRef = useRef()
   const materialRef = useRef()
   const edgesRef = useRef()
@@ -158,3 +158,5 @@ export function Globe({ rotation, targetRotation }) {
     </group>
   )
 }
+
+export const Globe = memo(GlobeComponent)

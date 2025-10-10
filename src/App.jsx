@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, Suspense } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Globe } from './components/Globe'
 import { ContentCard } from './components/ContentCard'
@@ -215,106 +215,107 @@ function App() {
     [currentPoint, randomSeed]
   )
 
+  // Memoize wheel handler to prevent recreation on every render
+  const handleWheel = useCallback((e) => {
+    e.preventDefault()
+
+    // Block all scroll during transitions
+    if (isTransitioning) {
+      return
+    }
+
+    const now = Date.now()
+    const deltaTime = now - lastScrollTime.current
+    lastScrollTime.current = now
+
+    // Always accumulate both directions
+    // If Shift is pressed, treat vertical scroll as horizontal
+    if (e.shiftKey) {
+      scrollAccumulator.current.y += e.deltaY
+    } else {
+      scrollAccumulator.current.x += e.deltaY
+      scrollAccumulator.current.y += e.deltaX
+    }
+
+    // Threshold for point switching
+    const threshold = 120
+
+    if (Math.abs(scrollAccumulator.current.x) > threshold ||
+        Math.abs(scrollAccumulator.current.y) > threshold) {
+
+      let nextPoint = currentPoint
+      let flyOutDir = ''
+      let flyInDirection = ''
+
+      // 4x4 matrix navigation
+      const currentRow = Math.floor(currentPoint / 4)
+      const currentCol = currentPoint % 4
+
+      // Determine direction and switch point
+      if (Math.abs(scrollAccumulator.current.x) > Math.abs(scrollAccumulator.current.y)) {
+        // Vertical scrolling (moves between rows, same column)
+        if (scrollAccumulator.current.x > 0) {
+          // Scrolling down - move to next row
+          const nextRow = (currentRow + 1) % 4
+          nextPoint = nextRow * 4 + currentCol
+          flyOutDir = 'fly-out-bottom'
+          flyInDirection = 'fly-from-top'
+        } else {
+          // Scrolling up - move to previous row
+          const nextRow = (currentRow - 1 + 4) % 4
+          nextPoint = nextRow * 4 + currentCol
+          flyOutDir = 'fly-out-top'
+          flyInDirection = 'fly-from-bottom'
+        }
+      } else {
+        // Horizontal scrolling (moves between columns, same row)
+        if (scrollAccumulator.current.y > 0) {
+          // Scrolling left - move to next column
+          const nextCol = (currentCol + 1) % 4
+          nextPoint = currentRow * 4 + nextCol
+          flyOutDir = 'fly-out-left'
+          flyInDirection = 'fly-from-right'
+        } else {
+          // Scrolling right - move to previous column
+          const nextCol = (currentCol - 1 + 4) % 4
+          nextPoint = currentRow * 4 + nextCol
+          flyOutDir = 'fly-out-right'
+          flyInDirection = 'fly-from-left'
+        }
+      }
+
+      // Reset accumulator immediately
+      scrollAccumulator.current = { x: 0, y: 0 }
+
+      // Stage 1: Trigger fly-out animation
+      setIsTransitioning(true)
+      setFlyOutDirection(flyOutDir)
+
+      // Stage 2: Wait for fly-out to complete, then switch content and fly-in
+      setTimeout(() => {
+        setCurrentPoint(nextPoint)
+        const newRotation = contentPoints[nextPoint].rotation
+        setTargetRotation({ x: newRotation.x, y: newRotation.y })
+        setAnimationDirection(flyInDirection)
+        setAnimationKey(prev => prev + 1)
+        setFlyOutDirection('')
+        // Randomize positions on each scroll
+        setRandomSeed(Math.random() * 1000)
+
+        // Allow new transitions after fly-in completes
+        setTimeout(() => {
+          setIsTransitioning(false)
+        }, 650) // Wait for fly-in to mostly complete
+      }, 400) // Fly-out animation duration
+    }
+  }, [currentPoint, isTransitioning])
+
   useEffect(() => {
     if (isLoading) return
 
-    const handleWheel = (e) => {
-      e.preventDefault()
-
-      // Block all scroll during transitions
-      if (isTransitioning) {
-        return
-      }
-
-      const now = Date.now()
-      const deltaTime = now - lastScrollTime.current
-      lastScrollTime.current = now
-
-      // Always accumulate both directions
-      // If Shift is pressed, treat vertical scroll as horizontal
-      if (e.shiftKey) {
-        scrollAccumulator.current.y += e.deltaY
-      } else {
-        scrollAccumulator.current.x += e.deltaY
-        scrollAccumulator.current.y += e.deltaX
-      }
-
-      // Threshold for point switching
-      const threshold = 120
-
-      if (Math.abs(scrollAccumulator.current.x) > threshold ||
-          Math.abs(scrollAccumulator.current.y) > threshold) {
-
-        let nextPoint = currentPoint
-        let flyOutDir = ''
-        let flyInDirection = ''
-
-        // 4x4 matrix navigation
-        const currentRow = Math.floor(currentPoint / 4)
-        const currentCol = currentPoint % 4
-
-        // Determine direction and switch point
-        if (Math.abs(scrollAccumulator.current.x) > Math.abs(scrollAccumulator.current.y)) {
-          // Vertical scrolling (moves between rows, same column)
-          if (scrollAccumulator.current.x > 0) {
-            // Scrolling down - move to next row
-            const nextRow = (currentRow + 1) % 4
-            nextPoint = nextRow * 4 + currentCol
-            flyOutDir = 'fly-out-bottom'
-            flyInDirection = 'fly-from-top'
-          } else {
-            // Scrolling up - move to previous row
-            const nextRow = (currentRow - 1 + 4) % 4
-            nextPoint = nextRow * 4 + currentCol
-            flyOutDir = 'fly-out-top'
-            flyInDirection = 'fly-from-bottom'
-          }
-        } else {
-          // Horizontal scrolling (moves between columns, same row)
-          if (scrollAccumulator.current.y > 0) {
-            // Scrolling left - move to next column
-            const nextCol = (currentCol + 1) % 4
-            nextPoint = currentRow * 4 + nextCol
-            flyOutDir = 'fly-out-left'
-            flyInDirection = 'fly-from-right'
-          } else {
-            // Scrolling right - move to previous column
-            const nextCol = (currentCol - 1 + 4) % 4
-            nextPoint = currentRow * 4 + nextCol
-            flyOutDir = 'fly-out-right'
-            flyInDirection = 'fly-from-left'
-          }
-        }
-
-        // Reset accumulator immediately
-        scrollAccumulator.current = { x: 0, y: 0 }
-
-        // Stage 1: Trigger fly-out animation
-        setIsTransitioning(true)
-        setFlyOutDirection(flyOutDir)
-
-        // Stage 2: Wait for fly-out to complete, then switch content and fly-in
-        setTimeout(() => {
-          setCurrentPoint(nextPoint)
-          const newRotation = contentPoints[nextPoint].rotation
-          setTargetRotation({ x: newRotation.x, y: newRotation.y })
-          setAnimationDirection(flyInDirection)
-          setAnimationKey(prev => prev + 1)
-          setFlyOutDirection('')
-          // Randomize positions on each scroll
-          setRandomSeed(Math.random() * 1000)
-
-          // Allow new transitions after fly-in completes
-          setTimeout(() => {
-            setIsTransitioning(false)
-          }, 650) // Wait for fly-in to mostly complete
-        }, 400) // Fly-out animation duration
-      }
-    }
-
     window.addEventListener('wheel', handleWheel, { passive: false })
     return () => window.removeEventListener('wheel', handleWheel)
-  }, [isLoading, currentPoint, isTransitioning])
+  }, [isLoading, handleWheel])
 
   // Initialize rotation and first card animation
   useEffect(() => {

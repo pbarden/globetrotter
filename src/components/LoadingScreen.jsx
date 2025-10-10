@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, memo } from 'react'
 import './LoadingScreen.css'
 
 // Helper function to morph circle to triangle
@@ -181,7 +181,7 @@ const getSquareToCirclePath = (t) => {
           Q ${p4.x - curve * 0.3} ${p4.y - curve} ${p1.x} ${p1.y} Z`
 }
 
-export function LoadingScreen({ onLoadComplete }) {
+function LoadingScreenComponent({ onLoadComplete }) {
   const [progress, setProgress] = useState(0)
   const [isReady, setIsReady] = useState(false)
   const [, forceUpdate] = useState({})
@@ -213,8 +213,9 @@ export function LoadingScreen({ onLoadComplete }) {
   }, [])
 
   useEffect(() => {
-    let progressInterval
+    let progressAnimationId
     let loadingComplete = false
+    let lastProgressUpdate = 0
 
     const checkResources = async () => {
       // Wait for critical resources
@@ -242,25 +243,36 @@ export function LoadingScreen({ onLoadComplete }) {
     // Start resource checking
     checkResources()
 
-    // Progress animation
-    progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        if (loadingComplete && prev >= 100) {
-          clearInterval(progressInterval)
-          setIsReady(true)
-          setTimeout(() => onLoadComplete(), 500)
-          return 100
-        }
-        // Slow down progress near 100 if resources aren't ready
-        const increment = (loadingComplete || prev < 90) ? 2 : 0.5
-        return Math.min(prev + increment, loadingComplete ? 100 : 95)
-      })
-    }, 30)
+    // Progress animation using requestAnimationFrame
+    const animateProgress = (timestamp) => {
+      // Update every ~30ms (similar to setInterval behavior)
+      if (timestamp - lastProgressUpdate > 30) {
+        lastProgressUpdate = timestamp
+
+        setProgress((prev) => {
+          if (loadingComplete && prev >= 100) {
+            setIsReady(true)
+            setTimeout(() => onLoadComplete(), 500)
+            return 100
+          }
+          // Slow down progress near 100 if resources aren't ready
+          const increment = (loadingComplete || prev < 90) ? 2 : 0.5
+          return Math.min(prev + increment, loadingComplete ? 100 : 95)
+        })
+      }
+
+      // Continue animation if not complete
+      if (!loadingComplete || progress < 100) {
+        progressAnimationId = requestAnimationFrame(animateProgress)
+      }
+    }
+
+    progressAnimationId = requestAnimationFrame(animateProgress)
 
     return () => {
-      if (progressInterval) clearInterval(progressInterval)
+      if (progressAnimationId) cancelAnimationFrame(progressAnimationId)
     }
-  }, [onLoadComplete])
+  }, [onLoadComplete, progress])
 
   return (
     <div className={`loading-screen ${progress === 100 ? 'fade-out' : ''}`}>
@@ -341,3 +353,5 @@ export function LoadingScreen({ onLoadComplete }) {
     </div>
   )
 }
+
+export const LoadingScreen = memo(LoadingScreenComponent)
