@@ -84,7 +84,7 @@ const contentPoints = [
     heading: 'Precision',
     subheading: 'Pixel Perfect',
     paragraph: 'Attention to detail in every aspect of design and development.',
-    rotation: { x: 0, y: 0 },
+    rotation: { x: Math.PI / 4, y: Math.PI / 4 },
     colorIndex: 6
   },
   {
@@ -140,7 +140,7 @@ const contentPoints = [
     heading: 'Intelligence',
     subheading: 'Smart Solutions',
     paragraph: 'Leveraging AI and data to create intelligent experiences.',
-    rotation: { x: 0, y: 0 },
+    rotation: { x: -Math.PI / 4, y: -Math.PI / 4 },
     colorIndex: 2
   },
   {
@@ -149,7 +149,7 @@ const contentPoints = [
     heading: 'Premium',
     subheading: 'Luxury Design',
     paragraph: 'Crafting high-end experiences with sophistication.',
-    rotation: { x: Math.PI, y: 0 },
+    rotation: { x: Math.PI * 0.75, y: Math.PI / 6 },
     colorIndex: 3
   },
   {
@@ -158,7 +158,7 @@ const contentPoints = [
     heading: 'Direction',
     subheading: 'Clear Vision',
     paragraph: 'Guiding projects with strategic thinking and clarity.',
-    rotation: { x: 0, y: Math.PI / 2 },
+    rotation: { x: Math.PI / 6, y: Math.PI * 0.6 },
     colorIndex: 4
   },
   {
@@ -167,7 +167,7 @@ const contentPoints = [
     heading: 'Entertainment',
     subheading: 'Engaging Content',
     paragraph: 'Creating delightful experiences that captivate audiences.',
-    rotation: { x: 0, y: -Math.PI / 2 },
+    rotation: { x: -Math.PI / 6, y: -Math.PI * 0.6 },
     colorIndex: 5
   }
 ]
