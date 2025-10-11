@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo, memo } from 'react'
 import './BlobLasso.css'
 
-function BlobLassoComponent({ content, isActive, randomSeed, colorIndex }) {
+function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntryComplete, isFirstEntry = false }) {
   const blobRef = useRef()
   const blobRef2 = useRef()
   const blobRef3 = useRef()
@@ -10,6 +10,9 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex }) {
   const colorTransitionRef = useRef(1)
   const [colorTransition, setColorTransition] = useState(1)
   const [previousColors, setPreviousColors] = useState(null)
+  const [entryProgress, setEntryProgress] = useState(0)
+  const hasCalledComplete = useRef(false)
+  const hasStartedAnimation = useRef(false)
 
   // Unified color system - matches App.jsx and ContentCard
   const blobColors = [
@@ -108,6 +111,16 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex }) {
     let lastUpdateTime = 0
     startTimeRef.current = performance.now() / 1000
 
+    // If not first entry, skip animation and call complete immediately
+    if (!isFirstEntry && !hasCalledComplete.current) {
+      setEntryProgress(1)
+      hasStartedAnimation.current = true
+      if (onEntryComplete) {
+        hasCalledComplete.current = true
+        onEntryComplete()
+      }
+    }
+
     const animateBlob = (timestamp) => {
       if (!blobRef.current || !blobRef2.current || !blobRef3.current) return
 
@@ -121,6 +134,19 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex }) {
         return
       }
       lastUpdateTime = timestamp
+
+      // Entry animation: zoom in from small to full size
+      if (isFirstEntry && entryProgress < 1) {
+        const entryDuration = 0.6 // 600ms
+        const newProgress = Math.min(entryProgress + (deltaTime / 1000) / entryDuration, 1)
+        setEntryProgress(newProgress)
+
+        // Fire callback when complete
+        if (newProgress >= 1 && !hasCalledComplete.current && onEntryComplete) {
+          hasCalledComplete.current = true
+          onEntryComplete()
+        }
+      }
 
       // Smooth color transition - slow fade over ~3 seconds
       if (colorTransitionRef.current < 1) {
@@ -191,6 +217,9 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex }) {
     return pathParts.join('')
   }
 
+  // Calculate entry scale: start at 0.2 (tiny) and zoom to 1.0
+  const entryScale = isFirstEntry ? 0.2 + (entryProgress * 0.8) : 1
+
   return (
     <>
       {/* Third blob for depth - furthest back */}
@@ -198,7 +227,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex }) {
         className="blob-lasso"
         viewBox="0 0 400 400"
         style={{
-          transform: `translate(calc(-50% + ${blob3Position.x}px), calc(-50% + ${blob3Position.y}px)) rotate(${blob3Rotation}deg) scale(${blob3Scale}) scaleX(${scale3X}) scaleY(${scale3Y})`,
+          transform: `translate(calc(-50% + ${blob3Position.x}px), calc(-50% + ${blob3Position.y}px)) rotate(${blob3Rotation}deg) scale(${blob3Scale * entryScale}) scaleX(${scale3X}) scaleY(${scale3Y})`,
           opacity: 0.4,
           zIndex: -1
         }}
@@ -232,7 +261,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex }) {
         className="blob-lasso"
         viewBox="0 0 400 400"
         style={{
-          transform: `translate(calc(-50% + ${blob2Position.x}px), calc(-50% + ${blob2Position.y}px)) rotate(${blob2Rotation}deg) scale(${blob2Scale}) scaleX(${scale2X}) scaleY(${scale2Y})`,
+          transform: `translate(calc(-50% + ${blob2Position.x}px), calc(-50% + ${blob2Position.y}px)) rotate(${blob2Rotation}deg) scale(${blob2Scale * entryScale}) scaleX(${scale2X}) scaleY(${scale2Y})`,
           opacity: 0.5,
           zIndex: 0
         }}
@@ -266,7 +295,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex }) {
         className="blob-lasso"
         viewBox="0 0 400 400"
         style={{
-          transform: `translate(calc(-50% + ${blobPosition.x}px), calc(-50% + ${blobPosition.y}px)) rotate(${blobRotation}deg) scale(${blobScale}) scaleX(${scaleX}) scaleY(${scaleY})`,
+          transform: `translate(calc(-50% + ${blobPosition.x}px), calc(-50% + ${blobPosition.y}px)) rotate(${blobRotation}deg) scale(${blobScale * entryScale}) scaleX(${scaleX}) scaleY(${scaleY})`,
           zIndex: 1
         }}
       >

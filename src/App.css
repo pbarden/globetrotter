@@ -3,7 +3,12 @@
   height: 100vh;
   position: relative;
   overflow: hidden;
-  background: radial-gradient(ellipse at bottom, #4a4a6e 0%, #1a1a2e 40%, #0f0f1a 100%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(20, 10, 40, 1) 0%,
+    rgba(10, 5, 20, 1) 50%,
+    rgba(0, 0, 0, 1) 100%
+  );
   perspective: 1200px;
   perspective-origin: center center;
 }
