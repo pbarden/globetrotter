@@ -55,6 +55,7 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
         config: globe,
         position: { x: startX, y: startY },
         targetPosition: screenPos,
+        originalPosition: screenPos, // Store original position for restoration
         radius: planetRadius,
         scale: sizeMultiplier,
         rotation: 0
@@ -151,6 +152,44 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
     } else {
       // First tap - select this planet
       setSelectedPlanetId(planet.id)
+
+      // Calculate selected planet's display position and size (using original position)
+      const centerX = dimensions.width / 2
+      const centerY = dimensions.height / 2
+      const selectedDisplayX = planet.originalPosition.x + (centerX - planet.originalPosition.x) * 0.7
+      const selectedDisplayY = planet.originalPosition.y + (centerY - planet.originalPosition.y) * 0.7
+      const selectedScaledRadius = planet.radius * 1.6
+
+      setPlanetPositions(prev => prev.map(p => {
+        // First restore all planets to original position
+        const restoredP = {
+          ...p,
+          position: { ...p.originalPosition }
+        }
+
+        if (restoredP.id === planet.id) return restoredP
+
+        // Check if this planet overlaps with selected planet at its new position
+        const dx = restoredP.position.x - selectedDisplayX
+        const dy = restoredP.position.y - selectedDisplayY
+        const distance = Math.sqrt(dx * dx + dy * dy)
+        const minDistance = selectedScaledRadius + restoredP.radius + 50 // Extra padding
+
+        if (distance < minDistance) {
+          // Push away from selected planet
+          const angle = Math.atan2(dy, dx)
+          const pushDistance = minDistance - distance
+          return {
+            ...restoredP,
+            position: {
+              x: restoredP.position.x + Math.cos(angle) * pushDistance,
+              y: restoredP.position.y + Math.sin(angle) * pushDistance
+            }
+          }
+        }
+
+        return restoredP
+      }))
     }
   }
 
