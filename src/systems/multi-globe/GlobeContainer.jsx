@@ -30,6 +30,7 @@ function GlobeContainer({
   const [flyOutDirection, setFlyOutDirection] = useState('')
   const [randomSeed, setRandomSeed] = useState(Math.random() * 1000)
   const [blobsActive, setBlobsActive] = useState(false)
+  const [blobsHaveShown, setBlobsHaveShown] = useState(false)
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
 
@@ -194,6 +195,7 @@ function GlobeContainer({
           setIsTransitioning(false)
           // Start blobs AFTER modal finishes entering
           setBlobsActive(true)
+          // Don't set blobsHaveShown yet - let animation complete first
         }, 650)
       }, 1000)
     }
@@ -245,7 +247,8 @@ function GlobeContainer({
         isActive={blobsActive}
         randomSeed={randomSeed}
         colorIndex={currentColorIndex}
-        isFirstEntry={currentPoint === 0 && !hasShownFirstContent}
+        isFirstEntry={!blobsHaveShown}
+        onEntryComplete={() => setBlobsHaveShown(true)}
       />
 
       {/* Content Cards */}

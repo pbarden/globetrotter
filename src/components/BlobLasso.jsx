@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo, memo } from 'react'
 import './BlobLasso.css'
 
-function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntryComplete, isFirstEntry = false }) {
+function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntryComplete, isFirstEntry = false, isExiting = false }) {
   const blobRef = useRef()
   const blobRef2 = useRef()
   const blobRef3 = useRef()
@@ -10,9 +10,12 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
   const colorTransitionRef = useRef(1)
   const [colorTransition, setColorTransition] = useState(1)
   const [previousColors, setPreviousColors] = useState(null)
-  const [entryProgress, setEntryProgress] = useState(0)
+  const [scaleProgress, setScaleProgress] = useState(0)
+  const [exitProgress, setExitProgress] = useState(0)
   const hasCalledComplete = useRef(false)
   const hasStartedAnimation = useRef(false)
+
+  console.log('BlobLasso render:', { isActive, isFirstEntry, isExiting, scaleProgress, exitProgress })
 
   // Unified color system - matches App.jsx and ContentCard
   const blobColors = [
@@ -105,6 +108,13 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
   }, [previousColors, colorTransition, colors])
 
   useEffect(() => {
+    console.log('BlobLasso useEffect:', {
+      isActive,
+      isFirstEntry,
+      scaleProgress,
+      hasRefs: !!(blobRef.current && blobRef2.current && blobRef3.current)
+    })
+
     if (!isActive || !blobRef.current || !blobRef2.current || !blobRef3.current) return
 
     let lastTime = 0
@@ -125,25 +135,27 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
       }
       lastUpdateTime = timestamp
 
-      // Entry animation: zoom in from small to full size
-      if (entryProgress < 1) {
-        if (isFirstEntry) {
-          const entryDuration = 0.6 // 600ms
-          const newProgress = Math.min(entryProgress + (deltaTime / 1000) / entryDuration, 1)
-          setEntryProgress(newProgress)
+      // Scale animation: 0.5 → 1.15 → 1.0 (entry) or 1.0 → 1.15 → 0.5 (exit)
+      if (isExiting && exitProgress < 1) {
+        const exitDuration = 0.4 // 400ms
+        const newProgress = Math.min(exitProgress + (deltaTime / 1000) / exitDuration, 1)
+        setExitProgress(newProgress)
+      } else if (isFirstEntry && scaleProgress < 1) {
+        const entryDuration = 0.4 // 400ms
+        const newProgress = Math.min(scaleProgress + (deltaTime / 1000) / entryDuration, 1)
+        setScaleProgress(newProgress)
 
-          // Fire callback when complete
-          if (newProgress >= 1 && !hasCalledComplete.current && onEntryComplete) {
-            hasCalledComplete.current = true
-            onEntryComplete()
-          }
-        } else {
-          // Not first entry - jump to full scale immediately
-          setEntryProgress(1)
-          if (!hasCalledComplete.current && onEntryComplete) {
-            hasCalledComplete.current = true
-            onEntryComplete()
-          }
+        // Fire callback when complete
+        if (newProgress >= 1 && !hasCalledComplete.current && onEntryComplete) {
+          hasCalledComplete.current = true
+          onEntryComplete()
+        }
+      } else if (!isFirstEntry && scaleProgress < 1) {
+        // Not first entry - jump to full scale immediately
+        setScaleProgress(1)
+        if (!hasCalledComplete.current && onEntryComplete) {
+          hasCalledComplete.current = true
+          onEntryComplete()
         }
       }
 
@@ -153,7 +165,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         setColorTransition(colorTransitionRef.current)
       }
 
-      // Generate and update blob paths
+      // Update blob paths continuously (always animate)
       const path = generateBlobPath(elapsed)
       const path2 = generateBlobPath(elapsed + 1.5)
       const path3 = generateBlobPath(elapsed + 2.8)
@@ -216,11 +228,55 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
     return pathParts.join('')
   }
 
-  // Calculate entry scale: start at 0 and grow to 1.0
-  const entryScale = isFirstEntry ? entryProgress : 1
+  // Calculate scale with bounce: 0.5 → 1.15 → 1.0 (entry) or 1.0 → 1.15 → 0.5 (exit)
+  const calculateScale = (progress, isExit) => {
+    if (isExit) {
+      // Exit: 1.0 → 1.15 → 0.5
+      if (progress < 0.3) {
+        // First 30%: grow from 1.0 to 1.15
+        return 1.0 + (progress / 0.3) * 0.15
+      } else {
+        // Last 70%: shrink from 1.15 to 0.5
+        return 1.15 - ((progress - 0.3) / 0.7) * 0.65
+      }
+    } else {
+      // Entry: 0.5 → 1.15 → 1.0
+      if (progress < 0.6) {
+        // First 60%: grow from 0.5 to 1.15
+        return 0.5 + (progress / 0.6) * 0.65
+      } else {
+        // Last 40%: settle from 1.15 to 1.0
+        return 1.15 - ((progress - 0.6) / 0.4) * 0.15
+      }
+    }
+  }
+
+  const baseScale = isExiting
+    ? calculateScale(exitProgress, true)
+    : isFirstEntry
+      ? calculateScale(scaleProgress, false)
+      : 1
+
+  // Stagger: blob1 starts at 0ms, blob2 at 100ms, blob3 at 200ms
+  const getStaggeredScale = (blobIndex) => {
+    const staggerDelay = blobIndex * 0.25 // 0, 0.25, 0.5 in progress units
+    if (isExiting) {
+      const adjustedProgress = Math.max(0, Math.min(1, exitProgress - staggerDelay) / (1 - staggerDelay))
+      const scale = exitProgress === 0 ? 1 : calculateScale(adjustedProgress, true)
+      console.log(`Blob ${blobIndex} exit scale:`, scale, { exitProgress, adjustedProgress })
+      return scale
+    } else if (isFirstEntry) {
+      const adjustedProgress = Math.max(0, Math.min(1, scaleProgress - staggerDelay) / (1 - staggerDelay))
+      const scale = scaleProgress === 0 ? 0 : calculateScale(adjustedProgress, false)
+      console.log(`Blob ${blobIndex} entry scale:`, scale, { scaleProgress, adjustedProgress, staggerDelay })
+      return scale
+    }
+    console.log(`Blob ${blobIndex} normal scale: 1`)
+    return 1
+  }
 
   // Don't render at all until active
-  if (!isActive) {
+  if (!isActive && !isExiting) {
     return null
   }
 
@@ -231,7 +287,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         className="blob-lasso"
         viewBox="0 0 400 400"
         style={{
-          transform: `translate(calc(-50% + ${blob3Position.x}px), calc(-50% + ${blob3Position.y}px)) rotate(${blob3Rotation}deg) scale(${blob3Scale * entryScale}) scaleX(${scale3X}) scaleY(${scale3Y})`,
+          transform: `translate(calc(-50% + ${blob3Position.x}px), calc(-50% + ${blob3Position.y}px)) rotate(${blob3Rotation}deg) scale(${blob3Scale * getStaggeredScale(2)}) scaleX(${scale3X}) scaleY(${scale3Y})`,
           opacity: 0.4,
           zIndex: -1
         }}
@@ -252,7 +308,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         </defs>
         <path
           ref={blobRef3}
-          d={generateBlobPath(2.8)}
+          d=""
           fill="none"
           stroke={`url(#gradient3-${content.id})`}
           strokeWidth="2"
@@ -265,7 +321,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         className="blob-lasso"
         viewBox="0 0 400 400"
         style={{
-          transform: `translate(calc(-50% + ${blob2Position.x}px), calc(-50% + ${blob2Position.y}px)) rotate(${blob2Rotation}deg) scale(${blob2Scale * entryScale}) scaleX(${scale2X}) scaleY(${scale2Y})`,
+          transform: `translate(calc(-50% + ${blob2Position.x}px), calc(-50% + ${blob2Position.y}px)) rotate(${blob2Rotation}deg) scale(${blob2Scale * getStaggeredScale(1)}) scaleX(${scale2X}) scaleY(${scale2Y})`,
           opacity: 0.5,
           zIndex: 0
         }}
@@ -286,7 +342,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         </defs>
         <path
           ref={blobRef2}
-          d={generateBlobPath(1.5)}
+          d=""
           fill="none"
           stroke={`url(#gradient2-${content.id})`}
           strokeWidth="2.5"
@@ -299,7 +355,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         className="blob-lasso"
         viewBox="0 0 400 400"
         style={{
-          transform: `translate(calc(-50% + ${blobPosition.x}px), calc(-50% + ${blobPosition.y}px)) rotate(${blobRotation}deg) scale(${blobScale * entryScale}) scaleX(${scaleX}) scaleY(${scaleY})`,
+          transform: `translate(calc(-50% + ${blobPosition.x}px), calc(-50% + ${blobPosition.y}px)) rotate(${blobRotation}deg) scale(${blobScale * getStaggeredScale(0)}) scaleX(${scaleX}) scaleY(${scaleY})`,
           zIndex: 1
         }}
       >
@@ -319,7 +375,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         </defs>
         <path
           ref={blobRef}
-          d={generateBlobPath(0)}
+          d=""
           fill="none"
           stroke={`url(#gradient-${content.id})`}
           strokeWidth="3"
