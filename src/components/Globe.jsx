@@ -109,7 +109,7 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, 
 
     // Update vertex colors with rainbow cycling (Optimizations #1 & #10: Throttled updates + reusable color object)
     const now = state.clock.elapsedTime
-    const shouldUpdateColors = now - lastColorUpdateTime.current > 0.016 // ~60fps throttle
+    const shouldUpdateColors = now - lastColorUpdateTime.current > 0.033 // ~30fps throttle (reduced from 60fps)
 
     if (shouldUpdateColors && geometry.attributes.color) {
       lastColorUpdateTime.current = now
