@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
 import { PlanetInstance } from './PlanetInstance'
-import { BlobLasso } from '../../../../components/BlobLasso'
 import { positionPlanetInQuadrant, getQuadrant, normalizedToScreen } from '../../configs/quadrantLayout'
 import './PlanetMap.css'
 
@@ -12,8 +11,6 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
   const [isAnimating, setIsAnimating] = useState(true)
   const [isRollingOff, setIsRollingOff] = useState(false)
   const [selectedPlanetId, setSelectedPlanetId] = useState(null)
-  const [blobsHaveShown, setBlobsHaveShown] = useState(false)
-  const [blobsExiting, setBlobsExiting] = useState(false)
   const animationFrame = useRef(null)
   const rafIds = useRef([]) // Track all RAF IDs for cleanup
   const timeoutIds = useRef([]) // Track all timeout IDs for cleanup
@@ -172,7 +169,6 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
     // If clicking the already selected planet, confirm and proceed
     if (selectedPlanetId === planet.id) {
       setIsRollingOff(true)
-      setBlobsExiting(true) // Trigger blob exit animation
 
       let startTime = null
       const duration = 600
@@ -265,33 +261,6 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
     <div className={`planet-map ${transitionType}`}>
       {/* Background gradient */}
       <div className="planet-map-background"></div>
-
-      {/* Center "Sun" Blobs - with full entry/exit animations */}
-      <BlobLasso
-        content={{ id: 5 }}
-        isActive={true}
-        randomSeed={100}
-        colorIndex={5}
-        isFirstEntry={!blobsHaveShown}
-        isExiting={blobsExiting}
-        onEntryComplete={() => setBlobsHaveShown(true)}
-      />
-      <BlobLasso
-        content={{ id: 8 }}
-        isActive={true}
-        randomSeed={200}
-        colorIndex={8}
-        isFirstEntry={!blobsHaveShown}
-        isExiting={blobsExiting}
-      />
-      <BlobLasso
-        content={{ id: 9 }}
-        isActive={true}
-        randomSeed={300}
-        colorIndex={9}
-        isFirstEntry={!blobsHaveShown}
-        isExiting={blobsExiting}
-      />
 
       {/* Title */}
       <div className="planet-map-title">
