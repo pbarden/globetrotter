@@ -139,48 +139,26 @@ export function PlanetMapScene({ globes, onPlanetClick }) {
       const normalizedPos = positionPlanetInQuadrant(quadrant, planetRadius / dimensions.width, positionedPlanets)
       const screenPos = normalizedToScreen(normalizedPos, dimensions.width, dimensions.height)
 
-      // Start position - evenly distribute around center
-      const angle = (index / globes.length) * Math.PI * 2
-      const startDistance = Math.max(dimensions.width, dimensions.height) * 0.55
-      const startX = dimensions.width / 2 + Math.cos(angle) * startDistance
-      const startY = dimensions.height / 2 + Math.sin(angle) * startDistance
-
-      // All planets aim DIRECTLY at CENTER
-      const centerX = dimensions.width / 2
-      const centerY = dimensions.height / 2
-      const dx = centerX - startX
-      const dy = centerY - startY
-
-      // Fast convergence
-      const speed = 2200
-      const trajectoryAngle = Math.atan2(dy, dx)
-
+      // NO ANIMATION - planets start at target position immediately
       positionedPlanets.push({
         id: globe.id,
         name: globe.name,
         size: globe.size,
         config: globe,
-        position: { x: startX, y: startY },
+        position: screenPos, // Start at target, not off-screen
         targetPosition: screenPos,
-        velocity: {
-          x: Math.cos(trajectoryAngle) * speed,
-          y: Math.sin(trajectoryAngle) * speed
-        },
-        angularVelocity: {
-          x: 0,
-          y: 0,
-          z: 0
-        },
+        velocity: { x: 0, y: 0 }, // No velocity
+        angularVelocity: { x: 0, y: 0, z: 0 },
         radius: planetRadius,
         scale: sizeMultiplier,
         mass: sizeMultiplier,
         bounceCount: 0,
-        isSettled: false
+        isSettled: true // Already settled, no animation
       })
     })
 
     setPlanets(positionedPlanets)
-    setIsAnimating(true)
+    setIsAnimating(false) // No animation needed
     animationStartTime.current = performance.now()
   }, [globes])
 

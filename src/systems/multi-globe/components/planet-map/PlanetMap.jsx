@@ -36,73 +36,22 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
       const normalizedPos = positionPlanetInQuadrant(quadrant, planetRadius / dimensions.width, positionedPlanets)
       const screenPos = normalizedToScreen(normalizedPos, dimensions.width, dimensions.height)
 
-      // Random start position off screen
-      const side = Math.floor(Math.random() * 4)
-      let startX, startY
-
-      switch (side) {
-        case 0: startX = Math.random() * dimensions.width; startY = -planetRadius * 3; break
-        case 1: startX = dimensions.width + planetRadius * 3; startY = Math.random() * dimensions.height; break
-        case 2: startX = Math.random() * dimensions.width; startY = dimensions.height + planetRadius * 3; break
-        case 3: startX = -planetRadius * 3; startY = Math.random() * dimensions.height; break
-        default: startX = dimensions.width / 2; startY = -planetRadius * 3;
-      }
-
       positionedPlanets.push({
         id: globe.id,
         name: globe.name,
         size: globe.size,
         config: globe,
-        position: { x: startX, y: startY },
+        position: screenPos, // Start at final position - no fly-in
         targetPosition: screenPos,
-        originalPosition: screenPos, // Store original position for restoration
+        originalPosition: screenPos,
         radius: planetRadius,
         scale: sizeMultiplier,
-        rotation: Math.random() * Math.PI * 2 // Random starting rotation
+        rotation: Math.random() * Math.PI * 2
       })
     })
 
     setPlanetPositions(positionedPlanets)
-
-    // Start animation
-    const startTime = performance.now()
-    const duration = 1500 // 1.5 seconds
-
-    const animate = (currentTime) => {
-      const elapsed = currentTime - startTime
-      const progress = Math.min(elapsed / duration, 1)
-
-      // Ease out cubic
-      const easeProgress = 1 - Math.pow(1 - progress, 3)
-
-      setPlanetPositions(prev => prev.map(planet => {
-        const dx = planet.targetPosition.x - planet.position.x
-        const dy = planet.targetPosition.y - planet.position.y
-
-        // Calculate new position
-        const newX = planet.position.x + dx * 0.08
-        const newY = planet.position.y + dy * 0.08
-
-        return {
-          ...planet,
-          position: progress < 1 ? { x: newX, y: newY } : planet.targetPosition
-        }
-      }))
-
-      if (progress < 1) {
-        animationFrame.current = requestAnimationFrame(animate)
-      } else {
-        setIsAnimating(false)
-      }
-    }
-
-    animationFrame.current = requestAnimationFrame(animate)
-
-    return () => {
-      if (animationFrame.current) {
-        cancelAnimationFrame(animationFrame.current)
-      }
-    }
+    setIsAnimating(false) // No animation - planets appear instantly
   }, [globes])
 
   // Handle planet click - two-tap logic
