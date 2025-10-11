@@ -342,7 +342,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         className="blob-lasso"
         viewBox="0 0 400 400"
         style={{
-          transform: `translate(calc(-50% + ${blob2Position.x}px), calc(-50% + ${blob2Position.y}px)) rotate(${blob2Rotation}deg) scale(${blob2Scale * getStaggeredScale(1)}) scaleX(${scale2X}) scaleY(${scale2Y})`,
+          transform: `translate(calc(-50% + ${blob2Position.x}px), calc(-50% + ${blob2Position.y}px)) rotate(${blob2Rotation}deg) scale(${blob2Scale * getStaggeredScale(1) * scaleMultiplier}) scaleX(${scale2X}) scaleY(${scale2Y})`,
           opacity: 0.5,
           zIndex: 0
         }}
@@ -376,7 +376,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         className="blob-lasso"
         viewBox="0 0 400 400"
         style={{
-          transform: `translate(calc(-50% + ${blobPosition.x}px), calc(-50% + ${blobPosition.y}px)) rotate(${blobRotation}deg) scale(${blobScale * getStaggeredScale(0)}) scaleX(${scaleX}) scaleY(${scaleY})`,
+          transform: `translate(calc(-50% + ${blobPosition.x}px), calc(-50% + ${blobPosition.y}px)) rotate(${blobRotation}deg) scale(${blobScale * getStaggeredScale(0) * scaleMultiplier}) scaleX(${scaleX}) scaleY(${scaleY})`,
           zIndex: 1
         }}
       >
