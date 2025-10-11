@@ -58,7 +58,7 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
         originalPosition: screenPos, // Store original position for restoration
         radius: planetRadius,
         scale: sizeMultiplier,
-        rotation: 0
+        rotation: Math.random() * Math.PI * 2 // Random starting rotation
       })
     })
 
@@ -83,14 +83,9 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
         const newX = planet.position.x + dx * 0.08
         const newY = planet.position.y + dy * 0.08
 
-        // Calculate rotation based on movement
-        const moveDistance = Math.sqrt(dx * dx + dy * dy)
-        const rotationIncrement = moveDistance * 0.002
-
         return {
           ...planet,
-          position: progress < 1 ? { x: newX, y: newY } : planet.targetPosition,
-          rotation: planet.rotation + rotationIncrement
+          position: progress < 1 ? { x: newX, y: newY } : planet.targetPosition
         }
       }))
 
@@ -179,11 +174,19 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
           // Push away from selected planet
           const angle = Math.atan2(dy, dx)
           const pushDistance = minDistance - distance
+          let newX = restoredP.position.x + Math.cos(angle) * pushDistance
+          let newY = restoredP.position.y + Math.sin(angle) * pushDistance
+
+          // Clamp to screen bounds with padding
+          const padding = restoredP.radius + 50
+          newX = Math.max(padding, Math.min(dimensions.width - padding, newX))
+          newY = Math.max(padding, Math.min(dimensions.height - padding, newY))
+
           return {
             ...restoredP,
             position: {
-              x: restoredP.position.x + Math.cos(angle) * pushDistance,
-              y: restoredP.position.y + Math.sin(angle) * pushDistance
+              x: newX,
+              y: newY
             }
           }
         }
