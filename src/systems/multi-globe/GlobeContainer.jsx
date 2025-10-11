@@ -31,6 +31,8 @@ function GlobeContainer({
   const [randomSeed, setRandomSeed] = useState(Math.random() * 1000)
   const [blobsActive, setBlobsActive] = useState(false)
   const [blobsHaveShown, setBlobsHaveShown] = useState(false)
+  const [blobsExiting, setBlobsExiting] = useState(false)
+  const [globeExiting, setGlobeExiting] = useState(false)
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
 
@@ -75,9 +77,30 @@ function GlobeContainer({
       return
     }
 
-    // Special behavior: if this is tiny globe, any scroll goes to map
+    // Special behavior: if this is tiny globe, any scroll goes to map with exit sequence
     if (sizeSpec.scrollBehavior === 'return-to-map' && onScrollToMap) {
-      onScrollToMap()
+      setIsTransitioning(true)
+
+      // REVERSE of entry: Blobs → Modal → Globe → Map
+      // Stage 1: Blobs shrink (400ms)
+      setBlobsExiting(true)
+
+      setTimeout(() => {
+        // Stage 2: Modal flies out (400ms)
+        const flyDir = e.deltaY > 0 ? 'fly-out-bottom' : 'fly-out-top'
+        setFlyOutDirection(flyDir)
+
+        setTimeout(() => {
+          // Stage 3: Globe falls (500ms)
+          setGlobeExiting(true)
+
+          setTimeout(() => {
+            // Stage 4: Transition to map
+            onScrollToMap()
+          }, 500)
+        }, 400)
+      }, 400)
+
       return
     }
 
@@ -196,8 +219,8 @@ function GlobeContainer({
           // Start blobs AFTER modal finishes entering
           setBlobsActive(true)
           // Don't set blobsHaveShown yet - let animation complete first
-        }, 650)
-      }, 1000)
+        }, 900)
+      }, 1800)
     }
   }, [hasShownFirstContent, contentPoints])
 
@@ -234,6 +257,7 @@ function GlobeContainer({
             targetRotation={targetRotation}
             scale={sizeSpec.scale}
             subdivision={sizeSpec.subdivision}
+            isExiting={globeExiting}
           />
         </Suspense>
       </Canvas>
@@ -248,6 +272,7 @@ function GlobeContainer({
         randomSeed={randomSeed}
         colorIndex={currentColorIndex}
         isFirstEntry={!blobsHaveShown}
+        isExiting={blobsExiting}
         onEntryComplete={() => setBlobsHaveShown(true)}
       />
 

@@ -2,7 +2,7 @@ import { useRef, useMemo, useState, useEffect, memo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2 }) {
+function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, isExiting = false }) {
   const meshRef = useRef()
   const materialRef = useRef()
   const edgesRef = useRef()
@@ -10,6 +10,7 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2 }
   const timeRef = useRef(0)
   const rotationVelocity = useRef(0)
   const [entryAnimation, setEntryAnimation] = useState(0)
+  const [exitAnimation, setExitAnimation] = useState(0)
   const hasEnteredRef = useRef(false)
   const idleRotationRef = useRef({ x: 0, y: 0 })
   const lastColorUpdateTime = useRef(0)
@@ -49,6 +50,17 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2 }
 
   // Animate rotation and colors
   useFrame((state, delta) => {
+    // Exit animation - fall down (REVERSE of entry)
+    if (isExiting && groupRef.current) {
+      const newProgress = Math.min(exitAnimation + delta * 2, 1)
+      setExitAnimation(newProgress)
+
+      // Fall with gravity (quadratic)
+      const easedProgress = newProgress * newProgress
+      groupRef.current.position.y = 0 - (15 * easedProgress)
+      return // Skip other animations
+    }
+
     // Entry animation with bounce
     if (entryAnimation < 1 && groupRef.current) {
       // Slower at the beginning, faster towards the end

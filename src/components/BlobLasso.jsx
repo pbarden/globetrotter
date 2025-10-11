@@ -8,14 +8,14 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
   const animationRef = useRef()
   const startTimeRef = useRef(0)
   const colorTransitionRef = useRef(1)
+  const scaleProgressRef = useRef(0)
+  const exitProgressRef = useRef(0)
   const [colorTransition, setColorTransition] = useState(1)
   const [previousColors, setPreviousColors] = useState(null)
   const [scaleProgress, setScaleProgress] = useState(0)
   const [exitProgress, setExitProgress] = useState(0)
   const hasCalledComplete = useRef(false)
   const hasStartedAnimation = useRef(false)
-
-  console.log('BlobLasso render:', { isActive, isFirstEntry, isExiting, scaleProgress, exitProgress })
 
   // Unified color system - matches App.jsx and ContentCard
   const blobColors = [
@@ -107,18 +107,21 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
     return colors
   }, [previousColors, colorTransition, colors])
 
+  // Reset exit progress when exiting starts
   useEffect(() => {
-    console.log('BlobLasso useEffect:', {
-      isActive,
-      isFirstEntry,
-      scaleProgress,
-      hasRefs: !!(blobRef.current && blobRef2.current && blobRef3.current)
-    })
+    if (isExiting) {
+      exitProgressRef.current = 0
+      setExitProgress(0)
+    }
+  }, [isExiting])
 
-    if (!isActive || !blobRef.current || !blobRef2.current || !blobRef3.current) return
+  useEffect(() => {
+    // Run when active OR exiting
+    if (!isActive && !isExiting) return
+    if (!blobRef.current || !blobRef2.current || !blobRef3.current) return
 
     let lastTime = 0
-    let lastUpdateTime = 0
+    let lastUpdateTime = performance.now()
     startTimeRef.current = performance.now() / 1000
 
     const animateBlob = (timestamp) => {
@@ -136,13 +139,15 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
       lastUpdateTime = timestamp
 
       // Scale animation: 0.5 → 1.15 → 1.0 (entry) or 1.0 → 1.15 → 0.5 (exit)
-      if (isExiting && exitProgress < 1) {
+      if (isExiting && exitProgressRef.current < 1) {
         const exitDuration = 0.4 // 400ms
-        const newProgress = Math.min(exitProgress + (deltaTime / 1000) / exitDuration, 1)
+        const newProgress = Math.min(exitProgressRef.current + (deltaTime / 1000) / exitDuration, 1)
+        exitProgressRef.current = newProgress
         setExitProgress(newProgress)
-      } else if (isFirstEntry && scaleProgress < 1) {
+      } else if (isFirstEntry && scaleProgressRef.current < 1) {
         const entryDuration = 0.4 // 400ms
-        const newProgress = Math.min(scaleProgress + (deltaTime / 1000) / entryDuration, 1)
+        const newProgress = Math.min(scaleProgressRef.current + (deltaTime / 1000) / entryDuration, 1)
+        scaleProgressRef.current = newProgress
         setScaleProgress(newProgress)
 
         // Fire callback when complete
@@ -150,8 +155,9 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
           hasCalledComplete.current = true
           onEntryComplete()
         }
-      } else if (!isFirstEntry && scaleProgress < 1) {
+      } else if (!isFirstEntry && scaleProgressRef.current < 1) {
         // Not first entry - jump to full scale immediately
+        scaleProgressRef.current = 1
         setScaleProgress(1)
         if (!hasCalledComplete.current && onEntryComplete) {
           hasCalledComplete.current = true
@@ -165,14 +171,16 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         setColorTransition(colorTransitionRef.current)
       }
 
-      // Update blob paths continuously (always animate)
-      const path = generateBlobPath(elapsed)
-      const path2 = generateBlobPath(elapsed + 1.5)
-      const path3 = generateBlobPath(elapsed + 2.8)
+      // Update blob paths - PAUSE during exit
+      if (!isExiting || exitProgressRef.current >= 1) {
+        const path = generateBlobPath(elapsed)
+        const path2 = generateBlobPath(elapsed + 1.5)
+        const path3 = generateBlobPath(elapsed + 2.8)
 
-      blobRef.current.setAttribute('d', path)
-      blobRef2.current.setAttribute('d', path2)
-      blobRef3.current.setAttribute('d', path3)
+        blobRef.current.setAttribute('d', path)
+        blobRef2.current.setAttribute('d', path2)
+        blobRef3.current.setAttribute('d', path3)
+      }
 
       animationRef.current = requestAnimationFrame(animateBlob)
     }
@@ -184,7 +192,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [isActive])
+  }, [isActive, isExiting])
 
   const generateBlobPath = (time) => {
     const points = 8
@@ -228,16 +236,16 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
     return pathParts.join('')
   }
 
-  // Calculate scale with bounce: 0.5 → 1.15 → 1.0 (entry) or 1.0 → 1.15 → 0.5 (exit)
+  // Calculate scale with bounce: 0.5 → 1.15 → 1.0 (entry) or 1.0 → 1.15 → 0.0 (exit)
   const calculateScale = (progress, isExit) => {
     if (isExit) {
-      // Exit: 1.0 → 1.15 → 0.5
+      // Exit: 1.0 → 1.15 → 0.0
       if (progress < 0.3) {
         // First 30%: grow from 1.0 to 1.15
         return 1.0 + (progress / 0.3) * 0.15
       } else {
-        // Last 70%: shrink from 1.15 to 0.5
-        return 1.15 - ((progress - 0.3) / 0.7) * 0.65
+        // Last 70%: shrink from 1.15 to 0.0
+        return 1.15 - ((progress - 0.3) / 0.7) * 1.15
       }
     } else {
       // Entry: 0.5 → 1.15 → 1.0
@@ -257,21 +265,22 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
       ? calculateScale(scaleProgress, false)
       : 1
 
-  // Stagger: blob1 starts at 0ms, blob2 at 100ms, blob3 at 200ms
+  // Stagger: blob1 starts at 0ms, blob2 at 100ms, blob3 at 200ms - SAME for entry and exit
   const getStaggeredScale = (blobIndex) => {
     const staggerDelay = blobIndex * 0.25 // 0, 0.25, 0.5 in progress units
+
     if (isExiting) {
-      const adjustedProgress = Math.max(0, Math.min(1, exitProgress - staggerDelay) / (1 - staggerDelay))
-      const scale = exitProgress === 0 ? 1 : calculateScale(adjustedProgress, true)
-      console.log(`Blob ${blobIndex} exit scale:`, scale, { exitProgress, adjustedProgress })
-      return scale
-    } else if (isFirstEntry) {
-      const adjustedProgress = Math.max(0, Math.min(1, scaleProgress - staggerDelay) / (1 - staggerDelay))
-      const scale = scaleProgress === 0 ? 0 : calculateScale(adjustedProgress, false)
-      console.log(`Blob ${blobIndex} entry scale:`, scale, { scaleProgress, adjustedProgress, staggerDelay })
-      return scale
+      if (exitProgress === 0) return 1
+      const adjustedProgress = Math.max(0, Math.min(1, (exitProgress - staggerDelay) / (1 - staggerDelay)))
+      return calculateScale(adjustedProgress, true)
     }
-    console.log(`Blob ${blobIndex} normal scale: 1`)
+
+    if (isFirstEntry) {
+      if (scaleProgress === 0) return 0
+      const adjustedProgress = Math.max(0, Math.min(1, (scaleProgress - staggerDelay) / (1 - staggerDelay)))
+      return calculateScale(adjustedProgress, false)
+    }
+
     return 1
   }
 
