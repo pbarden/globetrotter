@@ -29,6 +29,7 @@ function GlobeContainer({
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [flyOutDirection, setFlyOutDirection] = useState('')
   const [randomSeed, setRandomSeed] = useState(Math.random() * 1000)
+  const [blobsActive, setBlobsActive] = useState(false)
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
 
@@ -152,6 +153,8 @@ function GlobeContainer({
           setAnimationKey(prev => prev + 1)
           setFlyOutDirection('')
           setRandomSeed(Math.random() * 1000)
+          // Blobs stay active during card switches
+          setBlobsActive(true)
 
           // Allow new transitions after fly-in completes
           setTimeout(() => {
@@ -189,6 +192,8 @@ function GlobeContainer({
 
         setTimeout(() => {
           setIsTransitioning(false)
+          // Start blobs AFTER modal finishes entering
+          setBlobsActive(true)
         }, 650)
       }, 1000)
     }
@@ -237,9 +242,10 @@ function GlobeContainer({
           id: contentPoints[currentPoint].id,
           ...contentPoints[currentPoint].content
         }}
-        isActive={true}
+        isActive={blobsActive}
         randomSeed={randomSeed}
         colorIndex={currentColorIndex}
+        isFirstEntry={currentPoint === 0 && !hasShownFirstContent}
       />
 
       {/* Content Cards */}

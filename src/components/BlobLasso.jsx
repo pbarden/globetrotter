@@ -111,16 +111,6 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
     let lastUpdateTime = 0
     startTimeRef.current = performance.now() / 1000
 
-    // If not first entry, skip animation and call complete immediately
-    if (!isFirstEntry && !hasCalledComplete.current) {
-      setEntryProgress(1)
-      hasStartedAnimation.current = true
-      if (onEntryComplete) {
-        hasCalledComplete.current = true
-        onEntryComplete()
-      }
-    }
-
     const animateBlob = (timestamp) => {
       if (!blobRef.current || !blobRef2.current || !blobRef3.current) return
 
@@ -136,15 +126,24 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
       lastUpdateTime = timestamp
 
       // Entry animation: zoom in from small to full size
-      if (isFirstEntry && entryProgress < 1) {
-        const entryDuration = 0.6 // 600ms
-        const newProgress = Math.min(entryProgress + (deltaTime / 1000) / entryDuration, 1)
-        setEntryProgress(newProgress)
+      if (entryProgress < 1) {
+        if (isFirstEntry) {
+          const entryDuration = 0.6 // 600ms
+          const newProgress = Math.min(entryProgress + (deltaTime / 1000) / entryDuration, 1)
+          setEntryProgress(newProgress)
 
-        // Fire callback when complete
-        if (newProgress >= 1 && !hasCalledComplete.current && onEntryComplete) {
-          hasCalledComplete.current = true
-          onEntryComplete()
+          // Fire callback when complete
+          if (newProgress >= 1 && !hasCalledComplete.current && onEntryComplete) {
+            hasCalledComplete.current = true
+            onEntryComplete()
+          }
+        } else {
+          // Not first entry - jump to full scale immediately
+          setEntryProgress(1)
+          if (!hasCalledComplete.current && onEntryComplete) {
+            hasCalledComplete.current = true
+            onEntryComplete()
+          }
         }
       }
 
@@ -217,8 +216,13 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
     return pathParts.join('')
   }
 
-  // Calculate entry scale: start at 0.2 (tiny) and zoom to 1.0
-  const entryScale = isFirstEntry ? 0.2 + (entryProgress * 0.8) : 1
+  // Calculate entry scale: start at 0 and grow to 1.0
+  const entryScale = isFirstEntry ? entryProgress : 1
+
+  // Don't render at all until active
+  if (!isActive) {
+    return null
+  }
 
   return (
     <>
