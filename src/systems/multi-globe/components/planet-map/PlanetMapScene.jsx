@@ -22,10 +22,11 @@ function Planet3D({ planet, onHover, onUnhover, onClick, isAnimating }) {
       meshRef.current.position.x = newX
       meshRef.current.position.y = newY
 
-      // Rotate based on velocity (pool ball rolling effect)
-      if (planet.velocity) {
-        meshRef.current.rotation.x += planet.velocity.y * 0.00005
-        meshRef.current.rotation.y += planet.velocity.x * 0.00005
+      // Tumble like dice based on angular velocity
+      if (planet.angularVelocity && isAnimating) {
+        meshRef.current.rotation.x += planet.angularVelocity.x
+        meshRef.current.rotation.y += planet.angularVelocity.y
+        meshRef.current.rotation.z += planet.angularVelocity.z
       }
 
       // Gentle rotation when hovered
@@ -71,6 +72,7 @@ function Planet3D({ planet, onHover, onUnhover, onClick, isAnimating }) {
       <SimplifiedGlobe
         scale={worldScale}
         rotation={meshRef.current?.rotation}
+        size={planet.size}
       />
 
       {/* Glow effect */}
@@ -112,7 +114,6 @@ export function PlanetMapScene({ globes, onPlanetClick }) {
   const [planets, setPlanets] = useState([])
   const [isAnimating, setIsAnimating] = useState(false)
   const [isRollingOff, setIsRollingOff] = useState(false)
-  const physicsRef = useRef(null)
   const animationStartTime = useRef(null)
 
   // Initialize planets
@@ -138,37 +139,21 @@ export function PlanetMapScene({ globes, onPlanetClick }) {
       const normalizedPos = positionPlanetInQuadrant(quadrant, planetRadius / dimensions.width, positionedPlanets)
       const screenPos = normalizedToScreen(normalizedPos, dimensions.width, dimensions.height)
 
-      // Start position (off screen)
-      const side = Math.floor(Math.random() * 4)
-      let startX, startY
+      // Start position - evenly distribute around center
+      const angle = (index / globes.length) * Math.PI * 2
+      const startDistance = Math.max(dimensions.width, dimensions.height) * 0.55
+      const startX = dimensions.width / 2 + Math.cos(angle) * startDistance
+      const startY = dimensions.height / 2 + Math.sin(angle) * startDistance
 
-      switch (side) {
-        case 0: // Top
-          startX = Math.random() * dimensions.width
-          startY = -planetRadius * 2
-          break
-        case 1: // Right
-          startX = dimensions.width + planetRadius * 2
-          startY = Math.random() * dimensions.height
-          break
-        case 2: // Bottom
-          startX = Math.random() * dimensions.width
-          startY = dimensions.height + planetRadius * 2
-          break
-        case 3: // Left
-          startX = -planetRadius * 2
-          startY = Math.random() * dimensions.height
-          break
-        default:
-          startX = dimensions.width / 2
-          startY = -planetRadius * 2
-      }
+      // All planets aim DIRECTLY at CENTER
+      const centerX = dimensions.width / 2
+      const centerY = dimensions.height / 2
+      const dx = centerX - startX
+      const dy = centerY - startY
 
-      // Calculate initial velocity toward target
-      const dx = screenPos.x - startX
-      const dy = screenPos.y - startY
-      const distance = Math.sqrt(dx * dx + dy * dy)
-      const speed = 800 + Math.random() * 400
+      // Fast convergence
+      const speed = 2200
+      const trajectoryAngle = Math.atan2(dy, dx)
 
       positionedPlanets.push({
         id: globe.id,
@@ -178,12 +163,18 @@ export function PlanetMapScene({ globes, onPlanetClick }) {
         position: { x: startX, y: startY },
         targetPosition: screenPos,
         velocity: {
-          x: (dx / distance) * speed,
-          y: (dy / distance) * speed
+          x: Math.cos(trajectoryAngle) * speed,
+          y: Math.sin(trajectoryAngle) * speed
+        },
+        angularVelocity: {
+          x: 0,
+          y: 0,
+          z: 0
         },
         radius: planetRadius,
         scale: sizeMultiplier,
         mass: sizeMultiplier,
+        bounceCount: 0,
         isSettled: false
       })
     })
@@ -193,10 +184,9 @@ export function PlanetMapScene({ globes, onPlanetClick }) {
     animationStartTime.current = performance.now()
   }, [globes])
 
-  // Physics update loop
+  // Physics update loop - simple roll in with tumbling
   useFrame((state, delta) => {
     if (isRollingOff) {
-      // Roll-off animation
       setPlanets(prev => prev.map(p => ({
         ...p,
         position: {
@@ -205,7 +195,7 @@ export function PlanetMapScene({ globes, onPlanetClick }) {
         },
         velocity: {
           x: p.velocity.x,
-          y: p.velocity.y + 2000 * delta // Gravity acceleration
+          y: p.velocity.y + 2000 * delta
         }
       })))
       return
@@ -213,84 +203,64 @@ export function PlanetMapScene({ globes, onPlanetClick }) {
 
     if (!isAnimating) return
 
-    const elapsed = performance.now() - animationStartTime.current
-    const maxDuration = 2000 // Faster: 2 seconds max
-
     setPlanets(prev => {
-      const updated = prev.map(planet => {
-        if (planet.isSettled) return planet
+      const next = []
 
-        // Check if close to target - settle faster
-        const dx = planet.targetPosition.x - planet.position.x
-        const dy = planet.targetPosition.y - planet.position.y
-        const distToTarget = Math.sqrt(dx * dx + dy * dy)
+      for (let i = 0; i < prev.length; i++) {
+        const p = prev[i]
 
-        // If close to target or time's up, ease to target
-        if (distToTarget < 50 || elapsed > maxDuration * 0.6) {
-          const easeSpeed = 0.15
-          const newX = planet.position.x + dx * easeSpeed
-          const newY = planet.position.y + dy * easeSpeed
-
-          if (distToTarget < 2) {
-            return {
-              ...planet,
-              position: { x: planet.targetPosition.x, y: planet.targetPosition.y },
-              velocity: { x: 0, y: 0 },
-              isSettled: true
-            }
-          }
-
-          return {
-            ...planet,
-            position: { x: newX, y: newY },
-            velocity: { x: dx * easeSpeed, y: dy * easeSpeed }
-          }
+        if (p.isSettled) {
+          next.push(p)
+          continue
         }
 
-        // Physics movement
-        const friction = 0.97
-        const newVelX = planet.velocity.x * friction
-        const newVelY = planet.velocity.y * friction
-        const newX = planet.position.x + newVelX * delta
-        const newY = planet.position.y + newVelY * delta
+        const vel = Math.sqrt(p.velocity.x ** 2 + p.velocity.y ** 2)
+        const angVel = Math.sqrt(p.angularVelocity.x ** 2 + p.angularVelocity.y ** 2 + p.angularVelocity.z ** 2)
 
-        // Boundary bounce
-        let finalVelX = newVelX
-        let finalVelY = newVelY
-        let finalX = newX
-        let finalY = newY
-
-        const restitution = 0.6
-
-        if (newX - planet.radius < 0) {
-          finalX = planet.radius
-          finalVelX = Math.abs(newVelX) * restitution
-        } else if (newX + planet.radius > window.innerWidth) {
-          finalX = window.innerWidth - planet.radius
-          finalVelX = -Math.abs(newVelX) * restitution
+        // Settle when nearly stopped - don't snap to target, just stop where they are
+        if (vel < 2 && angVel < 0.001) {
+          next.push({
+            ...p,
+            velocity: { x: 0, y: 0 },
+            angularVelocity: { x: 0, y: 0, z: 0 },
+            isSettled: true
+          })
+          continue
         }
 
-        if (newY - planet.radius < 0) {
-          finalY = planet.radius
-          finalVelY = Math.abs(newVelY) * restitution
-        } else if (newY + planet.radius > window.innerHeight) {
-          finalY = window.innerHeight - planet.radius
-          finalVelY = -Math.abs(newVelY) * restitution
+        // Apply friction
+        const friction = 0.96
+        const newVelX = p.velocity.x * friction
+        const newVelY = p.velocity.y * friction
+
+        // Update position
+        const newX = p.position.x + newVelX * delta
+        const newY = p.position.y + newVelY * delta
+
+        // Angular velocity decays proportional to linear velocity for smooth stop
+        const velocityFactor = Math.max(0, Math.min(1, vel / 500))
+        const angularFriction = 0.85 - (0.3 * (1 - velocityFactor)) // 0.85 when fast, 0.55 when slow
+
+        const newAngularVelocity = {
+          x: p.angularVelocity.x * angularFriction,
+          y: p.angularVelocity.y * angularFriction,
+          z: p.angularVelocity.z * angularFriction
         }
 
-        return {
-          ...planet,
-          position: { x: finalX, y: finalY },
-          velocity: { x: finalVelX, y: finalVelY }
-        }
-      })
+        next.push({
+          ...p,
+          position: { x: newX, y: newY },
+          velocity: { x: newVelX, y: newVelY },
+          angularVelocity: newAngularVelocity
+        })
+      }
 
       // Check if all settled
-      if (updated.every(p => p.isSettled)) {
+      if (next.every(p => p.isSettled)) {
         setIsAnimating(false)
       }
 
-      return updated
+      return next
     })
   })
 
@@ -299,7 +269,6 @@ export function PlanetMapScene({ globes, onPlanetClick }) {
 
     setIsRollingOff(true)
 
-    // After roll-off, navigate
     setTimeout(() => {
       onPlanetClick?.(planet.config)
     }, 800)
