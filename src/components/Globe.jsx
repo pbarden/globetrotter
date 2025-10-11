@@ -1,4 +1,4 @@
-import { useRef, useMemo, useState, useEffect, memo } from 'react'
+import { useRef, useMemo, memo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -9,8 +9,8 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, 
   const groupRef = useRef()
   const timeRef = useRef(0)
   const rotationVelocity = useRef(0)
-  const [entryAnimation, setEntryAnimation] = useState(0)
-  const [exitAnimation, setExitAnimation] = useState(0)
+  const entryAnimationRef = useRef(0)
+  const exitAnimationRef = useRef(0)
   const hasEnteredRef = useRef(false)
   const idleRotationRef = useRef({ x: 0, y: 0 })
   const lastColorUpdateTime = useRef(0)
@@ -41,19 +41,12 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, 
   // Create reusable color object for vertex updates (Optimization #10)
   const color = useMemo(() => new THREE.Color(), [])
 
-  // Start entry animation on mount
-  useEffect(() => {
-    if (!hasEnteredRef.current) {
-      hasEnteredRef.current = true
-    }
-  }, [])
-
   // Animate rotation and colors
   useFrame((state, delta) => {
     // Exit animation - fall down (REVERSE of entry)
     if (isExiting && groupRef.current) {
-      const newProgress = Math.min(exitAnimation + delta * 2, 1)
-      setExitAnimation(newProgress)
+      const newProgress = Math.min(exitAnimationRef.current + delta * 2, 1)
+      exitAnimationRef.current = newProgress
 
       // Fall with gravity (quadratic)
       const easedProgress = newProgress * newProgress
@@ -62,11 +55,11 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, 
     }
 
     // Entry animation with bounce
-    if (entryAnimation < 1 && groupRef.current) {
+    if (entryAnimationRef.current < 1 && groupRef.current) {
       // Slower at the beginning, faster towards the end
-      const speed = entryAnimation < 0.3 ? 0.7 : 1.0
-      const newProgress = Math.min(entryAnimation + delta * speed, 1)
-      setEntryAnimation(newProgress)
+      const speed = entryAnimationRef.current < 0.3 ? 0.7 : 1.0
+      const newProgress = Math.min(entryAnimationRef.current + delta * speed, 1)
+      entryAnimationRef.current = newProgress
 
       // Back ease-out with overshoot
       const t = newProgress
@@ -79,22 +72,21 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, 
     }
 
     // Idle rotation - slow continuous spin (only after entry animation completes)
-    if (entryAnimation >= 1) {
+    if (entryAnimationRef.current >= 1) {
       idleRotationRef.current.y += delta * 0.15 // Slow Y-axis rotation
       idleRotationRef.current.x += delta * 0.05 // Very slow X-axis rotation
     }
 
-    // Calculate rotation velocity and apply target rotation + idle rotation
+    // Calculate rotation velocity and target rotation with idle rotation (optimization: calculate once)
     const effectiveTarget = targetRotation || { x: 0, y: 0 }
+    const targetWithIdle = {
+      x: effectiveTarget.x + idleRotationRef.current.x,
+      y: effectiveTarget.y + idleRotationRef.current.y
+    }
+
     if (meshRef.current) {
       const currentRotX = meshRef.current.rotation.x
       const currentRotY = meshRef.current.rotation.y
-
-      // Target rotation with idle rotation added
-      const targetWithIdle = {
-        x: effectiveTarget.x + idleRotationRef.current.x,
-        y: effectiveTarget.y + idleRotationRef.current.y
-      }
 
       const deltaX = targetWithIdle.x - currentRotX
       const deltaY = targetWithIdle.y - currentRotY
@@ -105,12 +97,7 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, 
     }
 
     if (edgesRef.current) {
-      // Apply same idle rotation to wireframe
-      const targetWithIdle = {
-        x: effectiveTarget.x + idleRotationRef.current.x,
-        y: effectiveTarget.y + idleRotationRef.current.y
-      }
-
+      // Apply same idle rotation to wireframe (reuse targetWithIdle)
       edgesRef.current.rotation.x += (targetWithIdle.x - edgesRef.current.rotation.x) * 0.05
       edgesRef.current.rotation.y += (targetWithIdle.y - edgesRef.current.rotation.y) * 0.05
     }

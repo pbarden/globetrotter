@@ -266,8 +266,8 @@ function GlobeSystem({ onReady }) {
         />
       )}
 
-      {/* Back button (only visible on map or non-home globes) */}
-      {(currentView === VIEWS.PLANET_MAP || (currentView === VIEWS.GLOBE && activeGlobeId !== 'home-planet')) && (
+      {/* Back button (only visible on non-home globe views) */}
+      {(currentView === VIEWS.GLOBE && activeGlobeId !== 'home-planet') && (
         <button
           className="back-button"
           onClick={navigateBack}

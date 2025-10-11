@@ -120,8 +120,8 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
     if (!isActive && !isExiting) return
     if (!blobRef.current || !blobRef2.current || !blobRef3.current) return
 
-    let lastTime = 0
     let lastUpdateTime = performance.now()
+    let lastStateUpdateTime = 0
     startTimeRef.current = performance.now() / 1000
 
     const animateBlob = (timestamp) => {
@@ -138,17 +138,26 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
       }
       lastUpdateTime = timestamp
 
-      // Scale animation: 0.5 → 1.15 → 1.0 (entry) or 1.0 → 1.15 → 0.5 (exit)
+      // Scale animation: 0.5 → 1.15 → 1.0 (entry) or 1.0 → 1.15 → 0.0 (exit)
+      // Only update state every 50ms to reduce re-renders (aesthetics unchanged)
+      const shouldUpdateState = timestamp - lastStateUpdateTime > 50
+
       if (isExiting && exitProgressRef.current < 1) {
         const exitDuration = 0.4 // 400ms
         const newProgress = Math.min(exitProgressRef.current + (deltaTime / 1000) / exitDuration, 1)
         exitProgressRef.current = newProgress
-        setExitProgress(newProgress)
+        if (shouldUpdateState) {
+          setExitProgress(newProgress)
+          lastStateUpdateTime = timestamp
+        }
       } else if (isFirstEntry && scaleProgressRef.current < 1) {
         const entryDuration = 0.4 // 400ms
         const newProgress = Math.min(scaleProgressRef.current + (deltaTime / 1000) / entryDuration, 1)
         scaleProgressRef.current = newProgress
-        setScaleProgress(newProgress)
+        if (shouldUpdateState) {
+          setScaleProgress(newProgress)
+          lastStateUpdateTime = timestamp
+        }
 
         // Fire callback when complete
         if (newProgress >= 1 && !hasCalledComplete.current && onEntryComplete) {
@@ -165,10 +174,13 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         }
       }
 
-      // Smooth color transition - slow fade over ~3 seconds
+      // Smooth color transition - throttle state updates to every 100ms
       if (colorTransitionRef.current < 1) {
-        colorTransitionRef.current = Math.min(colorTransitionRef.current + 0.005, 1)
-        setColorTransition(colorTransitionRef.current)
+        const newColorTransition = Math.min(colorTransitionRef.current + 0.005, 1)
+        colorTransitionRef.current = newColorTransition
+        if (shouldUpdateState) {
+          setColorTransition(newColorTransition)
+        }
       }
 
       // Update blob paths - PAUSE during exit
@@ -192,7 +204,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [isActive, isExiting])
+  }, [isActive, isExiting, isFirstEntry, onEntryComplete])
 
   const generateBlobPath = (time) => {
     const points = 8

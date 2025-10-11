@@ -35,7 +35,7 @@ export const sizeSpecs = {
   [GLOBE_SIZES.MEDIUM]: {
     size: 'medium',
     scale: 1.0,
-    subdivision: 2, // 320 faces
+    subdivision: 1, // 80 faces - simplified
     gridDimensions: { rows: 3, cols: 3 },
     totalCards: 9,
     globeRadius: 2.0,
@@ -46,7 +46,7 @@ export const sizeSpecs = {
   [GLOBE_SIZES.LARGE]: {
     size: 'large',
     scale: 1.2,
-    subdivision: 2, // 320 faces - current complexity
+    subdivision: 1, // 80 faces - simplified
     gridDimensions: { rows: 4, cols: 4 },
     totalCards: 16,
     globeRadius: 2.5,
