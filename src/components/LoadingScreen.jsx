@@ -342,6 +342,7 @@ function LoadingScreenComponent({ onLoadComplete }) {
           </div>
         </div>
         <h1 className="loading-title">moon man digital</h1>
+        <p className="loading-subtitle">presents</p>
         <div className="loading-bar">
           <div className="loading-progress" style={{ width: `${progress}%` }}></div>
         </div>
