@@ -33,6 +33,9 @@ function GlobeSystem({ onReady }) {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [transitionType, setTransitionType] = useState('')
 
+  // Exit sequence trigger for globe views
+  const [shouldTriggerExitSequence, setShouldTriggerExitSequence] = useState(false)
+
   // Navigation history
   const [navigationHistory, setNavigationHistory] = useState([VIEWS.HOME_PLANET])
 
@@ -120,6 +123,21 @@ function GlobeSystem({ onReady }) {
     }, 400)
   }, [isTransitioning])
 
+  // Handle exit sequence completion
+  const handleExitSequenceComplete = useCallback(() => {
+    // After exit animations complete, transition to map
+    setCurrentView(VIEWS.PLANET_MAP)
+    setActiveGlobeId(null)
+    setActiveGlobe(null)
+    setNavigationHistory(prev => prev.slice(0, -1))
+    setShouldTriggerExitSequence(false)
+
+    setTimeout(() => {
+      setIsTransitioning(false)
+      setTransitionType('')
+    }, 100)
+  }, [])
+
   // Back button navigation
   const navigateBack = useCallback(() => {
     if (isTransitioning || navigationHistory.length <= 1) return
@@ -127,21 +145,10 @@ function GlobeSystem({ onReady }) {
     const previousView = navigationHistory[navigationHistory.length - 2]
 
     if (currentView === VIEWS.GLOBE) {
-      // From globe -> back to map
+      // From globe -> back to map with exit sequence
       setIsTransitioning(true)
       setTransitionType('globe-to-map')
-
-      setTimeout(() => {
-        setCurrentView(VIEWS.PLANET_MAP)
-        setActiveGlobeId(null)
-        setActiveGlobe(null)
-        setNavigationHistory(prev => prev.slice(0, -1))
-
-        setTimeout(() => {
-          setIsTransitioning(false)
-          setTransitionType('')
-        }, 800)
-      }, 400)
+      setShouldTriggerExitSequence(true)
     } else if (currentView === VIEWS.PLANET_MAP) {
       // From map -> back to home planet
       navigateToHome()
@@ -224,6 +231,8 @@ function GlobeSystem({ onReady }) {
           currentCardIndex={currentCardIndex}
           onNavigate={handleGlobeNavigate}
           onScrollToMap={navigateToPlanetMap}
+          shouldStartExitSequence={shouldTriggerExitSequence}
+          onExitSequenceComplete={handleExitSequenceComplete}
           isTransitioning={isTransitioning}
           transitionType={transitionType}
         />
@@ -250,6 +259,8 @@ function GlobeSystem({ onReady }) {
           currentCardIndex={currentCardIndex}
           onNavigate={handleGlobeNavigate}
           onScrollToMap={null}
+          shouldStartExitSequence={shouldTriggerExitSequence}
+          onExitSequenceComplete={handleExitSequenceComplete}
           isTransitioning={isTransitioning}
           transitionType={transitionType}
         />

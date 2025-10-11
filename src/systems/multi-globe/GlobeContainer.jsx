@@ -19,7 +19,9 @@ function GlobeContainer({
   globeConfig,
   currentCardIndex: externalCardIndex = 0,
   onNavigate,
-  onScrollToMap
+  onScrollToMap,
+  shouldStartExitSequence = false,
+  onExitSequenceComplete
 }) {
   const [hasShownFirstContent, setHasShownFirstContent] = useState(false)
   const [currentPoint, setCurrentPoint] = useState(externalCardIndex)
@@ -223,6 +225,34 @@ function GlobeContainer({
       }, 1800)
     }
   }, [hasShownFirstContent, contentPoints])
+
+  // Handle exit sequence when triggered externally (e.g., back button)
+  useEffect(() => {
+    if (shouldStartExitSequence && !isTransitioning) {
+      setIsTransitioning(true)
+
+      // REVERSE of entry: Blobs → Modal → Globe → Complete
+      // Stage 1: Blobs shrink (400ms)
+      setBlobsExiting(true)
+
+      setTimeout(() => {
+        // Stage 2: Modal flies out (400ms)
+        setFlyOutDirection('fly-out-bottom')
+
+        setTimeout(() => {
+          // Stage 3: Globe falls (500ms)
+          setGlobeExiting(true)
+
+          setTimeout(() => {
+            // Stage 4: Notify completion
+            if (onExitSequenceComplete) {
+              onExitSequenceComplete()
+            }
+          }, 500)
+        }, 400)
+      }, 400)
+    }
+  }, [shouldStartExitSequence, isTransitioning, onExitSequenceComplete])
 
   // Determine if card needs reorientation
   const needsReorientation = () => {
