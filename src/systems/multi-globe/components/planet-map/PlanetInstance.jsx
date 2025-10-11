@@ -51,8 +51,10 @@ function PlanetInstance({ planet, onClick, isAnimating, isSelected = false }) {
       {/* 3D Globe */}
       <div className="planet-globe-container">
         <Canvas
-          camera={{ position: [0, 0, 4], fov: 50 }}
+          orthographic
+          camera={{ position: [0, 0, 5], zoom: 120 }}
           style={{ width: '100%', height: '100%' }}
+          gl={{ antialias: true }}
         >
           <Suspense fallback={null}>
             <ambientLight intensity={0.5} />
