@@ -129,7 +129,7 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
             x: p.position.x,
             y: p.position.y + (dimensions.height + 300) * easeProgress
           },
-          rotation: p.rotation + easeProgress * 10
+          rotation: p.rotation + easeProgress * 2
         })))
 
         if (progress < 1) {

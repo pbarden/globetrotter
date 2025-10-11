@@ -177,16 +177,20 @@ function GlobeContainer({
   // Initialize rotation and first card animation
   useEffect(() => {
     if (!hasShownFirstContent) {
-      setIsTransitioning(true)
       const initialRotation = contentPoints[0].rotation
       setTargetRotation({ x: initialRotation.x, y: initialRotation.y })
-      setAnimationDirection('fly-from-bottom')
-      setAnimationKey(prev => prev + 1)
-      setHasShownFirstContent(true)
 
+      // Delay card animation to start after globe settles
       setTimeout(() => {
-        setIsTransitioning(false)
-      }, 650)
+        setIsTransitioning(true)
+        setAnimationDirection('fly-from-bottom')
+        setAnimationKey(prev => prev + 1)
+        setHasShownFirstContent(true)
+
+        setTimeout(() => {
+          setIsTransitioning(false)
+        }, 650)
+      }, 1000)
     }
   }, [hasShownFirstContent, contentPoints])
 

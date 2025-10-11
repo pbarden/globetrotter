@@ -44,7 +44,7 @@ function PlanetInstance({ planet, onClick, isAnimating, isSelected = false }) {
         transform: isSelected ? 'translate(-50%, -50%) scale(1.6)' : 'translate(-50%, -50%)',
         width: `${radius * 2}px`,
         height: `${radius * 2}px`,
-        transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        transition: isAnimating ? 'none' : 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
         pointerEvents: 'none'
       }}
     >

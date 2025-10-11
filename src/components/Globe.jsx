@@ -51,28 +51,26 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2 }
   useFrame((state, delta) => {
     // Entry animation with bounce
     if (entryAnimation < 1 && groupRef.current) {
-      const newProgress = Math.min(entryAnimation + delta * 0.8, 1)
+      // Slower at the beginning, faster towards the end
+      const speed = entryAnimation < 0.3 ? 0.7 : 1.0
+      const newProgress = Math.min(entryAnimation + delta * speed, 1)
       setEntryAnimation(newProgress)
 
-      // Easing function with bounce (elastic ease-out)
+      // Back ease-out with overshoot
       const t = newProgress
-      let easedProgress
-      if (t < 0.5) {
-        // First half: ease out with overshoot
-        easedProgress = 1 - Math.pow(1 - 2 * t, 3) / 2
-      } else {
-        // Second half: settle with small bounce
-        const t2 = (t - 0.5) * 2
-        easedProgress = 1 + Math.sin(t2 * Math.PI * 2) * 0.05 * (1 - t2)
-      }
+      const c1 = 1.70158
+      const c3 = c1 + 1
+      const easedProgress = 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2)
 
       // Move from bottom (y = -10) to center (y = 0)
       groupRef.current.position.y = -10 + (10 * easedProgress)
     }
 
-    // Idle rotation - slow continuous spin
-    idleRotationRef.current.y += delta * 0.15 // Slow Y-axis rotation
-    idleRotationRef.current.x += delta * 0.05 // Very slow X-axis rotation
+    // Idle rotation - slow continuous spin (only after entry animation completes)
+    if (entryAnimation >= 1) {
+      idleRotationRef.current.y += delta * 0.15 // Slow Y-axis rotation
+      idleRotationRef.current.x += delta * 0.05 // Very slow X-axis rotation
+    }
 
     // Calculate rotation velocity and apply target rotation + idle rotation
     const effectiveTarget = targetRotation || { x: 0, y: 0 }
