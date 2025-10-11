@@ -38,7 +38,7 @@
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  z-index: 2;
+  z-index: 10;
   opacity: 0;
   animation: fadeInTitle 1s ease 0.5s forwards;
   pointer-events: none;
@@ -79,7 +79,7 @@
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  z-index: 2;
+  z-index: 10;
   opacity: 0;
   animation: fadeInInstructions 1s ease 1.5s forwards;
   pointer-events: none;

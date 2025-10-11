@@ -143,7 +143,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
       const shouldUpdateState = timestamp - lastStateUpdateTime > 50
 
       if (isExiting && exitProgressRef.current < 1) {
-        const exitDuration = 0.4 // 400ms
+        const exitDuration = 0.25 // 250ms - faster exit
         const newProgress = Math.min(exitProgressRef.current + (deltaTime / 1000) / exitDuration, 1)
         exitProgressRef.current = newProgress
         if (shouldUpdateState) {
