@@ -83,25 +83,25 @@ function GlobeContainer({
     if (sizeSpec.scrollBehavior === 'return-to-map' && onScrollToMap) {
       setIsTransitioning(true)
 
-      // REVERSE of entry: Blobs → Modal → Globe → Map
+      // REVERSE of entry: Blobs → Modal → Globe → Map (with sexy delays)
       // Stage 1: Blobs shrink (400ms)
       setBlobsExiting(true)
 
       setTimeout(() => {
-        // Stage 2: Modal flies out (400ms)
+        // Stage 2: Modal flies out (400ms) - starts after blob animation + delay
         const flyDir = e.deltaY > 0 ? 'fly-out-bottom' : 'fly-out-top'
         setFlyOutDirection(flyDir)
 
         setTimeout(() => {
-          // Stage 3: Globe falls (500ms)
+          // Stage 3: Globe falls (500ms) - starts after modal animation + delay
           setGlobeExiting(true)
 
           setTimeout(() => {
             // Stage 4: Transition to map
             onScrollToMap()
           }, 500)
-        }, 400)
-      }, 400)
+        }, 650)
+      }, 650)
 
       return
     }
@@ -231,16 +231,16 @@ function GlobeContainer({
     if (shouldStartExitSequence && !isTransitioning) {
       setIsTransitioning(true)
 
-      // REVERSE of entry: Blobs → Modal → Globe → Complete
+      // REVERSE of entry: Blobs → Modal → Globe → Complete (with sexy delays)
       // Stage 1: Blobs shrink (400ms)
       setBlobsExiting(true)
 
       setTimeout(() => {
-        // Stage 2: Modal flies out (400ms)
+        // Stage 2: Modal flies out (400ms) - starts after blob animation + delay
         setFlyOutDirection('fly-out-bottom')
 
         setTimeout(() => {
-          // Stage 3: Globe falls (500ms)
+          // Stage 3: Globe falls (500ms) - starts after modal animation + delay
           setGlobeExiting(true)
 
           setTimeout(() => {
@@ -249,8 +249,8 @@ function GlobeContainer({
               onExitSequenceComplete()
             }
           }, 500)
-        }, 400)
-      }, 400)
+        }, 650)
+      }, 650)
     }
   }, [shouldStartExitSequence, isTransitioning, onExitSequenceComplete])
 
