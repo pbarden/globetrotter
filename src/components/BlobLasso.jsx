@@ -248,17 +248,11 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
     return pathParts.join('')
   }
 
-  // Calculate scale with bounce: 0.5 → 1.15 → 1.0 (entry) or 1.0 → 1.15 → 0.0 (exit)
+  // Calculate scale with bounce: 0.5 → 1.15 → 1.0 (entry) or 1.0 → 0.0 (exit)
   const calculateScale = (progress, isExit) => {
     if (isExit) {
-      // Exit: 1.0 → 1.15 → 0.0
-      if (progress < 0.3) {
-        // First 30%: grow from 1.0 to 1.15
-        return 1.0 + (progress / 0.3) * 0.15
-      } else {
-        // Last 70%: shrink from 1.15 to 0.0
-        return 1.15 - ((progress - 0.3) / 0.7) * 1.15
-      }
+      // Exit: Direct linear shrink from 1.0 → 0.0 (no bounce)
+      return 1.0 - progress
     } else {
       // Entry: 0.5 → 1.15 → 1.0
       if (progress < 0.6) {
