@@ -10,6 +10,7 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
   const [planetPositions, setPlanetPositions] = useState([])
   const [isAnimating, setIsAnimating] = useState(true)
   const [isRollingOff, setIsRollingOff] = useState(false)
+  const [selectedPlanetId, setSelectedPlanetId] = useState(null)
   const animationFrame = useRef(null)
   const dimensions = { width: window.innerWidth, height: window.innerHeight }
 
@@ -108,43 +109,49 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
     }
   }, [globes])
 
-  // Handle planet click
+  // Handle planet click - two-tap logic
   const handlePlanetClick = (planet) => {
     if (isAnimating || isRollingOff) return
 
-    setIsRollingOff(true)
+    // If clicking the already selected planet, confirm and proceed
+    if (selectedPlanetId === planet.id) {
+      setIsRollingOff(true)
 
-    const startTime = performance.now()
-    const duration = 600
+      const startTime = performance.now()
+      const duration = 600
 
-    const animateRollOff = (currentTime) => {
-      const elapsed = currentTime - startTime
-      const progress = Math.min(elapsed / duration, 1)
+      const animateRollOff = (currentTime) => {
+        const elapsed = currentTime - startTime
+        const progress = Math.min(elapsed / duration, 1)
 
-      // Ease in (gravity acceleration)
-      const easeProgress = progress * progress
+        // Ease in (gravity acceleration)
+        const easeProgress = progress * progress
 
-      setPlanetPositions(prev => prev.map(p => ({
-        ...p,
-        position: {
-          x: p.position.x,
-          y: p.position.y + (dimensions.height + 300) * easeProgress
-        },
-        rotation: p.rotation + easeProgress * 10
-      })))
+        setPlanetPositions(prev => prev.map(p => ({
+          ...p,
+          position: {
+            x: p.position.x,
+            y: p.position.y + (dimensions.height + 300) * easeProgress
+          },
+          rotation: p.rotation + easeProgress * 10
+        })))
 
-      if (progress < 1) {
-        requestAnimationFrame(animateRollOff)
-      } else {
-        setTimeout(() => {
-          if (onPlanetClick) {
-            onPlanetClick(planet.config)
-          }
-        }, 100)
+        if (progress < 1) {
+          requestAnimationFrame(animateRollOff)
+        } else {
+          setTimeout(() => {
+            if (onPlanetClick) {
+              onPlanetClick(planet.config)
+            }
+          }, 100)
+        }
       }
-    }
 
-    requestAnimationFrame(animateRollOff)
+      requestAnimationFrame(animateRollOff)
+    } else {
+      // First tap - select this planet
+      setSelectedPlanetId(planet.id)
+    }
   }
 
   return (
@@ -166,6 +173,7 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
             planet={planet}
             onClick={() => handlePlanetClick(planet)}
             isAnimating={isAnimating || isRollingOff}
+            isSelected={selectedPlanetId === planet.id}
           />
         ))}
       </div>
@@ -173,7 +181,7 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
       {/* Instructions */}
       {!isAnimating && !isRollingOff && (
         <div className="planet-map-instructions">
-          <p>Click on any planet to explore</p>
+          <p>{selectedPlanetId ? 'Tap again to continue' : 'Select a planet to explore'}</p>
         </div>
       )}
     </div>

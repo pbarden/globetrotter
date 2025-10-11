@@ -7,7 +7,7 @@ import './PlanetInstance.css'
 /**
  * PlanetInstance - Individual planet with simplified globe
  */
-function PlanetInstance({ planet, onClick, isAnimating }) {
+function PlanetInstance({ planet, onClick, isAnimating, isSelected = false }) {
   const [isHovered, setIsHovered] = useState(false)
 
   const { position, radius, name, scale, size, rotation } = planet
@@ -27,17 +27,17 @@ function PlanetInstance({ planet, onClick, isAnimating }) {
 
   return (
     <div
-      className={`planet-instance ${isHovered ? 'hovered' : ''} ${isAnimating ? 'animating' : ''}`}
+      className={`planet-instance ${isHovered ? 'hovered' : ''} ${isAnimating ? 'animating' : ''} ${isSelected ? 'selected' : ''}`}
       data-size={size}
       style={{
         position: 'absolute',
         left: `${position.x}px`,
         top: `${position.y}px`,
-        transform: 'translate(-50%, -50%)',
+        transform: isSelected ? 'translate(-50%, -50%) scale(1.3)' : 'translate(-50%, -50%)',
         width: `${radius * 2}px`,
         height: `${radius * 2}px`,
         cursor: isAnimating ? 'default' : 'pointer',
-        transition: 'none'
+        transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
       }}
       onMouseEnter={() => !isAnimating && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -56,18 +56,19 @@ function PlanetInstance({ planet, onClick, isAnimating }) {
             <SimplifiedGlobe
               scale={scale * 0.5}
               rotation={{ x: 0, y: rotation }}
+              isSelected={isSelected}
             />
           </Suspense>
         </Canvas>
       </div>
 
-      {/* Planet label (visible on hover) */}
+      {/* Planet label (visible on hover or when selected) */}
       <div className={`planet-label ${labelOnTop ? 'label-top' : ''}`}>
         <span>{name}</span>
       </div>
 
       {/* Hover ring effect */}
-      {isHovered && (
+      {(isHovered || isSelected) && (
         <div className="planet-ring"></div>
       )}
     </div>

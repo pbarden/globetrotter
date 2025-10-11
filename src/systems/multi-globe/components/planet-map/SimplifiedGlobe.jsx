@@ -6,10 +6,11 @@ import * as THREE from 'three'
  * SimplifiedGlobe - Lightweight blocky globe for planet map
  * Uses same icosahedron structure as full Globe but with fewer subdivisions
  */
-export function SimplifiedGlobe({ scale = 1, rotation = null }) {
+export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false }) {
   const meshRef = useRef()
   const edgesRef = useRef()
   const timeRef = useRef(0)
+  const spinRef = useRef(0)
   const color = useMemo(() => new THREE.Color(), [])
 
   // Create icosahedron geometry with fewer subdivisions (blocky look)
@@ -36,19 +37,35 @@ export function SimplifiedGlobe({ scale = 1, rotation = null }) {
 
   // Update rotation when it changes
   useEffect(() => {
-    if (meshRef.current && rotation) {
+    if (meshRef.current && rotation && !isSelected) {
       meshRef.current.rotation.x = rotation.x
       meshRef.current.rotation.y = rotation.y
     }
-    if (edgesRef.current && rotation) {
+    if (edgesRef.current && rotation && !isSelected) {
       edgesRef.current.rotation.x = rotation.x
       edgesRef.current.rotation.y = rotation.y
     }
-  }, [rotation])
 
-  // Animate colors
+    // When becoming selected, initialize spinRef with current rotation
+    if (isSelected && meshRef.current) {
+      spinRef.current = meshRef.current.rotation.y
+    }
+  }, [rotation, isSelected])
+
+  // Animate colors and spin when selected
   useFrame((state, delta) => {
     timeRef.current += delta * 0.3 // Slower color cycling
+
+    // Spin on Y axis when selected
+    if (isSelected) {
+      spinRef.current += delta * 0.5 // Slow spin speed
+      if (meshRef.current) {
+        meshRef.current.rotation.y = spinRef.current
+      }
+      if (edgesRef.current) {
+        edgesRef.current.rotation.y = spinRef.current
+      }
+    }
 
     if (geometry.attributes.color) {
       const colors = geometry.attributes.color.array
@@ -82,15 +99,15 @@ export function SimplifiedGlobe({ scale = 1, rotation = null }) {
       {/* Crystal mesh with rainbow refraction */}
       <mesh ref={meshRef} geometry={geometry}>
         <meshPhongMaterial
-          color="#b8d4ff"
-          emissive="#cce5ff"
-          emissiveIntensity={0.08}
+          color={isSelected ? "#88ddff" : "#b8d4ff"}
+          emissive={isSelected ? "#88ddff" : "#cce5ff"}
+          emissiveIntensity={isSelected ? 0.3 : 0.08}
           flatShading={true}
           shininess={150}
           specular="#e0f0ff"
           vertexColors={true}
           transparent={true}
-          opacity={0.4}
+          opacity={isSelected ? 0.6 : 0.4}
         />
       </mesh>
 
