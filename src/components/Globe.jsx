@@ -2,7 +2,7 @@ import { useRef, useMemo, useState, useEffect, memo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-function GlobeComponent({ rotation, targetRotation }) {
+function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2 }) {
   const meshRef = useRef()
   const materialRef = useRef()
   const edgesRef = useRef()
@@ -16,7 +16,7 @@ function GlobeComponent({ rotation, targetRotation }) {
 
   // Create icosahedron geometry with random hue offsets for each vertex
   const { geometry, hueOffsets } = useMemo(() => {
-    const geo = new THREE.IcosahedronGeometry(2.5, 2)
+    const geo = new THREE.IcosahedronGeometry(2.5, subdivision)
     const offsets = []
     const colors = []
 
@@ -30,7 +30,7 @@ function GlobeComponent({ rotation, targetRotation }) {
     geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
 
     return { geometry: geo, hueOffsets: offsets }
-  }, [])
+  }, [subdivision])
 
   // Create edges geometry for wireframe
   const edges = useMemo(() => {
@@ -134,7 +134,7 @@ function GlobeComponent({ rotation, targetRotation }) {
   })
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} scale={scale}>
       {/* Crystal mesh with rainbow refraction */}
       <mesh ref={meshRef} geometry={geometry}>
         <meshPhongMaterial

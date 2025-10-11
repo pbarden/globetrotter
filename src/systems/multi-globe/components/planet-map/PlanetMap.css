@@ -1,0 +1,179 @@
+/* PlanetMap.css - Planet map overview screen */
+
+.planet-map {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.planet-map.fade-out {
+  opacity: 0;
+}
+
+/* Background gradient */
+.planet-map-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(20, 10, 40, 1) 0%,
+    rgba(10, 5, 20, 1) 50%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  z-index: 1;
+}
+
+/* Title */
+.planet-map-title {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 10;
+  opacity: 0;
+  animation: fadeInTitle 1s ease 0.5s forwards;
+}
+
+.planet-map-title h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin: 0 0 0.5rem 0;
+  color: #ffffff;
+  text-shadow: 0 0 30px rgba(106, 90, 205, 0.8);
+  letter-spacing: 0.05em;
+}
+
+.planet-map-title p {
+  font-size: 1.3rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Planets container */
+.planets-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+}
+
+/* Instructions */
+.planet-map-instructions {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 10;
+  opacity: 0;
+  animation: fadeInInstructions 1s ease 1.5s forwards;
+}
+
+.planet-map-instructions p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+/* Animations */
+@keyframes fadeInTitle {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes fadeInInstructions {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Transition animations */
+.planet-map.map-entry {
+  animation: mapFadeIn 0.8s ease forwards;
+}
+
+.planet-map.map-exit {
+  animation: mapFadeOut 0.4s ease forwards;
+}
+
+@keyframes mapFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes mapFadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 3D Planet labels */
+.planet-label-3d {
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.planet-label-3d span {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(106, 90, 205, 0.6);
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 10px rgba(106, 90, 205, 0.8);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .planet-map-title h1 {
+    font-size: 2.5rem;
+  }
+
+  .planet-map-title p {
+    font-size: 1rem;
+  }
+
+  .planet-map-instructions p {
+    font-size: 0.95rem;
+  }
+
+  .planet-label-3d span {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+}

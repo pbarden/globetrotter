@@ -1,0 +1,77 @@
+import { useState, useMemo } from 'react'
+import { Canvas } from '@react-three/fiber'
+import { Suspense } from 'react'
+import { SimplifiedGlobe } from './SimplifiedGlobe'
+import './PlanetInstance.css'
+
+/**
+ * PlanetInstance - Individual planet with simplified globe
+ */
+function PlanetInstance({ planet, onClick, isAnimating }) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  const { position, radius, name, scale, size, rotation } = planet
+
+  // Calculate if label should be on top
+  const labelOnTop = useMemo(() => {
+    const labelHeight = 50
+    const bottomSpace = window.innerHeight - (position.y + radius + labelHeight)
+    return bottomSpace < 20
+  }, [position.y, radius])
+
+  const handleClick = () => {
+    if (!isAnimating && onClick) {
+      onClick(planet)
+    }
+  }
+
+  return (
+    <div
+      className={`planet-instance ${isHovered ? 'hovered' : ''} ${isAnimating ? 'animating' : ''}`}
+      data-size={size}
+      style={{
+        position: 'absolute',
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        transform: 'translate(-50%, -50%)',
+        width: `${radius * 2}px`,
+        height: `${radius * 2}px`,
+        cursor: isAnimating ? 'default' : 'pointer',
+        transition: 'none'
+      }}
+      onMouseEnter={() => !isAnimating && setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={handleClick}
+    >
+      {/* 3D Globe */}
+      <div className="planet-globe-container">
+        <Canvas
+          camera={{ position: [0, 0, 4], fov: 50 }}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <Suspense fallback={null}>
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 10, 10]} intensity={0.8} />
+            <pointLight position={[-5, -5, 5]} intensity={0.4} />
+            <SimplifiedGlobe
+              scale={scale * 0.5}
+              rotation={{ x: 0, y: rotation }}
+            />
+          </Suspense>
+        </Canvas>
+      </div>
+
+      {/* Planet label (visible on hover) */}
+      <div className={`planet-label ${labelOnTop ? 'label-top' : ''}`}>
+        <span>{name}</span>
+      </div>
+
+      {/* Hover ring effect */}
+      {isHovered && (
+        <div className="planet-ring"></div>
+      )}
+    </div>
+  )
+}
+
+export { PlanetInstance }
