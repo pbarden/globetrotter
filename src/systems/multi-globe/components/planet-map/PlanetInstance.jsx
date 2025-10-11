@@ -10,7 +10,7 @@ import './PlanetInstance.css'
 function PlanetInstance({ planet, onClick, isAnimating, isSelected = false }) {
   const [isHovered, setIsHovered] = useState(false)
 
-  const { position, radius, name, scale, size, rotation } = planet
+  const { position, radius, name, scale, size, rotation, showColors = true } = planet
 
   // Calculate center of screen
   const centerX = window.innerWidth / 2
@@ -66,6 +66,7 @@ function PlanetInstance({ planet, onClick, isAnimating, isSelected = false }) {
               isSelected={isSelected}
               isAnimating={isAnimating}
               size={size}
+              showColors={showColors}
             />
           </Suspense>
         </Canvas>

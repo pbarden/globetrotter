@@ -36,22 +36,106 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
       const normalizedPos = positionPlanetInQuadrant(quadrant, planetRadius / dimensions.width, positionedPlanets)
       const screenPos = normalizedToScreen(normalizedPos, dimensions.width, dimensions.height)
 
+      // Start position above screen
+      const startY = screenPos.y - dimensions.height - 200
+
       positionedPlanets.push({
         id: globe.id,
         name: globe.name,
         size: globe.size,
         config: globe,
-        position: screenPos, // Start at final position - no fly-in
+        position: { x: screenPos.x, y: startY }, // Start above screen
         targetPosition: screenPos,
         originalPosition: screenPos,
         radius: planetRadius,
         scale: sizeMultiplier,
-        rotation: Math.random() * Math.PI * 2
+        rotation: Math.random() * Math.PI * 2, // FIXED rotation - does not change
+        staggerIndex: positionedPlanets.length,
+        isSettled: false, // Track if this planet has finished animating
+        showColors: false // Start as wireframe only
       })
     })
 
     setPlanetPositions(positionedPlanets)
-    setIsAnimating(false) // No animation - planets appear instantly
+    setIsAnimating(true)
+
+    // Animate each planet with stagger - match roll-off speed
+    const dropDuration = 600 // Match roll-off duration
+    const settleDuration = 250
+    const staggerDelay = 500 // 0.5 seconds between each planet starting
+
+    positionedPlanets.forEach((planet, index) => {
+      setTimeout(() => {
+        const startTime = performance.now()
+
+        const animateDrop = (currentTime) => {
+          const elapsed = currentTime - startTime
+          const progress = Math.min(elapsed / dropDuration, 1)
+          const easeProgress = progress * progress // Ease in
+
+          const startY = planet.position.y
+          const targetY = planet.targetPosition.y
+          const distance = targetY - startY
+          const currentY = startY + distance * easeProgress
+
+          setPlanetPositions(prev => prev.map(p => {
+            if (p.id !== planet.id) return p
+
+            return {
+              ...p,
+              position: { x: p.targetPosition.x, y: currentY },
+              rotation: p.rotation // Keep rotation CONSTANT
+            }
+          }))
+
+          if (progress < 1) {
+            requestAnimationFrame(animateDrop)
+          } else {
+            // Start settle animation - overshoot then bounce back
+            const settleStartTime = performance.now()
+            const overshootAmount = 50 // Increased for more noticeable effect
+
+            const animateSettle = (currentTime) => {
+              const elapsed = currentTime - settleStartTime
+              const progress = Math.min(elapsed / settleDuration, 1)
+
+              // Bounce: go down first, then back up
+              // Use sine wave to create smooth bounce effect
+              const overshoot = Math.sin(progress * Math.PI) * overshootAmount
+
+              setPlanetPositions(prev => prev.map(p => {
+                if (p.id !== planet.id) return p
+
+                return {
+                  ...p,
+                  position: { x: p.targetPosition.x, y: p.targetPosition.y + overshoot },
+                  rotation: p.rotation // Keep rotation CONSTANT
+                }
+              }))
+
+              if (progress < 1) {
+                requestAnimationFrame(animateSettle)
+              } else {
+                // Mark this planet as settled and show colors - it can start rotating now
+                setPlanetPositions(prev => prev.map(p => {
+                  if (p.id !== planet.id) return p
+                  return { ...p, isSettled: true, showColors: true }
+                }))
+
+                // Check if this is the last planet to turn off global animation state
+                if (index === positionedPlanets.length - 1) {
+                  setTimeout(() => setIsAnimating(false), 100)
+                }
+              }
+            }
+
+            requestAnimationFrame(animateSettle)
+          }
+        }
+
+        requestAnimationFrame(animateDrop)
+      }, index * staggerDelay)
+    })
   }, [globes])
 
   // Handle planet click - two-tap logic
@@ -163,7 +247,7 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
             key={planet.id}
             planet={planet}
             onClick={() => handlePlanetClick(planet)}
-            isAnimating={isAnimating || isRollingOff}
+            isAnimating={!planet.isSettled || isRollingOff}
             isSelected={selectedPlanetId === planet.id}
           />
         ))}

@@ -6,7 +6,7 @@ import * as THREE from 'three'
  * SimplifiedGlobe - Lightweight blocky globe for planet map
  * Uses same icosahedron structure as full Globe but with fewer subdivisions
  */
-export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false, isAnimating = false, size = 'tiny' }) {
+export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false, isAnimating = false, size = 'tiny', showColors = true }) {
   const meshRef = useRef()
   const edgesRef = useRef()
   const timeRef = useRef(0)
@@ -90,7 +90,10 @@ export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false
 
   // Animate colors and slow spin (only after initial animation completes)
   useFrame((state, delta) => {
-    timeRef.current += delta * 0.3 // Slower color cycling
+    // Only update time when NOT animating (freezes color cycling but keeps colors visible)
+    if (!isAnimating) {
+      timeRef.current += delta * 0.3
+    }
 
     // Very slow spin on both axes for all planets (only after roll-in + delay)
     if (!isAnimating && canSpinRef.current) {
@@ -139,24 +142,31 @@ export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false
         decay={2}
       />
 
-      {/* Crystal mesh with rainbow refraction */}
-      <mesh ref={meshRef} geometry={geometry}>
-        <meshPhongMaterial
-          color={isSelected ? "#88ddff" : "#b8d4ff"}
-          emissive={isSelected ? "#88ddff" : "#cce5ff"}
-          emissiveIntensity={isSelected ? 0.3 : 0.08}
-          flatShading={true}
-          shininess={150}
-          specular="#e0f0ff"
-          vertexColors={true}
-          transparent={true}
-          opacity={isSelected ? 0.6 : 0.4}
-        />
-      </mesh>
+      {/* Crystal mesh with rainbow refraction - only shown after landing */}
+      {showColors && (
+        <mesh ref={meshRef} geometry={geometry}>
+          <meshPhongMaterial
+            color={isSelected ? "#88ddff" : "#b8d4ff"}
+            emissive={isSelected ? "#88ddff" : "#cce5ff"}
+            emissiveIntensity={isSelected ? 0.3 : 0.08}
+            flatShading={true}
+            shininess={150}
+            specular="#e0f0ff"
+            vertexColors={true}
+            transparent={true}
+            opacity={isSelected ? 0.6 : 0.4}
+          />
+        </mesh>
+      )}
 
-      {/* Wireframe overlay */}
+      {/* Wireframe overlay - always shown, brighter when no colors */}
       <lineSegments ref={edgesRef} geometry={edges}>
-        <lineBasicMaterial color="#aaccff" linewidth={1} opacity={0.2} transparent={true} />
+        <lineBasicMaterial
+          color={showColors ? "#aaccff" : "#00ffff"}
+          linewidth={1}
+          opacity={showColors ? 0.2 : 1.0}
+          transparent={true}
+        />
       </lineSegments>
     </group>
   )
