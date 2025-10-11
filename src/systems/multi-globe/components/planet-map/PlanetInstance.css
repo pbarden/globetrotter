@@ -3,10 +3,10 @@
 .planet-instance {
   position: absolute;
   transition: transform 0.3s ease;
-  pointer-events: auto;
+  overflow: visible;
 }
 
-.planet-instance:not(.animating):hover {
+.planet-instance:not(.animating):not(.selected):hover {
   transform: translate(-50%, -50%) scale(1.15) !important;
   z-index: 100;
 }
@@ -19,6 +19,19 @@
   width: 100%;
   height: 100%;
   overflow: visible;
+  pointer-events: none;
+}
+
+/* Circular clickable area overlay */
+.planet-click-area {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 /* Planet glow effect - removed, now handled by backlight in 3D scene */
