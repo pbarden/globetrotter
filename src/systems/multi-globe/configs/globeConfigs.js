@@ -7,7 +7,7 @@ import { getRotationForCard } from './rotationMaps'
 // Home Planet - Tiny globe with GameTitleCard (entry point)
 export const homePlanetConfig = {
   id: 'home-planet',
-  name: 'Moon Man Digital',
+  name: 'Home',
   size: GLOBE_SIZES.TINY,
   quadrant: 'topLeft', // Position on map
 
