@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo, memo } from 'react'
 import './BlobLasso.css'
 
-function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntryComplete, isFirstEntry = false, isExiting = false }) {
+function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntryComplete, isFirstEntry = false, isExiting = false, scaleMultiplier = 1 }) {
   const blobRef = useRef()
   const blobRef2 = useRef()
   const blobRef3 = useRef()
@@ -308,7 +308,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         className="blob-lasso"
         viewBox="0 0 400 400"
         style={{
-          transform: `translate(calc(-50% + ${blob3Position.x}px), calc(-50% + ${blob3Position.y}px)) rotate(${blob3Rotation}deg) scale(${blob3Scale * getStaggeredScale(2)}) scaleX(${scale3X}) scaleY(${scale3Y})`,
+          transform: `translate(calc(-50% + ${blob3Position.x}px), calc(-50% + ${blob3Position.y}px)) rotate(${blob3Rotation}deg) scale(${blob3Scale * getStaggeredScale(2) * scaleMultiplier}) scaleX(${scale3X}) scaleY(${scale3Y})`,
           opacity: 0.4,
           zIndex: -1
         }}

@@ -47,6 +47,9 @@ function GlobeContainer({
   // Get current color index from content point
   const currentColorIndex = contentPoints[currentPoint].content.colorIndex
 
+  // Check if this is the home planet for larger blobs
+  const isHomePlanet = globeConfig.id === 'home-planet'
+
   // Calculate blob position for light source (matches BlobLasso calculation)
   const getBlobLightPosition = (contentId) => {
     const seed1 = contentId * 3.7 + randomSeed
@@ -304,6 +307,7 @@ function GlobeContainer({
         isFirstEntry={!blobsHaveShown}
         isExiting={blobsExiting}
         onEntryComplete={() => setBlobsHaveShown(true)}
+        scaleMultiplier={isHomePlanet ? 2 : 1}
       />
 
       {/* Content Cards */}

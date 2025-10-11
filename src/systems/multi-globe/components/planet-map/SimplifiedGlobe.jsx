@@ -6,11 +6,15 @@ import * as THREE from 'three'
  * SimplifiedGlobe - Lightweight blocky globe for planet map
  * Uses same icosahedron structure as full Globe but with fewer subdivisions
  */
-export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false }) {
+export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false, isAnimating = false }) {
   const meshRef = useRef()
   const edgesRef = useRef()
   const timeRef = useRef(0)
-  const spinRef = useRef(0)
+  const spinYRef = useRef(null)
+  const spinXRef = useRef(null)
+  const canSpinRef = useRef(false)
+  const initializedRef = useRef(false)
+  const delayTimerRef = useRef(null)
   const color = useMemo(() => new THREE.Color(), [])
 
   // Create icosahedron geometry with fewer subdivisions (blocky look)
@@ -35,35 +39,65 @@ export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false
     return new THREE.EdgesGeometry(geometry, 15)
   }, [geometry])
 
-  // Update rotation when it changes
+  // Initialize ONCE on mount - set rotation and never change until spin starts
   useEffect(() => {
-    if (meshRef.current && rotation && !isSelected) {
+    if (!initializedRef.current && meshRef.current && rotation) {
+      spinXRef.current = rotation.x
+      spinYRef.current = rotation.y
       meshRef.current.rotation.x = rotation.x
       meshRef.current.rotation.y = rotation.y
+
+      if (edgesRef.current) {
+        edgesRef.current.rotation.x = rotation.x
+        edgesRef.current.rotation.y = rotation.y
+      }
+
+      initializedRef.current = true
     }
-    if (edgesRef.current && rotation && !isSelected) {
-      edgesRef.current.rotation.x = rotation.x
-      edgesRef.current.rotation.y = rotation.y
+  }, [rotation])
+
+  // Enable spinning 400ms after animation completes
+  useEffect(() => {
+    if (!isAnimating && !canSpinRef.current) {
+      delayTimerRef.current = setTimeout(() => {
+        canSpinRef.current = true
+      }, 400)
     }
 
-    // When becoming selected, initialize spinRef with current rotation
-    if (isSelected && meshRef.current) {
-      spinRef.current = meshRef.current.rotation.y
+    if (isAnimating) {
+      canSpinRef.current = false
+      if (delayTimerRef.current) {
+        clearTimeout(delayTimerRef.current)
+        delayTimerRef.current = null
+      }
     }
-  }, [rotation, isSelected])
 
-  // Animate colors and spin when selected
+    return () => {
+      if (delayTimerRef.current) {
+        clearTimeout(delayTimerRef.current)
+      }
+    }
+  }, [isAnimating])
+
+  // Animate colors and slow spin (only after initial animation completes)
   useFrame((state, delta) => {
     timeRef.current += delta * 0.3 // Slower color cycling
 
-    // Spin on Y axis when selected
-    if (isSelected) {
-      spinRef.current += delta * 0.5 // Slow spin speed
+    // Very slow spin on both axes for all planets (only after roll-in + delay)
+    if (!isAnimating && canSpinRef.current) {
+      const spinSpeedY = isSelected ? 0.5 : 0.15 // Selected spins faster on Y
+      const spinSpeedX = isSelected ? 0.15 : 0.05 // Very slight X rotation
+
+      spinYRef.current += delta * spinSpeedY
+      spinXRef.current += delta * spinSpeedX
+
       if (meshRef.current) {
-        meshRef.current.rotation.y = spinRef.current
+        meshRef.current.rotation.x = spinXRef.current
+        meshRef.current.rotation.y = spinYRef.current
       }
       if (edgesRef.current) {
-        edgesRef.current.rotation.y = spinRef.current
+        edgesRef.current.rotation.x = spinXRef.current
+        edgesRef.current.rotation.y = spinYRef.current
       }
     }
 
