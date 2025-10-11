@@ -1,0 +1,167 @@
+.title-card-layout {
+  position: relative;
+  width: 90%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title-content-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+/* Title Section */
+.title-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  width: 100%;
+}
+
+.game-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin: 0;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.game-subtitle {
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: #b0b0d0;
+  letter-spacing: 0.1em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+/* Instructions Box */
+.instructions-box {
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: rgba(15, 15, 25, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(106, 90, 205, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.instructions-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6a5acd;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.instructions-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #d0d0e0;
+  margin: 0;
+}
+
+/* Menu Buttons */
+.menu-buttons-container {
+  width: 100%;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.menu-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  border: 1px solid;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  flex: 1;
+  min-width: 140px;
+  max-width: 180px;
+  justify-content: center;
+}
+
+.menu-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(106, 90, 205, 0.3);
+}
+
+.menu-icon {
+  flex-shrink: 0;
+}
+
+.menu-text {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+/* Continue Prompt */
+.continue-prompt {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.continue-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.continue-indicator span {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .game-title {
+    font-size: 2.5rem;
+  }
+
+  .menu-buttons-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .menu-button {
+    max-width: none;
+  }
+}

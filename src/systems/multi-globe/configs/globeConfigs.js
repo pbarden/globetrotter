@@ -18,34 +18,11 @@ export const homePlanetConfig = {
       rotation: { x: 0, y: 0 },
       templateType: 'gameTitle',
       content: {
-        title: 'Moon Man Digital',
-        subtitle: 'Choose Your Path',
-        items: [
-          {
-            id: 'creative',
-            image: '/images/creative-path.jpg',
-            name: 'Creative',
-            description: 'Explore artistic and design projects',
-            price: 'Free',
-            linkedGlobeId: 'creative-globe'
-          },
-          {
-            id: 'technical',
-            image: '/images/tech-path.jpg',
-            name: 'Technical',
-            description: 'Dive into development and engineering',
-            price: 'Free',
-            linkedGlobeId: 'tech-globe'
-          },
-          {
-            id: 'business',
-            image: '/images/business-path.jpg',
-            name: 'Business',
-            description: 'Discover strategy and growth',
-            price: 'Free',
-            linkedGlobeId: 'business-globe'
-          }
-        ],
+        layoutType: 'titleCard',
+        iconName: 'Sparkles',
+        heading: 'Globetrotter',
+        subheading: 'An Interactive Journey',
+        paragraph: 'Scroll in any direction to explore the universe. Discover planets, unlock secrets, and navigate through the cosmic web of creativity.',
         colorIndex: 0
       }
     }
