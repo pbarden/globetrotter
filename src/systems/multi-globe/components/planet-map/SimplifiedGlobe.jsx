@@ -6,7 +6,7 @@ import * as THREE from 'three'
  * SimplifiedGlobe - Lightweight blocky globe for planet map
  * Uses same icosahedron structure as full Globe but with fewer subdivisions
  */
-export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false, isAnimating = false }) {
+export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false, isAnimating = false, size = 'tiny' }) {
   const meshRef = useRef()
   const edgesRef = useRef()
   const timeRef = useRef(0)
@@ -17,9 +17,18 @@ export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false
   const delayTimerRef = useRef(null)
   const color = useMemo(() => new THREE.Color(), [])
 
-  // Create icosahedron geometry with fewer subdivisions (blocky look)
+  // Create icosahedron geometry with subdivision based on size
   const { geometry, hueOffsets } = useMemo(() => {
-    const geo = new THREE.IcosahedronGeometry(2.5, 0) // subdivision 0 = very blocky (20 faces)
+    // Map size to subdivision level: tiny/small=0, medium/large=1
+    const subdivisionMap = {
+      'tiny': 0,    // 20 faces
+      'small': 0,   // 20 faces
+      'medium': 1,  // 80 faces
+      'large': 1    // 80 faces
+    }
+    const subdivision = subdivisionMap[size] || 0
+
+    const geo = new THREE.IcosahedronGeometry(2.5, subdivision)
     const offsets = []
     const colors = []
 
@@ -32,7 +41,7 @@ export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false
     geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
 
     return { geometry: geo, hueOffsets: offsets }
-  }, [])
+  }, [size])
 
   // Create edges geometry for wireframe
   const edges = useMemo(() => {

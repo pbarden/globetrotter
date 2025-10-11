@@ -65,6 +65,7 @@ function PlanetInstance({ planet, onClick, isAnimating, isSelected = false }) {
               rotation={{ x: 0, y: rotation }}
               isSelected={isSelected}
               isAnimating={isAnimating}
+              size={size}
             />
           </Suspense>
         </Canvas>
