@@ -12,11 +12,19 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
   const [isRollingOff, setIsRollingOff] = useState(false)
   const [selectedPlanetId, setSelectedPlanetId] = useState(null)
   const animationFrame = useRef(null)
+  const rafIds = useRef([]) // Track all RAF IDs for cleanup
+  const timeoutIds = useRef([]) // Track all timeout IDs for cleanup
   const dimensions = { width: window.innerWidth, height: window.innerHeight }
 
   // Initialize planets
   useEffect(() => {
     if (!globes || globes.length === 0) return
+
+    // Clear any existing animations
+    rafIds.current.forEach(id => cancelAnimationFrame(id))
+    timeoutIds.current.forEach(id => clearTimeout(id))
+    rafIds.current = []
+    timeoutIds.current = []
 
     const positionedPlanets = []
 
@@ -65,11 +73,12 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
     const staggerDelay = 300 // Faster stagger between planets
 
     positionedPlanets.forEach((planet, index) => {
-      setTimeout(() => {
-        const startTime = performance.now()
+      const timeoutId = setTimeout(() => {
+        let dropStartTime = null
 
         const animateDrop = (currentTime) => {
-          const elapsed = currentTime - startTime
+          if (!dropStartTime) dropStartTime = currentTime
+          const elapsed = currentTime - dropStartTime
           const progress = Math.min(elapsed / dropDuration, 1)
           const easeProgress = progress * progress // Ease in
 
@@ -89,13 +98,15 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
           }))
 
           if (progress < 1) {
-            requestAnimationFrame(animateDrop)
+            const rafId = requestAnimationFrame(animateDrop)
+            rafIds.current.push(rafId)
           } else {
             // Start settle animation - overshoot then bounce back
-            const settleStartTime = performance.now()
+            let settleStartTime = null
             const overshootAmount = 50 // Increased for more noticeable effect
 
             const animateSettle = (currentTime) => {
+              if (!settleStartTime) settleStartTime = currentTime
               const elapsed = currentTime - settleStartTime
               const progress = Math.min(elapsed / settleDuration, 1)
 
@@ -114,7 +125,8 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
               }))
 
               if (progress < 1) {
-                requestAnimationFrame(animateSettle)
+                const rafId = requestAnimationFrame(animateSettle)
+                rafIds.current.push(rafId)
               } else {
                 // Mark this planet as settled and show colors - it can start rotating now
                 setPlanetPositions(prev => prev.map(p => {
@@ -124,18 +136,30 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
 
                 // Check if this is the last planet to turn off global animation state
                 if (index === positionedPlanets.length - 1) {
-                  setTimeout(() => setIsAnimating(false), 100)
+                  const finalTimeoutId = setTimeout(() => setIsAnimating(false), 100)
+                  timeoutIds.current.push(finalTimeoutId)
                 }
               }
             }
 
-            requestAnimationFrame(animateSettle)
+            const rafId = requestAnimationFrame(animateSettle)
+            rafIds.current.push(rafId)
           }
         }
 
-        requestAnimationFrame(animateDrop)
+        const rafId = requestAnimationFrame(animateDrop)
+        rafIds.current.push(rafId)
       }, index * staggerDelay)
+      timeoutIds.current.push(timeoutId)
     })
+
+    // Cleanup function
+    return () => {
+      rafIds.current.forEach(id => cancelAnimationFrame(id))
+      timeoutIds.current.forEach(id => clearTimeout(id))
+      rafIds.current = []
+      timeoutIds.current = []
+    }
   }, [globes])
 
   // Handle planet click - two-tap logic
@@ -146,10 +170,11 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
     if (selectedPlanetId === planet.id) {
       setIsRollingOff(true)
 
-      const startTime = performance.now()
+      let startTime = null
       const duration = 600
 
       const animateRollOff = (currentTime) => {
+        if (!startTime) startTime = currentTime
         const elapsed = currentTime - startTime
         const progress = Math.min(elapsed / duration, 1)
 
@@ -166,17 +191,20 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
         })))
 
         if (progress < 1) {
-          requestAnimationFrame(animateRollOff)
+          const rafId = requestAnimationFrame(animateRollOff)
+          rafIds.current.push(rafId)
         } else {
-          setTimeout(() => {
+          const timeoutId = setTimeout(() => {
             if (onPlanetClick) {
               onPlanetClick(planet.config)
             }
           }, 100)
+          timeoutIds.current.push(timeoutId)
         }
       }
 
-      requestAnimationFrame(animateRollOff)
+      const rafId = requestAnimationFrame(animateRollOff)
+      rafIds.current.push(rafId)
     } else {
       // First tap - select this planet
       setSelectedPlanetId(planet.id)
