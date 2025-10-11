@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from 'react'
+import { useRef, useMemo, useEffect, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -16,6 +16,8 @@ export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false
   const initializedRef = useRef(false)
   const delayTimerRef = useRef(null)
   const color = useMemo(() => new THREE.Color(), [])
+  const [colorOpacity, setColorOpacity] = useState(0)
+  const fadeStartTimeRef = useRef(null)
 
   // Create icosahedron geometry with subdivision based on size
   const { geometry, hueOffsets } = useMemo(() => {
@@ -90,6 +92,22 @@ export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false
 
   // Animate colors and slow spin (only after initial animation completes)
   useFrame((state, delta) => {
+    // Handle color fade-in when showColors becomes true
+    if (showColors) {
+      if (fadeStartTimeRef.current === null) {
+        fadeStartTimeRef.current = performance.now()
+      }
+      const fadeElapsed = performance.now() - fadeStartTimeRef.current
+      const fadeDuration = 1200 // Much slower fade
+      const fadeProgress = Math.min(fadeElapsed / fadeDuration, 1)
+      // Smooth ease-out for gentle fade-in
+      const easedProgress = 1 - Math.pow(1 - fadeProgress, 3)
+      setColorOpacity(easedProgress)
+    } else {
+      fadeStartTimeRef.current = null
+      setColorOpacity(0)
+    }
+
     // Only update time when NOT animating (freezes color cycling but keeps colors visible)
     if (!isAnimating) {
       timeRef.current += delta * 0.3
@@ -142,7 +160,7 @@ export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false
         decay={2}
       />
 
-      {/* Crystal mesh with rainbow refraction - only shown after landing */}
+      {/* Crystal mesh with rainbow refraction - fades in after landing */}
       {showColors && (
         <mesh ref={meshRef} geometry={geometry}>
           <meshPhongMaterial
@@ -154,7 +172,7 @@ export function SimplifiedGlobe({ scale = 1, rotation = null, isSelected = false
             specular="#e0f0ff"
             vertexColors={true}
             transparent={true}
-            opacity={isSelected ? 0.6 : 0.4}
+            opacity={(isSelected ? 0.6 : 0.4) * colorOpacity}
           />
         </mesh>
       )}

@@ -62,7 +62,7 @@ function PlanetMap({ globes, onPlanetClick, transitionType = '' }) {
     // Animate each planet with stagger - match roll-off speed
     const dropDuration = 600 // Match roll-off duration
     const settleDuration = 250
-    const staggerDelay = 500 // 0.5 seconds between each planet starting
+    const staggerDelay = 300 // Faster stagger between planets
 
     positionedPlanets.forEach((planet, index) => {
       setTimeout(() => {
