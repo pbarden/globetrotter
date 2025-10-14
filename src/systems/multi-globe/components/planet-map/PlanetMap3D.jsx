@@ -15,7 +15,7 @@ function PlanetMap3D({ globes, onPlanetClick, transitionType = '' }) {
 
       {/* Title */}
       <div className="planet-map-title">
-        <h1>Planet Map</h1>
+        <h1>Moon Map</h1>
         <p>Choose your destination</p>
       </div>
 

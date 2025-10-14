@@ -36,24 +36,24 @@ export const homePlanetConfig = {
   }
 }
 
-// Portfolio Globe - Large globe with InfoCards (current implementation)
+// Adventure Globe - Large globe with game abilities and mechanics
 export const portfolioGlobeConfig = {
   id: 'portfolio-globe',
-  name: 'Portfolio',
+  name: 'Adventure',
   size: GLOBE_SIZES.LARGE,
   quadrant: 'bottomRight', // Position on map
 
-  // Content points from current App.jsx (16 cards)
+  // Content points - Game abilities and mechanics
   contentPoints: [
     // Row 0
     {
       id: 0,
       templateType: 'info',
       content: {
-        iconName: 'Rocket',
-        heading: 'Innovation',
-        subheading: 'Pushing Boundaries',
-        paragraph: 'Exploring new frontiers in design and technology with cutting-edge solutions.',
+        iconName: 'Zap',
+        heading: 'Lightning Strike',
+        subheading: 'Electric Mastery',
+        paragraph: 'Harness the raw power of electricity to strike down enemies with devastating bolts of pure energy.',
         colorIndex: 0
       },
       position: { row: 0, col: 0 },
@@ -63,10 +63,10 @@ export const portfolioGlobeConfig = {
       id: 1,
       templateType: 'info',
       content: {
-        iconName: 'Lightbulb',
-        heading: 'Creativity',
-        subheading: 'Inspired Design',
-        paragraph: 'Crafting unique experiences that blend aesthetics with functionality.',
+        iconName: 'Shield',
+        heading: 'Force Barrier',
+        subheading: 'Ultimate Defense',
+        paragraph: 'Create an impenetrable shield of energy that deflects all incoming attacks and protects allies.',
         colorIndex: 1
       },
       position: { row: 0, col: 1 },
@@ -76,10 +76,10 @@ export const portfolioGlobeConfig = {
       id: 2,
       templateType: 'info',
       content: {
-        iconName: 'Palette',
-        heading: 'Artistry',
-        subheading: 'Visual Excellence',
-        paragraph: 'Creating stunning visuals that capture attention and inspire imagination.',
+        iconName: 'Flame',
+        heading: 'Inferno Blast',
+        subheading: 'Pyro Power',
+        paragraph: 'Unleash a devastating wave of flames that engulfs everything in its path with scorching heat.',
         colorIndex: 2
       },
       position: { row: 0, col: 2 },
@@ -89,10 +89,10 @@ export const portfolioGlobeConfig = {
       id: 3,
       templateType: 'info',
       content: {
-        iconName: 'Zap',
-        heading: 'Performance',
-        subheading: 'Lightning Fast',
-        paragraph: 'Optimized for speed and efficiency without compromising quality.',
+        iconName: 'Wind',
+        heading: 'Cyclone Rush',
+        subheading: 'Wind Walker',
+        paragraph: 'Command the winds to propel yourself at incredible speeds while evading all danger.',
         colorIndex: 3
       },
       position: { row: 0, col: 3 },
@@ -103,10 +103,10 @@ export const portfolioGlobeConfig = {
       id: 4,
       templateType: 'info',
       content: {
-        iconName: 'Star',
-        heading: 'Excellence',
-        subheading: 'Quality First',
-        paragraph: 'Committed to delivering exceptional results in every project.',
+        iconName: 'Sparkles',
+        heading: 'Star Burst',
+        subheading: 'Cosmic Strike',
+        paragraph: 'Channel celestial energy into explosive projectiles that rain down from the heavens above.',
         colorIndex: 4
       },
       position: { row: 1, col: 0 },
@@ -116,10 +116,10 @@ export const portfolioGlobeConfig = {
       id: 5,
       templateType: 'info',
       content: {
-        iconName: 'Sparkles',
-        heading: 'Future',
-        subheading: 'Next Generation',
-        paragraph: 'Building tomorrow\'s solutions with today\'s innovations.',
+        iconName: 'Heart',
+        heading: 'Life Surge',
+        subheading: 'Healing Wave',
+        paragraph: 'Restore vitality to yourself and allies with a powerful pulse of regenerative energy.',
         colorIndex: 5
       },
       position: { row: 1, col: 1 },
@@ -130,9 +130,9 @@ export const portfolioGlobeConfig = {
       templateType: 'info',
       content: {
         iconName: 'Target',
-        heading: 'Precision',
-        subheading: 'Pixel Perfect',
-        paragraph: 'Attention to detail in every aspect of design and development.',
+        heading: 'Sniper Focus',
+        subheading: 'Perfect Aim',
+        paragraph: 'Enter a state of absolute concentration where every shot finds its mark with deadly precision.',
         colorIndex: 6
       },
       position: { row: 1, col: 2 },
@@ -142,10 +142,10 @@ export const portfolioGlobeConfig = {
       id: 7,
       templateType: 'info',
       content: {
-        iconName: 'Users',
-        heading: 'Diversity',
-        subheading: 'Inclusive Design',
-        paragraph: 'Creating experiences that welcome and engage everyone.',
+        iconName: 'Ghost',
+        heading: 'Shadow Step',
+        subheading: 'Stealth Mode',
+        paragraph: 'Become one with the shadows and move unseen through enemy territory with perfect silence.',
         colorIndex: 7
       },
       position: { row: 1, col: 3 },
@@ -156,10 +156,10 @@ export const portfolioGlobeConfig = {
       id: 8,
       templateType: 'info',
       content: {
-        iconName: 'Flame',
-        heading: 'Passion',
-        subheading: 'Driven by Purpose',
-        paragraph: 'Fueled by enthusiasm and dedication to excellence.',
+        iconName: 'Sword',
+        heading: 'Blade Dance',
+        subheading: 'Melee Master',
+        paragraph: 'Execute a series of lightning-fast sword strikes that overwhelm opponents in close combat.',
         colorIndex: 8
       },
       position: { row: 2, col: 0 },
@@ -169,10 +169,10 @@ export const portfolioGlobeConfig = {
       id: 9,
       templateType: 'info',
       content: {
-        iconName: 'Globe',
-        heading: 'Global',
-        subheading: 'Worldwide Reach',
-        paragraph: 'Connecting people and ideas across the world.',
+        iconName: 'Mountain',
+        heading: 'Earth Shatter',
+        subheading: 'Geo Control',
+        paragraph: 'Summon the power of earth to create devastating shockwaves that rupture the ground itself.',
         colorIndex: 9
       },
       position: { row: 2, col: 1 },
@@ -182,10 +182,10 @@ export const portfolioGlobeConfig = {
       id: 10,
       templateType: 'info',
       content: {
-        iconName: 'Layers',
-        heading: 'Experience',
-        subheading: 'User Focused',
-        paragraph: 'Designing memorable interactions that resonate.',
+        iconName: 'Snowflake',
+        heading: 'Frost Nova',
+        subheading: 'Ice Magic',
+        paragraph: 'Freeze your enemies in their tracks with an explosive burst of absolute zero temperature.',
         colorIndex: 0
       },
       position: { row: 2, col: 2 },
@@ -196,9 +196,9 @@ export const portfolioGlobeConfig = {
       templateType: 'info',
       content: {
         iconName: 'Trophy',
-        heading: 'Achievement',
-        subheading: 'Award Winning',
-        paragraph: 'Recognized for outstanding work and innovation.',
+        heading: 'Champion Mode',
+        subheading: 'Ultimate Power',
+        paragraph: 'Temporarily ascend to champion status, multiplying all your abilities and becoming unstoppable.',
         colorIndex: 1
       },
       position: { row: 2, col: 3 },
@@ -210,9 +210,9 @@ export const portfolioGlobeConfig = {
       templateType: 'info',
       content: {
         iconName: 'Brain',
-        heading: 'Intelligence',
-        subheading: 'Smart Solutions',
-        paragraph: 'Leveraging AI and data to create intelligent experiences.',
+        heading: 'Mind Control',
+        subheading: 'Psychic Force',
+        paragraph: 'Bend the will of your enemies and turn them into temporary allies with telepathic power.',
         colorIndex: 2
       },
       position: { row: 3, col: 0 },
@@ -223,9 +223,9 @@ export const portfolioGlobeConfig = {
       templateType: 'info',
       content: {
         iconName: 'Gem',
-        heading: 'Premium',
-        subheading: 'Luxury Design',
-        paragraph: 'Crafting high-end experiences with sophistication.',
+        heading: 'Crystal Shield',
+        subheading: 'Rare Defense',
+        paragraph: 'Summon crystalline armor that absorbs damage and reflects attacks back at your foes.',
         colorIndex: 3
       },
       position: { row: 3, col: 1 },
@@ -235,10 +235,10 @@ export const portfolioGlobeConfig = {
       id: 14,
       templateType: 'info',
       content: {
-        iconName: 'Navigation',
-        heading: 'Direction',
-        subheading: 'Clear Vision',
-        paragraph: 'Guiding projects with strategic thinking and clarity.',
+        iconName: 'Compass',
+        heading: 'Path Finder',
+        subheading: 'Navigator',
+        paragraph: 'Reveal hidden paths and secret passages while marking objectives across all dimensions.',
         colorIndex: 4
       },
       position: { row: 3, col: 2 },
@@ -248,10 +248,10 @@ export const portfolioGlobeConfig = {
       id: 15,
       templateType: 'info',
       content: {
-        iconName: 'PartyPopper',
-        heading: 'Entertainment',
-        subheading: 'Engaging Content',
-        paragraph: 'Creating delightful experiences that captivate audiences.',
+        iconName: 'Rocket',
+        heading: 'Boost Jump',
+        subheading: 'Zero Gravity',
+        paragraph: 'Launch yourself skyward with explosive force and traverse vast distances with aerial mobility.',
         colorIndex: 5
       },
       position: { row: 3, col: 3 },
@@ -267,10 +267,10 @@ export const portfolioGlobeConfig = {
   }
 }
 
-// Example Small Globe - Skills showcase
+// Powers Globe - Elemental powers and special abilities
 export const skillsGlobeConfig = {
   id: 'skills-globe',
-  name: 'Skills',
+  name: 'Powers',
   size: GLOBE_SIZES.SMALL,
   quadrant: 'topRight',
 
@@ -279,10 +279,10 @@ export const skillsGlobeConfig = {
       id: 0,
       templateType: 'info',
       content: {
-        iconName: 'Code',
-        heading: 'Development',
-        subheading: 'Full Stack',
-        paragraph: 'Expert in modern web technologies and frameworks.',
+        iconName: 'Flame',
+        heading: 'Fire Element',
+        subheading: 'Pyromancer',
+        paragraph: 'Master the ancient art of fire magic and incinerate all who stand in your way.',
         colorIndex: 0
       },
       position: { row: 0, col: 0 },
@@ -292,10 +292,10 @@ export const skillsGlobeConfig = {
       id: 1,
       templateType: 'info',
       content: {
-        iconName: 'Paintbrush',
-        heading: 'Design',
-        subheading: 'UI/UX',
-        paragraph: 'Creating beautiful and intuitive user experiences.',
+        iconName: 'Droplet',
+        heading: 'Water Element',
+        subheading: 'Hydromancer',
+        paragraph: 'Control the flow of water to heal allies or crush enemies with tidal forces.',
         colorIndex: 1
       },
       position: { row: 0, col: 1 },
@@ -305,10 +305,10 @@ export const skillsGlobeConfig = {
       id: 2,
       templateType: 'info',
       content: {
-        iconName: 'Database',
-        heading: 'Data',
-        subheading: 'Management',
-        paragraph: 'Efficient data structures and database optimization.',
+        iconName: 'Wind',
+        heading: 'Air Element',
+        subheading: 'Aeromancer',
+        paragraph: 'Become one with the wind and soar through the skies with unmatched freedom.',
         colorIndex: 2
       },
       position: { row: 1, col: 0 },
@@ -318,10 +318,10 @@ export const skillsGlobeConfig = {
       id: 3,
       templateType: 'info',
       content: {
-        iconName: 'Cloud',
-        heading: 'Cloud',
-        subheading: 'Infrastructure',
-        paragraph: 'Scalable cloud solutions and DevOps practices.',
+        iconName: 'Mountain',
+        heading: 'Earth Element',
+        subheading: 'Geomancer',
+        paragraph: 'Command stone and soil to create unbreakable defenses and devastating earthquakes.',
         colorIndex: 3
       },
       position: { row: 1, col: 1 },
@@ -337,26 +337,132 @@ export const skillsGlobeConfig = {
   }
 }
 
-// Example Medium Globe - Projects showcase
+// Worlds Globe - Different game realms and dimensions
 export const projectsGlobeConfig = {
   id: 'projects-globe',
-  name: 'Projects',
+  name: 'Worlds',
   size: GLOBE_SIZES.MEDIUM,
   quadrant: 'bottomLeft',
 
-  contentPoints: Array.from({ length: 9 }, (_, index) => ({
-    id: index,
-    templateType: 'info',
-    content: {
-      iconName: ['Package', 'Blocks', 'Box', 'Container', 'Grid', 'Layout', 'Layers', 'Maximize', 'Monitor'][index],
-      heading: `Project ${index + 1}`,
-      subheading: 'Featured Work',
-      paragraph: `Description of project ${index + 1} showcasing expertise and creativity.`,
-      colorIndex: index % 10
+  contentPoints: [
+    {
+      id: 0,
+      templateType: 'info',
+      content: {
+        iconName: 'Sunrise',
+        heading: 'Dawn Kingdom',
+        subheading: 'The First Light',
+        paragraph: 'A majestic realm where eternal sunrise bathes golden fields and crystal towers in warm light.',
+        colorIndex: 0
+      },
+      position: { row: 0, col: 0 },
+      rotation: getRotationForCard(GLOBE_SIZES.MEDIUM, 0)
     },
-    position: { row: Math.floor(index / 3), col: index % 3 },
-    rotation: getRotationForCard(GLOBE_SIZES.MEDIUM, index)
-  })),
+    {
+      id: 1,
+      templateType: 'info',
+      content: {
+        iconName: 'Moon',
+        heading: 'Twilight Vale',
+        subheading: 'Realm of Shadows',
+        paragraph: 'A mysterious land shrouded in perpetual dusk where magic flows through ancient forests.',
+        colorIndex: 1
+      },
+      position: { row: 0, col: 1 },
+      rotation: getRotationForCard(GLOBE_SIZES.MEDIUM, 1)
+    },
+    {
+      id: 2,
+      templateType: 'info',
+      content: {
+        iconName: 'Snowflake',
+        heading: 'Frost Peaks',
+        subheading: 'Frozen Heights',
+        paragraph: 'Towering mountains of eternal ice where only the bravest adventurers dare to tread.',
+        colorIndex: 2
+      },
+      position: { row: 0, col: 2 },
+      rotation: getRotationForCard(GLOBE_SIZES.MEDIUM, 2)
+    },
+    {
+      id: 3,
+      templateType: 'info',
+      content: {
+        iconName: 'Volcano',
+        heading: 'Ember Wastes',
+        subheading: 'Land of Fire',
+        paragraph: 'A scorched desert of lava flows and volcanic ash where dragons make their ancient lairs.',
+        colorIndex: 3
+      },
+      position: { row: 1, col: 0 },
+      rotation: getRotationForCard(GLOBE_SIZES.MEDIUM, 3)
+    },
+    {
+      id: 4,
+      templateType: 'info',
+      content: {
+        iconName: 'Trees',
+        heading: 'Emerald Grove',
+        subheading: 'Living Forest',
+        paragraph: 'An enchanted woodland where nature spirits dwell among trees older than time itself.',
+        colorIndex: 4
+      },
+      position: { row: 1, col: 1 },
+      rotation: getRotationForCard(GLOBE_SIZES.MEDIUM, 4)
+    },
+    {
+      id: 5,
+      templateType: 'info',
+      content: {
+        iconName: 'Waves',
+        heading: 'Azure Depths',
+        subheading: 'Ocean Kingdom',
+        paragraph: 'A vast underwater realm of sunken ruins and bioluminescent creatures in the deep abyss.',
+        colorIndex: 5
+      },
+      position: { row: 1, col: 2 },
+      rotation: getRotationForCard(GLOBE_SIZES.MEDIUM, 5)
+    },
+    {
+      id: 6,
+      templateType: 'info',
+      content: {
+        iconName: 'CloudSun',
+        heading: 'Sky Citadel',
+        subheading: 'Floating Islands',
+        paragraph: 'Magnificent cities suspended in the clouds connected by bridges of solid light.',
+        colorIndex: 6
+      },
+      position: { row: 2, col: 0 },
+      rotation: getRotationForCard(GLOBE_SIZES.MEDIUM, 6)
+    },
+    {
+      id: 7,
+      templateType: 'info',
+      content: {
+        iconName: 'Zap',
+        heading: 'Storm Plains',
+        subheading: 'Electric Fields',
+        paragraph: 'Endless grasslands where lightning storms rage eternally and thunder echoes across the horizon.',
+        colorIndex: 7
+      },
+      position: { row: 2, col: 1 },
+      rotation: getRotationForCard(GLOBE_SIZES.MEDIUM, 7)
+    },
+    {
+      id: 8,
+      templateType: 'info',
+      content: {
+        iconName: 'Stars',
+        heading: 'Cosmic Void',
+        subheading: 'Between Worlds',
+        paragraph: 'A mysterious dimension of swirling stardust where reality bends and time has no meaning.',
+        colorIndex: 8
+      },
+      position: { row: 2, col: 2 },
+      rotation: getRotationForCard(GLOBE_SIZES.MEDIUM, 8)
+    }
+  ],
 
   navigation: {
     allowScroll: true,

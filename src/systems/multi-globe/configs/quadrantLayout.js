@@ -1,4 +1,4 @@
-// Quadrant layout system for Planet Map
+// Quadrant layout system for Moon Map
 // Defines positioning rules for planets on the map
 
 export const quadrants = {
