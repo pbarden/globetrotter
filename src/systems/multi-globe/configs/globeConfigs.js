@@ -4,38 +4,6 @@
 import { GLOBE_SIZES } from './sizeSpecs'
 import { getRotationForCard } from './rotationMaps'
 
-// Home Planet - Tiny globe with GameTitleCard (entry point)
-export const homePlanetConfig = {
-  id: 'home-planet',
-  name: 'Home',
-  size: GLOBE_SIZES.TINY,
-  quadrant: 'topLeft', // Position on map
-
-  contentPoints: [
-    {
-      id: 0,
-      position: { row: 0, col: 0 },
-      rotation: { x: 0, y: 0 },
-      templateType: 'gameTitle',
-      content: {
-        layoutType: 'titleCard',
-        iconName: 'Sparkles',
-        heading: 'Globetrotter',
-        subheading: 'An Interactive Journey',
-        paragraph: 'Scroll in any direction to explore the universe. Discover planets, unlock secrets, and navigate through the cosmic web of creativity.',
-        colorIndex: 0
-      }
-    }
-  ],
-
-  navigation: {
-    allowScroll: true,
-    scrollToMap: true, // Any scroll goes to map
-    wrapAround: false,
-    transitionDuration: 650
-  }
-}
-
 // Adventure Globe - Large globe with game abilities and mechanics
 export const portfolioGlobeConfig = {
   id: 'portfolio-globe',
@@ -474,7 +442,6 @@ export const projectsGlobeConfig = {
 
 // All globe configurations
 export const allGlobeConfigs = [
-  homePlanetConfig,
   portfolioGlobeConfig,
   skillsGlobeConfig,
   projectsGlobeConfig
@@ -483,9 +450,4 @@ export const allGlobeConfigs = [
 // Get globe config by ID
 export function getGlobeConfig(globeId) {
   return allGlobeConfigs.find(config => config.id === globeId)
-}
-
-// Get home planet config
-export function getHomePlanetConfig() {
-  return homePlanetConfig
 }
