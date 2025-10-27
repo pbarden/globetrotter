@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GLOBE_CONFIG, ANIMATION_TIMINGS } from '../config/animations'
 
-function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = GLOBE_CONFIG.SUBDIVISION, isExiting = false }) {
+function GlobeComponent({ rotation, targetRotation, scale = 1, position = [0, 0, 0], subdivision = GLOBE_CONFIG.SUBDIVISION, isExiting = false }) {
   const meshRef = useRef()
   const materialRef = useRef()
   const edgesRef = useRef()
@@ -14,6 +14,13 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = GLO
   const exitAnimationRef = useRef(0)
   const idleRotationRef = useRef({ x: 0, y: 0 })
   const lastColorUpdateTime = useRef(0)
+  const basePosition = useMemo(() => position, [position[0], position[1], position[2]])
+
+  // Smooth position interpolation - the "sexy" movement
+  const currentPosition = useRef([0, 0, 0])
+  const targetPosition = useRef([0, 0, 0])
+  const currentScale = useRef(1)
+  const targetScale = useRef(1)
 
   // Create icosahedron geometry with random hue offsets for each vertex
   const { geometry, hueOffsets } = useMemo(() => {
@@ -41,8 +48,23 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = GLO
   // Create reusable color object for vertex updates (Optimization #10)
   const color = useMemo(() => new THREE.Color(), [])
 
+  // Update target position and scale when props change
+  useMemo(() => {
+    targetPosition.current = [...basePosition]
+    targetScale.current = scale
+  }, [basePosition, scale])
+
   // Animate rotation and colors
   useFrame((state, delta) => {
+    // Smooth position and scale interpolation - slow and sexy
+    // Lerp factor: lower = slower, more elegant movement (0.02 = ~2% per frame)
+    const lerpFactor = 0.02
+
+    currentPosition.current[0] += (targetPosition.current[0] - currentPosition.current[0]) * lerpFactor
+    currentPosition.current[1] += (targetPosition.current[1] - currentPosition.current[1]) * lerpFactor
+    currentPosition.current[2] += (targetPosition.current[2] - currentPosition.current[2]) * lerpFactor
+    currentScale.current += (targetScale.current - currentScale.current) * lerpFactor
+
     // Exit animation - fall down (REVERSE of entry)
     if (isExiting && groupRef.current) {
       const newProgress = Math.min(exitAnimationRef.current + delta * 2, 1)
@@ -50,7 +72,12 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = GLO
 
       // Fall with gravity (quadratic)
       const easedProgress = newProgress * newProgress
-      groupRef.current.position.y = 0 - (Math.abs(GLOBE_CONFIG.EXIT_POSITION_Y) * easedProgress)
+      groupRef.current.position.set(
+        currentPosition.current[0],
+        currentPosition.current[1] - (Math.abs(GLOBE_CONFIG.EXIT_POSITION_Y) * easedProgress),
+        currentPosition.current[2]
+      )
+      groupRef.current.scale.setScalar(currentScale.current)
       return // Skip other animations
     }
 
@@ -67,14 +94,30 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = GLO
       const c3 = c1 + 1
       const easedProgress = 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2)
 
-      // Move from bottom to center
-      groupRef.current.position.y = GLOBE_CONFIG.ENTRY_POSITION_Y + (Math.abs(GLOBE_CONFIG.ENTRY_POSITION_Y) * easedProgress)
+      // Move from bottom to final position (using smoothly interpolated position)
+      const entryOffset = GLOBE_CONFIG.ENTRY_POSITION_Y + (Math.abs(GLOBE_CONFIG.ENTRY_POSITION_Y) * easedProgress)
+      groupRef.current.position.set(
+        currentPosition.current[0],
+        currentPosition.current[1] + entryOffset,
+        currentPosition.current[2]
+      )
+      groupRef.current.scale.setScalar(currentScale.current)
+    } else if (entryAnimationRef.current >= 1 && groupRef.current) {
+      // Animation complete, apply smooth interpolated position and scale
+      groupRef.current.position.set(
+        currentPosition.current[0],
+        currentPosition.current[1],
+        currentPosition.current[2]
+      )
+      groupRef.current.scale.setScalar(currentScale.current)
     }
 
     // Idle rotation - slow continuous spin (only after entry animation completes)
+    // Scale inversely affects rotation speed: larger = slower (more majestic)
     if (entryAnimationRef.current >= 1) {
-      idleRotationRef.current.y += delta * GLOBE_CONFIG.ROTATION_SPEED.IDLE_Y
-      idleRotationRef.current.x += delta * GLOBE_CONFIG.ROTATION_SPEED.IDLE_X
+      const scaleInverseFactor = 1 / currentScale.current
+      idleRotationRef.current.y += delta * GLOBE_CONFIG.ROTATION_SPEED.IDLE_Y * scaleInverseFactor
+      idleRotationRef.current.x += delta * GLOBE_CONFIG.ROTATION_SPEED.IDLE_X * scaleInverseFactor
     }
 
     // Calculate rotation velocity and target rotation with idle rotation (optimization: calculate once)
@@ -92,19 +135,29 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = GLO
       const deltaY = targetWithIdle.y - currentRotY
       rotationVelocity.current = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
 
-      meshRef.current.rotation.x += deltaX * 0.05
-      meshRef.current.rotation.y += deltaY * 0.05
+      // Apply scale-based rotation damping: larger globe rotates slower
+      const scaleInverseFactor = 1 / currentScale.current
+      const rotationSpeed = 0.05 * scaleInverseFactor
+
+      meshRef.current.rotation.x += deltaX * rotationSpeed
+      meshRef.current.rotation.y += deltaY * rotationSpeed
     }
 
     if (edgesRef.current) {
-      // Apply same idle rotation to wireframe (reuse targetWithIdle)
-      edgesRef.current.rotation.x += (targetWithIdle.x - edgesRef.current.rotation.x) * 0.05
-      edgesRef.current.rotation.y += (targetWithIdle.y - edgesRef.current.rotation.y) * 0.05
+      // Apply same scale-based rotation to wireframe
+      const scaleInverseFactor = 1 / currentScale.current
+      const rotationSpeed = 0.05 * scaleInverseFactor
+
+      edgesRef.current.rotation.x += (targetWithIdle.x - edgesRef.current.rotation.x) * rotationSpeed
+      edgesRef.current.rotation.y += (targetWithIdle.y - edgesRef.current.rotation.y) * rotationSpeed
     }
 
     // Update time for color cycling
+    // Scale inversely affects color cycling: larger globe = slower color shifts
     const isRotating = Math.abs(rotationVelocity.current) > 0.01
-    const timeSpeed = isRotating ? GLOBE_CONFIG.ROTATION_SPEED.COLOR_FAST : GLOBE_CONFIG.ROTATION_SPEED.COLOR_SLOW
+    const baseTimeSpeed = isRotating ? GLOBE_CONFIG.ROTATION_SPEED.COLOR_FAST : GLOBE_CONFIG.ROTATION_SPEED.COLOR_SLOW
+    const scaleInverseFactor = 1 / currentScale.current
+    const timeSpeed = baseTimeSpeed * scaleInverseFactor
     timeRef.current += delta * timeSpeed
 
     // Update vertex colors with rainbow cycling (Optimizations #1 & #10: Throttled updates + reusable color object)
@@ -131,7 +184,7 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = GLO
   })
 
   return (
-    <group ref={groupRef} scale={scale}>
+    <group ref={groupRef}>
       {/* Crystal mesh with rainbow refraction */}
       <mesh ref={meshRef} geometry={geometry}>
         <meshPhongMaterial

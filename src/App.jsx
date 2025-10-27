@@ -7,6 +7,7 @@ import { LoadingScreen } from './components/LoadingScreen'
 import { CONTENT_POINTS } from './config/content'
 import { getColorScheme } from './config/colors'
 import { ANIMATION_TIMINGS, SCROLL_CONFIG } from './config/animations'
+import { getCompositionState } from './config/compositions'
 import './App.css'
 
 const STORAGE_KEY = 'globetrotter_current_point'
@@ -40,9 +41,13 @@ function App() {
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
 
-  // Get current color index from content point
+  // Get current color index and composition from content point
   const currentColorIndex = CONTENT_POINTS[currentPoint].colorIndex
   const currentColorScheme = useMemo(() => getColorScheme(currentColorIndex), [currentColorIndex])
+  const currentComposition = useMemo(() => {
+    const compositionId = CONTENT_POINTS[currentPoint].composition || 'default'
+    return getCompositionState(compositionId)
+  }, [currentPoint])
 
   // Calculate blob position for light source (matches BlobLasso calculation)
   const getBlobLightPosition = (contentId) => {
@@ -303,7 +308,11 @@ function App() {
               distance={50}
               decay={0.8}
             />
-            <Globe targetRotation={targetRotation} />
+            <Globe
+              targetRotation={targetRotation}
+              position={currentComposition.globe.position}
+              scale={currentComposition.globe.scale}
+            />
           </Suspense>
         </Canvas>
 
@@ -314,6 +323,7 @@ function App() {
             isActive={true}
             randomSeed={randomSeed}
             colorIndex={currentColorIndex}
+            compositionState={currentComposition}
           />
         )}
 

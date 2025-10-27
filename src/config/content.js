@@ -10,7 +10,8 @@ export const CONTENT_POINTS = [
     subheading: 'Pushing Boundaries',
     paragraph: 'Exploring new frontiers in design and technology with cutting-edge solutions.',
     rotation: { x: 0, y: 0 },
-    colorIndex: 0
+    colorIndex: 0,
+    composition: 'default'
   },
   {
     id: 1,
@@ -19,7 +20,8 @@ export const CONTENT_POINTS = [
     subheading: 'Inspired Design',
     paragraph: 'Crafting unique experiences that blend aesthetics with functionality.',
     rotation: { x: Math.PI, y: 0 },
-    colorIndex: 1
+    colorIndex: 1,
+    composition: 'rings'
   },
   {
     id: 2,
@@ -28,7 +30,8 @@ export const CONTENT_POINTS = [
     subheading: 'Visual Excellence',
     paragraph: 'Creating stunning visuals that capture attention and inspire imagination.',
     rotation: { x: 0, y: Math.PI / 2 },
-    colorIndex: 2
+    colorIndex: 2,
+    composition: 'meteor'
   },
   {
     id: 3,
@@ -37,7 +40,8 @@ export const CONTENT_POINTS = [
     subheading: 'Lightning Fast',
     paragraph: 'Optimized for speed and efficiency without compromising quality.',
     rotation: { x: 0, y: -Math.PI / 2 },
-    colorIndex: 3
+    colorIndex: 3,
+    composition: 'sky'
   },
   // Row 1
   {
@@ -47,7 +51,8 @@ export const CONTENT_POINTS = [
     subheading: 'Quality First',
     paragraph: 'Committed to delivering exceptional results in every project.',
     rotation: { x: Math.PI / 2, y: 0 },
-    colorIndex: 4
+    colorIndex: 4,
+    composition: 'atmosphere'
   },
   {
     id: 5,
@@ -56,7 +61,8 @@ export const CONTENT_POINTS = [
     subheading: 'Next Generation',
     paragraph: 'Building tomorrow\'s solutions with today\'s innovations.',
     rotation: { x: -Math.PI / 2, y: 0 },
-    colorIndex: 5
+    colorIndex: 5,
+    composition: 'portal'
   },
   {
     id: 6,
@@ -65,7 +71,8 @@ export const CONTENT_POINTS = [
     subheading: 'Pixel Perfect',
     paragraph: 'Attention to detail in every aspect of design and development.',
     rotation: { x: Math.PI / 4, y: Math.PI / 4 },
-    colorIndex: 6
+    colorIndex: 6,
+    composition: 'atom'
   },
   {
     id: 7,
@@ -74,7 +81,8 @@ export const CONTENT_POINTS = [
     subheading: 'Inclusive Design',
     paragraph: 'Creating experiences that welcome and engage everyone.',
     rotation: { x: Math.PI, y: 0 },
-    colorIndex: 7
+    colorIndex: 7,
+    composition: 'default'
   },
   // Row 2
   {
@@ -84,7 +92,8 @@ export const CONTENT_POINTS = [
     subheading: 'Driven by Purpose',
     paragraph: 'Fueled by enthusiasm and dedication to excellence.',
     rotation: { x: 0, y: Math.PI / 2 },
-    colorIndex: 8
+    colorIndex: 8,
+    composition: 'default'
   },
   {
     id: 9,
