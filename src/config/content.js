@@ -112,7 +112,8 @@ export const CONTENT_POINTS = [
     subheading: 'User Focused',
     paragraph: 'Designing memorable interactions that resonate.',
     rotation: { x: Math.PI / 2, y: 0 },
-    colorIndex: 0
+    colorIndex: 0,
+    composition: 'comet'
   },
   {
     id: 11,

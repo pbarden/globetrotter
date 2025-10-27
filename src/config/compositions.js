@@ -43,10 +43,11 @@ export const COMPOSITION_STATES = {
     },
     blobs: {
       positionMode: 'trailing',     // Blobs follow in a trail
-      centerOffset: { x: 150, y: 150 }, // Offset up-right from center
+      centerOffset: { x: 100, y: 100 }, // Offset up-right from center
       trailDirection: { x: 1, y: 1 },   // Direction of trail (up-right)
-      spreadMultiplier: 0.7,
-      scaleMultiplier: 0.8,
+      trailSpacing: 150,            // Space between each blob in trail
+      spreadMultiplier: 0.8,
+      scaleMultiplier: 1.2,         // Slightly larger
     }
   },
 
@@ -129,6 +130,23 @@ export const COMPOSITION_STATES = {
       spreadMultiplier: 0.1,        // Minimal spread - keep centered
       scaleMultiplier: 1.0,         // Base multiplier, each blob scales differently
     }
+  },
+
+  // Comet - globe positioned up-right, blobs trail toward down-left (reverse meteor)
+  comet: {
+    id: 'comet',
+    globe: {
+      position: [1.5, 1.5, 0],      // Up and right in 3D space
+      scale: 0.9,
+    },
+    blobs: {
+      positionMode: 'trailing',     // Blobs follow in a trail
+      centerOffset: { x: -100, y: -100 }, // Offset down-left from center
+      trailDirection: { x: -1, y: -1 },   // Direction of trail (down-left)
+      trailSpacing: 150,            // Space between each blob in trail
+      spreadMultiplier: 0.8,
+      scaleMultiplier: 1.2,         // Slightly larger
+    }
   }
 }
 
@@ -193,9 +211,9 @@ export const calculateBlobPosition = (compositionState, seed1, seed2, seed3, blo
 
     case 'trailing': {
       // Blobs trail in a direction
-      const { trailDirection = { x: 1, y: 1 } } = compositionState.blobs
-      const trailOffset = blobIndex * 100 // Space out along trail
-      const perpNoise = Math.sin(seed3) * 50 // Slight perpendicular variation
+      const { trailDirection = { x: 1, y: 1 }, trailSpacing = 150 } = compositionState.blobs
+      const trailOffset = blobIndex * trailSpacing // Space out along trail (more spacing)
+      const perpNoise = Math.sin(seed3) * 40 // Slight perpendicular variation for organic feel
 
       return {
         x: (trailDirection.x * trailOffset) + (centerOffset.x || 0) + perpNoise,
