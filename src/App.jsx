@@ -310,12 +310,84 @@ function App() {
     }
   }, [currentPoint, isTransitioning])
 
+  // Arrow key handler - matches swipe behavior
+  const handleKeyDown = useCallback((e) => {
+    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      return
+    }
+
+    e.preventDefault()
+
+    if (isTransitioning) {
+      return
+    }
+
+    let nextPoint = currentPoint
+    let flyOutDir = ''
+    let flyInDirection = ''
+
+    const currentRow = Math.floor(currentPoint / 4)
+    const currentCol = currentPoint % 4
+
+    switch (e.key) {
+      case 'ArrowUp':
+        // Swipe up = next row
+        const nextRowUp = (currentRow + 1) % 4
+        nextPoint = nextRowUp * 4 + currentCol
+        flyOutDir = 'fly-out-bottom'
+        flyInDirection = 'fly-from-top'
+        break
+      case 'ArrowDown':
+        // Swipe down = previous row
+        const nextRowDown = (currentRow - 1 + 4) % 4
+        nextPoint = nextRowDown * 4 + currentCol
+        flyOutDir = 'fly-out-top'
+        flyInDirection = 'fly-from-bottom'
+        break
+      case 'ArrowLeft':
+        // Swipe left = next column
+        const nextColLeft = (currentCol + 1) % 4
+        nextPoint = currentRow * 4 + nextColLeft
+        flyOutDir = 'fly-out-left'
+        flyInDirection = 'fly-from-right'
+        break
+      case 'ArrowRight':
+        // Swipe right = previous column
+        const nextColRight = (currentCol - 1 + 4) % 4
+        nextPoint = currentRow * 4 + nextColRight
+        flyOutDir = 'fly-out-right'
+        flyInDirection = 'fly-from-left'
+        break
+    }
+
+    setIsTransitioning(true)
+    setFlyOutDirection(flyOutDir)
+
+    setTimeout(() => {
+      setCurrentPoint(nextPoint)
+      const newRotation = contentPoints[nextPoint].rotation
+      setTargetRotation({ x: newRotation.x, y: newRotation.y })
+      setAnimationDirection(flyInDirection)
+      setAnimationKey(prev => prev + 1)
+      setFlyOutDirection('')
+      setRandomSeed(Math.random() * 1000)
+
+      setTimeout(() => {
+        setIsTransitioning(false)
+      }, 650)
+    }, 400)
+  }, [currentPoint, isTransitioning])
+
   useEffect(() => {
     if (isLoading) return
 
     window.addEventListener('wheel', handleWheel, { passive: false })
-    return () => window.removeEventListener('wheel', handleWheel)
-  }, [isLoading, handleWheel])
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('wheel', handleWheel)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isLoading, handleWheel, handleKeyDown])
 
   // Initialize rotation and first card animation
   useEffect(() => {
