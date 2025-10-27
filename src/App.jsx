@@ -9,10 +9,28 @@ import { getColorScheme } from './config/colors'
 import { ANIMATION_TIMINGS, SCROLL_CONFIG } from './config/animations'
 import './App.css'
 
+const STORAGE_KEY = 'globetrotter_current_point'
+
+// Load saved position from localStorage
+const getSavedPosition = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved !== null) {
+      const position = parseInt(saved, 10)
+      if (position >= 0 && position < CONTENT_POINTS.length) {
+        return position
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to load saved position:', error)
+  }
+  return 0
+}
+
 function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [hasShownFirstContent, setHasShownFirstContent] = useState(false)
-  const [currentPoint, setCurrentPoint] = useState(0)
+  const [currentPoint, setCurrentPoint] = useState(getSavedPosition)
   const [targetRotation, setTargetRotation] = useState(null)
   const [animationDirection, setAnimationDirection] = useState('')
   const [animationKey, setAnimationKey] = useState(0)
@@ -227,11 +245,20 @@ function App() {
     }
   }, [isLoading, handleWheel, handleKeyDown])
 
+  // Save current position to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, currentPoint.toString())
+    } catch (error) {
+      console.warn('Failed to save position:', error)
+    }
+  }, [currentPoint])
+
   // Initialize rotation and first card animation
   useEffect(() => {
     if (!isLoading && !hasShownFirstContent) {
       setIsTransitioning(true) // Block scrolling during initial animation
-      const initialRotation = CONTENT_POINTS[0].rotation
+      const initialRotation = CONTENT_POINTS[currentPoint].rotation
       setTargetRotation({ x: initialRotation.x, y: initialRotation.y })
       setAnimationDirection('fly-from-bottom')
       setAnimationKey(prev => prev + 1)
@@ -242,7 +269,7 @@ function App() {
         setIsTransitioning(false)
       }, ANIMATION_TIMINGS.CARD_FLY_IN_DURATION)
     }
-  }, [isLoading, hasShownFirstContent])
+  }, [isLoading, hasShownFirstContent, currentPoint])
 
   // Determine if card needs reorientation (when it would be upside down or sideways)
   const needsReorientation = () => {
