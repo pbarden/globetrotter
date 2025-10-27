@@ -4,210 +4,10 @@ import { Globe } from './components/Globe'
 import { ContentCard } from './components/ContentCard'
 import { BlobLasso } from './components/BlobLasso'
 import { LoadingScreen } from './components/LoadingScreen'
+import { CONTENT_POINTS } from './config/content'
+import { getColorScheme } from './config/colors'
+import { ANIMATION_TIMINGS, SCROLL_CONFIG } from './config/animations'
 import './App.css'
-
-// Unified color system - matches ContentCard color schemes
-const blobColors = [
-  '#ffd700', // Gold/Orange/Yellow
-  '#ff00ff', // Magenta/Pink/Purple
-  '#00ff88', // Green/Mint/Lime
-  '#ff6b6b', // Red/Crimson/Pink
-  '#b388ff', // Purple/Violet/Lavender
-  '#00ffff', // Cyan/Sky Blue/Aqua
-  '#ff9500', // Orange/Tangerine
-  '#00ff00', // Bright Green/Neon
-  '#ff1493', // Hot Pink/Deep Pink
-  '#9370db', // Medium Purple/Blue Violet
-]
-
-// Content in a 4x4 matrix (16 points)
-const contentPoints = [
-  // Row 0
-  {
-    id: 0,
-    iconName: 'Rocket',
-    heading: 'Innovation',
-    subheading: 'Pushing Boundaries',
-    paragraph: 'Exploring new frontiers in design and technology with cutting-edge solutions.',
-    rotation: { x: 0, y: 0 },
-    colorIndex: 0
-  },
-  {
-    id: 1,
-    iconName: 'Lightbulb',
-    heading: 'Creativity',
-    subheading: 'Inspired Design',
-    paragraph: 'Crafting unique experiences that blend aesthetics with functionality.',
-    rotation: { x: Math.PI, y: 0 },
-    colorIndex: 1
-  },
-  {
-    id: 2,
-    iconName: 'Palette',
-    heading: 'Artistry',
-    subheading: 'Visual Excellence',
-    paragraph: 'Creating stunning visuals that capture attention and inspire imagination.',
-    rotation: { x: 0, y: Math.PI / 2 },
-    colorIndex: 2
-  },
-  {
-    id: 3,
-    iconName: 'Zap',
-    heading: 'Performance',
-    subheading: 'Lightning Fast',
-    paragraph: 'Optimized for speed and efficiency without compromising quality.',
-    rotation: { x: 0, y: -Math.PI / 2 },
-    colorIndex: 3
-  },
-  // Row 1
-  {
-    id: 4,
-    iconName: 'Star',
-    heading: 'Excellence',
-    subheading: 'Quality First',
-    paragraph: 'Committed to delivering exceptional results in every project.',
-    rotation: { x: Math.PI / 2, y: 0 },
-    colorIndex: 4
-  },
-  {
-    id: 5,
-    iconName: 'Sparkles',
-    heading: 'Future',
-    subheading: 'Next Generation',
-    paragraph: 'Building tomorrow\'s solutions with today\'s innovations.',
-    rotation: { x: -Math.PI / 2, y: 0 },
-    colorIndex: 5
-  },
-  {
-    id: 6,
-    iconName: 'Target',
-    heading: 'Precision',
-    subheading: 'Pixel Perfect',
-    paragraph: 'Attention to detail in every aspect of design and development.',
-    rotation: { x: Math.PI / 4, y: Math.PI / 4 },
-    colorIndex: 6
-  },
-  {
-    id: 7,
-    iconName: 'Users',
-    heading: 'Diversity',
-    subheading: 'Inclusive Design',
-    paragraph: 'Creating experiences that welcome and engage everyone.',
-    rotation: { x: Math.PI, y: 0 },
-    colorIndex: 7
-  },
-  // Row 2
-  {
-    id: 8,
-    iconName: 'Flame',
-    heading: 'Passion',
-    subheading: 'Driven by Purpose',
-    paragraph: 'Fueled by enthusiasm and dedication to excellence.',
-    rotation: { x: 0, y: Math.PI / 2 },
-    colorIndex: 8
-  },
-  {
-    id: 9,
-    iconName: 'Globe',
-    heading: 'Global',
-    subheading: 'Worldwide Reach',
-    paragraph: 'Connecting people and ideas across the world.',
-    rotation: { x: 0, y: -Math.PI / 2 },
-    colorIndex: 9
-  },
-  {
-    id: 10,
-    iconName: 'Layers',
-    heading: 'Experience',
-    subheading: 'User Focused',
-    paragraph: 'Designing memorable interactions that resonate.',
-    rotation: { x: Math.PI / 2, y: 0 },
-    colorIndex: 0
-  },
-  {
-    id: 11,
-    iconName: 'Trophy',
-    heading: 'Achievement',
-    subheading: 'Award Winning',
-    paragraph: 'Recognized for outstanding work and innovation.',
-    rotation: { x: -Math.PI / 2, y: 0 },
-    colorIndex: 1
-  },
-  // Row 3
-  {
-    id: 12,
-    iconName: 'Brain',
-    heading: 'Intelligence',
-    subheading: 'Smart Solutions',
-    paragraph: 'Leveraging AI and data to create intelligent experiences.',
-    rotation: { x: -Math.PI / 4, y: -Math.PI / 4 },
-    colorIndex: 2
-  },
-  {
-    id: 13,
-    iconName: 'Gem',
-    heading: 'Premium',
-    subheading: 'Luxury Design',
-    paragraph: 'Crafting high-end experiences with sophistication.',
-    rotation: { x: Math.PI * 0.75, y: Math.PI / 6 },
-    colorIndex: 3
-  },
-  {
-    id: 14,
-    iconName: 'Navigation',
-    heading: 'Direction',
-    subheading: 'Clear Vision',
-    paragraph: 'Guiding projects with strategic thinking and clarity.',
-    rotation: { x: Math.PI / 6, y: Math.PI * 0.6 },
-    colorIndex: 4
-  },
-  {
-    id: 15,
-    iconName: 'PartyPopper',
-    heading: 'Entertainment',
-    subheading: 'Engaging Content',
-    paragraph: 'Creating delightful experiences that captivate audiences.',
-    rotation: { x: -Math.PI / 6, y: -Math.PI * 0.6 },
-    colorIndex: 5
-  },
-  // Row 4
-  {
-    id: 16,
-    iconName: 'Sword',
-    heading: 'Combat',
-    subheading: 'Battle System',
-    paragraph: 'Engage in dynamic battles with strategic depth and skill-based mechanics.',
-    rotation: { x: Math.PI / 3, y: Math.PI / 3 },
-    colorIndex: 6
-  },
-  {
-    id: 17,
-    iconName: 'Crown',
-    heading: 'Conquest',
-    subheading: 'Victory Awaits',
-    paragraph: 'Rise through the ranks and claim your place among legends.',
-    rotation: { x: -Math.PI / 3, y: -Math.PI / 3 },
-    colorIndex: 7
-  },
-  {
-    id: 18,
-    iconName: 'Map',
-    heading: 'Exploration',
-    subheading: 'Vast Worlds',
-    paragraph: 'Discover hidden secrets and treasures across expansive realms.',
-    rotation: { x: Math.PI * 0.4, y: -Math.PI * 0.5 },
-    colorIndex: 8
-  },
-  {
-    id: 19,
-    iconName: 'Coins',
-    heading: 'Rewards',
-    subheading: 'Epic Loot',
-    paragraph: 'Collect powerful items and unlock rare achievements on your journey.',
-    rotation: { x: -Math.PI * 0.4, y: Math.PI * 0.5 },
-    colorIndex: 9
-  }
-]
 
 function App() {
   const [isLoading, setIsLoading] = useState(true)
@@ -223,7 +23,8 @@ function App() {
   const lastScrollTime = useRef(Date.now())
 
   // Get current color index from content point
-  const currentColorIndex = contentPoints[currentPoint].colorIndex
+  const currentColorIndex = CONTENT_POINTS[currentPoint].colorIndex
+  const currentColorScheme = useMemo(() => getColorScheme(currentColorIndex), [currentColorIndex])
 
   // Calculate blob position for light source (matches BlobLasso calculation)
   const getBlobLightPosition = (contentId) => {
@@ -275,7 +76,7 @@ function App() {
     }
 
     // Threshold for point switching
-    const threshold = 120
+    const threshold = SCROLL_CONFIG.THRESHOLD
 
     if (Math.abs(scrollAccumulator.current.x) > threshold ||
         Math.abs(scrollAccumulator.current.y) > threshold) {
@@ -284,23 +85,23 @@ function App() {
       let flyOutDir = ''
       let flyInDirection = ''
 
-      // 5x4 matrix navigation (5 rows, 4 columns)
-      const currentRow = Math.floor(currentPoint / 4)
-      const currentCol = currentPoint % 4
+      // Grid navigation
+      const currentRow = Math.floor(currentPoint / SCROLL_CONFIG.GRID_COLS)
+      const currentCol = currentPoint % SCROLL_CONFIG.GRID_COLS
 
       // Determine direction and switch point
       if (Math.abs(scrollAccumulator.current.x) > Math.abs(scrollAccumulator.current.y)) {
         // Vertical scrolling (moves between rows, same column)
         if (scrollAccumulator.current.x > 0) {
           // Scrolling down - move to next row
-          const nextRow = (currentRow + 1) % 5
-          nextPoint = nextRow * 4 + currentCol
+          const nextRow = (currentRow + 1) % SCROLL_CONFIG.GRID_ROWS
+          nextPoint = nextRow * SCROLL_CONFIG.GRID_COLS + currentCol
           flyOutDir = 'fly-out-bottom'
           flyInDirection = 'fly-from-top'
         } else {
           // Scrolling up - move to previous row
-          const nextRow = (currentRow - 1 + 5) % 5
-          nextPoint = nextRow * 4 + currentCol
+          const nextRow = (currentRow - 1 + SCROLL_CONFIG.GRID_ROWS) % SCROLL_CONFIG.GRID_ROWS
+          nextPoint = nextRow * SCROLL_CONFIG.GRID_COLS + currentCol
           flyOutDir = 'fly-out-top'
           flyInDirection = 'fly-from-bottom'
         }
@@ -308,14 +109,14 @@ function App() {
         // Horizontal scrolling (moves between columns, same row)
         if (scrollAccumulator.current.y > 0) {
           // Scrolling left - move to next column
-          const nextCol = (currentCol + 1) % 4
-          nextPoint = currentRow * 4 + nextCol
+          const nextCol = (currentCol + 1) % SCROLL_CONFIG.GRID_COLS
+          nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextCol
           flyOutDir = 'fly-out-left'
           flyInDirection = 'fly-from-right'
         } else {
           // Scrolling right - move to previous column
-          const nextCol = (currentCol - 1 + 4) % 4
-          nextPoint = currentRow * 4 + nextCol
+          const nextCol = (currentCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS
+          nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextCol
           flyOutDir = 'fly-out-right'
           flyInDirection = 'fly-from-left'
         }
@@ -331,7 +132,7 @@ function App() {
       // Stage 2: Wait for fly-out to complete, then switch content and fly-in
       setTimeout(() => {
         setCurrentPoint(nextPoint)
-        const newRotation = contentPoints[nextPoint].rotation
+        const newRotation = CONTENT_POINTS[nextPoint].rotation
         setTargetRotation({ x: newRotation.x, y: newRotation.y })
         setAnimationDirection(flyInDirection)
         setAnimationKey(prev => prev + 1)
@@ -342,8 +143,8 @@ function App() {
         // Allow new transitions after fly-in completes
         setTimeout(() => {
           setIsTransitioning(false)
-        }, 650) // Wait for fly-in to mostly complete
-      }, 400) // Fly-out animation duration
+        }, ANIMATION_TIMINGS.CARD_FLY_IN_DURATION)
+      }, ANIMATION_TIMINGS.CARD_FLY_OUT_DURATION)
     }
   }, [currentPoint, isTransitioning])
 
@@ -363,35 +164,35 @@ function App() {
     let flyOutDir = ''
     let flyInDirection = ''
 
-    const currentRow = Math.floor(currentPoint / 4)
-    const currentCol = currentPoint % 4
+    const currentRow = Math.floor(currentPoint / SCROLL_CONFIG.GRID_COLS)
+    const currentCol = currentPoint % SCROLL_CONFIG.GRID_COLS
 
     switch (e.key) {
       case 'ArrowUp':
         // Swipe up = next row
-        const nextRowUp = (currentRow + 1) % 5
-        nextPoint = nextRowUp * 4 + currentCol
+        const nextRowUp = (currentRow + 1) % SCROLL_CONFIG.GRID_ROWS
+        nextPoint = nextRowUp * SCROLL_CONFIG.GRID_COLS + currentCol
         flyOutDir = 'fly-out-bottom'
         flyInDirection = 'fly-from-top'
         break
       case 'ArrowDown':
         // Swipe down = previous row
-        const nextRowDown = (currentRow - 1 + 5) % 5
-        nextPoint = nextRowDown * 4 + currentCol
+        const nextRowDown = (currentRow - 1 + SCROLL_CONFIG.GRID_ROWS) % SCROLL_CONFIG.GRID_ROWS
+        nextPoint = nextRowDown * SCROLL_CONFIG.GRID_COLS + currentCol
         flyOutDir = 'fly-out-top'
         flyInDirection = 'fly-from-bottom'
         break
       case 'ArrowLeft':
         // Swipe left = next column
-        const nextColLeft = (currentCol + 1) % 4
-        nextPoint = currentRow * 4 + nextColLeft
+        const nextColLeft = (currentCol + 1) % SCROLL_CONFIG.GRID_COLS
+        nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextColLeft
         flyOutDir = 'fly-out-left'
         flyInDirection = 'fly-from-right'
         break
       case 'ArrowRight':
         // Swipe right = previous column
-        const nextColRight = (currentCol - 1 + 4) % 4
-        nextPoint = currentRow * 4 + nextColRight
+        const nextColRight = (currentCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS
+        nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextColRight
         flyOutDir = 'fly-out-right'
         flyInDirection = 'fly-from-left'
         break
@@ -402,7 +203,7 @@ function App() {
 
     setTimeout(() => {
       setCurrentPoint(nextPoint)
-      const newRotation = contentPoints[nextPoint].rotation
+      const newRotation = CONTENT_POINTS[nextPoint].rotation
       setTargetRotation({ x: newRotation.x, y: newRotation.y })
       setAnimationDirection(flyInDirection)
       setAnimationKey(prev => prev + 1)
@@ -411,8 +212,8 @@ function App() {
 
       setTimeout(() => {
         setIsTransitioning(false)
-      }, 650)
-    }, 400)
+      }, ANIMATION_TIMINGS.CARD_FLY_IN_DURATION)
+    }, ANIMATION_TIMINGS.CARD_FLY_OUT_DURATION)
   }, [currentPoint, isTransitioning])
 
   useEffect(() => {
@@ -430,7 +231,7 @@ function App() {
   useEffect(() => {
     if (!isLoading && !hasShownFirstContent) {
       setIsTransitioning(true) // Block scrolling during initial animation
-      const initialRotation = contentPoints[0].rotation
+      const initialRotation = CONTENT_POINTS[0].rotation
       setTargetRotation({ x: initialRotation.x, y: initialRotation.y })
       setAnimationDirection('fly-from-bottom')
       setAnimationKey(prev => prev + 1)
@@ -439,13 +240,13 @@ function App() {
       // Allow scrolling after initial fly-in completes
       setTimeout(() => {
         setIsTransitioning(false)
-      }, 650) // Match the fly-in animation duration
+      }, ANIMATION_TIMINGS.CARD_FLY_IN_DURATION)
     }
   }, [isLoading, hasShownFirstContent])
 
   // Determine if card needs reorientation (when it would be upside down or sideways)
   const needsReorientation = () => {
-    const point = contentPoints[currentPoint]
+    const point = CONTENT_POINTS[currentPoint]
     return Math.abs(point.rotation.x) > Math.PI / 4 || Math.abs(point.rotation.y) > Math.PI / 4
   }
 
@@ -471,7 +272,7 @@ function App() {
             <pointLight
               position={blobLightPosition}
               intensity={8}
-              color={blobColors[currentColorIndex]}
+              color={currentColorScheme.primary}
               distance={50}
               decay={0.8}
             />
@@ -482,7 +283,7 @@ function App() {
         {/* Blob Lasso */}
         {!isLoading && (
           <BlobLasso
-            content={contentPoints[currentPoint]}
+            content={CONTENT_POINTS[currentPoint]}
             isActive={true}
             randomSeed={randomSeed}
             colorIndex={currentColorIndex}
@@ -492,7 +293,7 @@ function App() {
         {/* Content Cards */}
         <ContentCard
           key={animationKey}
-          content={contentPoints[currentPoint]}
+          content={CONTENT_POINTS[currentPoint]}
           isActive={!isLoading && hasShownFirstContent}
           needsReorientation={needsReorientation()}
           animationDirection={flyOutDirection || animationDirection}

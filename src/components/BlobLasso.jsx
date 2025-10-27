@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useMemo, memo } from 'react'
 import './BlobLasso.css'
+import { getColorsArray } from '../config/colors'
+import { BLOB_CONFIG, ANIMATION_TIMINGS } from '../config/animations'
 
 function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntryComplete, isFirstEntry = false, isExiting = false, scaleMultiplier = 1 }) {
   const blobRef = useRef()
@@ -16,20 +18,6 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
   const [exitProgress, setExitProgress] = useState(0)
   const hasCalledComplete = useRef(false)
   const hasStartedAnimation = useRef(false)
-
-  // Unified color system - matches App.jsx and ContentCard
-  const blobColors = [
-    ['#ffd700', '#ff8c00', '#ffaa00'], // Gold/Orange/Yellow
-    ['#ff00ff', '#ff00aa', '#aa00ff'], // Magenta/Pink/Purple
-    ['#00ff88', '#00ffaa', '#88ff00'], // Green/Mint/Lime
-    ['#ff6b6b', '#ff3333', '#ff9999'], // Red/Crimson/Pink
-    ['#b388ff', '#8844ff', '#cc99ff'], // Purple/Violet/Lavender
-    ['#00ffff', '#00ccff', '#66ffff'], // Cyan/Sky Blue/Aqua
-    ['#ff9500', '#ff6b00', '#ffb84d'], // Orange/Tangerine
-    ['#00ff00', '#00cc00', '#66ff66'], // Bright Green/Neon
-    ['#ff1493', '#ff007f', '#ff69b4'], // Hot Pink/Deep Pink
-    ['#9370db', '#8a2be2', '#ba55d3'], // Medium Purple/Blue Violet
-  ]
 
   // Generate random positions that spread across the screen
   const seed1 = content.id * 3.7 + randomSeed
@@ -72,7 +60,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
   const scale3X = Math.round((0.65 + (Math.sin(seed2 * 2.2) * 0.35)) * 100) / 100
   const scale3Y = Math.round((0.65 + (Math.cos(seed3 * 2.0) * 0.35)) * 100) / 100
 
-  const colors = useMemo(() => blobColors[colorIndex % blobColors.length], [colorIndex])
+  const colors = useMemo(() => getColorsArray(colorIndex), [colorIndex])
 
   // Trigger color transition when content changes
   useEffect(() => {
@@ -130,9 +118,10 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
       const currentTime = timestamp / 1000
       const elapsed = currentTime - startTimeRef.current
 
-      // Throttle to 30fps (~33ms between updates)
+      // Throttle to configured FPS
       const deltaTime = timestamp - lastUpdateTime
-      if (deltaTime < 33) {
+      const frameTime = 1000 / ANIMATION_TIMINGS.BLOB_FPS
+      if (deltaTime < frameTime) {
         animationRef.current = requestAnimationFrame(animateBlob)
         return
       }
@@ -143,7 +132,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
       const shouldUpdateState = timestamp - lastStateUpdateTime > 50
 
       if (isExiting && exitProgressRef.current < 1) {
-        const exitDuration = 0.4 // 400ms - matches entry timing
+        const exitDuration = ANIMATION_TIMINGS.BLOB_EXIT_DURATION
         const newProgress = Math.min(exitProgressRef.current + (deltaTime / 1000) / exitDuration, 1)
         exitProgressRef.current = newProgress
         if (shouldUpdateState) {
@@ -151,7 +140,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
           lastStateUpdateTime = timestamp
         }
       } else if (isFirstEntry && scaleProgressRef.current < 1) {
-        const entryDuration = 0.4 // 400ms
+        const entryDuration = ANIMATION_TIMINGS.BLOB_ENTRY_DURATION
         const newProgress = Math.min(scaleProgressRef.current + (deltaTime / 1000) / entryDuration, 1)
         scaleProgressRef.current = newProgress
         if (shouldUpdateState) {
@@ -303,13 +292,13 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         viewBox="0 0 400 400"
         style={{
           transform: `translate(calc(-50% + ${blob3Position.x}px), calc(-50% + ${blob3Position.y}px)) rotate(${blob3Rotation}deg) scale(${blob3Scale * getStaggeredScale(2) * scaleMultiplier}) scaleX(${scale3X}) scaleY(${scale3Y})`,
-          opacity: 0.4,
+          opacity: BLOB_CONFIG.OPACITY.LAYER_3,
           zIndex: -1
         }}
       >
         <defs>
           <filter id={`glow3-${content.id}`}>
-            <feGaussianBlur stdDeviation="12" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation={BLOB_CONFIG.BLUR_RADIUS.LAYER_3} result="coloredBlur"/>
             <feMerge>
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>
@@ -337,13 +326,13 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
         viewBox="0 0 400 400"
         style={{
           transform: `translate(calc(-50% + ${blob2Position.x}px), calc(-50% + ${blob2Position.y}px)) rotate(${blob2Rotation}deg) scale(${blob2Scale * getStaggeredScale(1) * scaleMultiplier}) scaleX(${scale2X}) scaleY(${scale2Y})`,
-          opacity: 0.5,
+          opacity: BLOB_CONFIG.OPACITY.LAYER_2,
           zIndex: 0
         }}
       >
         <defs>
           <filter id={`glow2-${content.id}`}>
-            <feGaussianBlur stdDeviation="10" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation={BLOB_CONFIG.BLUR_RADIUS.LAYER_2} result="coloredBlur"/>
             <feMerge>
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>
@@ -376,7 +365,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, onEntry
       >
         <defs>
           <filter id={`glow-${content.id}`}>
-            <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation={BLOB_CONFIG.BLUR_RADIUS.LAYER_1} result="coloredBlur"/>
             <feMerge>
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>

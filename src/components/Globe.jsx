@@ -1,8 +1,9 @@
 import { useRef, useMemo, memo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { GLOBE_CONFIG, ANIMATION_TIMINGS } from '../config/animations'
 
-function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, isExiting = false }) {
+function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = GLOBE_CONFIG.SUBDIVISION, isExiting = false }) {
   const meshRef = useRef()
   const materialRef = useRef()
   const edgesRef = useRef()
@@ -16,7 +17,7 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, 
 
   // Create icosahedron geometry with random hue offsets for each vertex
   const { geometry, hueOffsets } = useMemo(() => {
-    const geo = new THREE.IcosahedronGeometry(2.5, subdivision)
+    const geo = new THREE.IcosahedronGeometry(GLOBE_CONFIG.SIZE, subdivision)
     const offsets = []
     const colors = []
 
@@ -49,7 +50,7 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, 
 
       // Fall with gravity (quadratic)
       const easedProgress = newProgress * newProgress
-      groupRef.current.position.y = 0 - (15 * easedProgress)
+      groupRef.current.position.y = 0 - (Math.abs(GLOBE_CONFIG.EXIT_POSITION_Y) * easedProgress)
       return // Skip other animations
     }
 
@@ -66,14 +67,14 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, 
       const c3 = c1 + 1
       const easedProgress = 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2)
 
-      // Move from bottom (y = -10) to center (y = 0)
-      groupRef.current.position.y = -10 + (10 * easedProgress)
+      // Move from bottom to center
+      groupRef.current.position.y = GLOBE_CONFIG.ENTRY_POSITION_Y + (Math.abs(GLOBE_CONFIG.ENTRY_POSITION_Y) * easedProgress)
     }
 
     // Idle rotation - slow continuous spin (only after entry animation completes)
     if (entryAnimationRef.current >= 1) {
-      idleRotationRef.current.y += delta * 0.15 // Slow Y-axis rotation
-      idleRotationRef.current.x += delta * 0.05 // Very slow X-axis rotation
+      idleRotationRef.current.y += delta * GLOBE_CONFIG.ROTATION_SPEED.IDLE_Y
+      idleRotationRef.current.x += delta * GLOBE_CONFIG.ROTATION_SPEED.IDLE_X
     }
 
     // Calculate rotation velocity and target rotation with idle rotation (optimization: calculate once)
@@ -103,12 +104,12 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, 
 
     // Update time for color cycling
     const isRotating = Math.abs(rotationVelocity.current) > 0.01
-    const timeSpeed = isRotating ? 2.0 : 0.3 // Speed up color changes during rotation
+    const timeSpeed = isRotating ? GLOBE_CONFIG.ROTATION_SPEED.COLOR_FAST : GLOBE_CONFIG.ROTATION_SPEED.COLOR_SLOW
     timeRef.current += delta * timeSpeed
 
     // Update vertex colors with rainbow cycling (Optimizations #1 & #10: Throttled updates + reusable color object)
     const now = state.clock.elapsedTime
-    const shouldUpdateColors = now - lastColorUpdateTime.current > 0.033 // ~30fps throttle (reduced from 60fps)
+    const shouldUpdateColors = now - lastColorUpdateTime.current > (1 / ANIMATION_TIMINGS.COLOR_UPDATE_FPS)
 
     if (shouldUpdateColors && geometry.attributes.color) {
       lastColorUpdateTime.current = now
