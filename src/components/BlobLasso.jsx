@@ -54,19 +54,31 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, composi
 
   // Apply composition scale multiplier to blob scales
   const compScaleMultiplier = compositionState?.blobs?.scaleMultiplier || 1
-  const blobScale = Math.round((0.5 + (Math.sin(seed1 + seed2) * 0.5 + 0.5)) * compScaleMultiplier * 100) / 100
+
+  // For tunnel mode, apply depth-based scaling (blob 0=small, 1=med, 2=large)
+  const isTunnelMode = compositionState?.blobs?.positionMode === 'tunnel'
+  const depthScales = [1.5, 2.8, 4.5] // Small, medium, HUGE for dramatic tunnel depth
+
+  const initialScale = 0.5 + (Math.sin(seed1 + seed2) * 0.5 + 0.5)
+  const blobScale = Math.round(initialScale * compScaleMultiplier * 100) / 100
 
   // Generate pseudo-3D squash effect (oval shapes) based on position
+  const blob1BaseScale = isTunnelMode ? depthScales[0] : 1.0
   const scaleX = Math.round((0.7 + (Math.sin(seed1 * 1.5) * 0.3)) * 100) / 100
   const scaleY = Math.round((0.7 + (Math.cos(seed2 * 1.5) * 0.3)) * 100) / 100
 
+  // Apply tunnel depth scaling to first blob
+  const finalBlobScale = isTunnelMode ? blobScale * blob1BaseScale : blobScale
+
   const blob2Rotation = Math.round(blobRotation + (Math.cos(seed3) * 60 + 30))
-  const blob2Scale = Math.round(blobScale * (0.7 + Math.sin(seed2 * 2.3) * 0.3) * 100) / 100
+  const blob2BaseScale = isTunnelMode ? depthScales[1] : (0.7 + Math.sin(seed2 * 2.3) * 0.3)
+  const blob2Scale = Math.round(blobScale * blob2BaseScale * 100) / 100
   const scale2X = Math.round((0.6 + (Math.cos(seed1 * 2.1) * 0.4)) * 100) / 100
   const scale2Y = Math.round((0.6 + (Math.sin(seed2 * 1.9) * 0.4)) * 100) / 100
 
   const blob3Rotation = Math.round(blobRotation + (Math.sin(seed1) * 70 + 60))
-  const blob3Scale = Math.round(blobScale * (0.6 + Math.cos(seed3 * 2.1) * 0.3) * 100) / 100
+  const blob3BaseScale = isTunnelMode ? depthScales[2] : (0.6 + Math.cos(seed3 * 2.1) * 0.3)
+  const blob3Scale = Math.round(blobScale * blob3BaseScale * 100) / 100
   const scale3X = Math.round((0.65 + (Math.sin(seed2 * 2.2) * 0.35)) * 100) / 100
   const scale3Y = Math.round((0.65 + (Math.cos(seed3 * 2.0) * 0.35)) * 100) / 100
 
@@ -369,7 +381,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, composi
         className="blob-lasso"
         viewBox="0 0 400 400"
         style={{
-          transform: `translate(calc(-50% + ${blobPosition.x}px), calc(-50% + ${blobPosition.y}px)) rotate(${blobRotation}deg) scale(${blobScale * getStaggeredScale(0) * scaleMultiplier}) scaleX(${scaleX}) scaleY(${scaleY})`,
+          transform: `translate(calc(-50% + ${blobPosition.x}px), calc(-50% + ${blobPosition.y}px)) rotate(${blobRotation}deg) scale(${finalBlobScale * getStaggeredScale(0) * scaleMultiplier}) scaleX(${scaleX}) scaleY(${scaleY})`,
           zIndex: 1
         }}
       >

@@ -102,7 +102,8 @@ export const CONTENT_POINTS = [
     subheading: 'Worldwide Reach',
     paragraph: 'Connecting people and ideas across the world.',
     rotation: { x: 0, y: -Math.PI / 2 },
-    colorIndex: 9
+    colorIndex: 9,
+    composition: 'warp'
   },
   {
     id: 10,

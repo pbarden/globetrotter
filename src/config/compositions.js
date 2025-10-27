@@ -50,19 +50,19 @@ export const COMPOSITION_STATES = {
     }
   },
 
-  // Globe large at bottom (half off-screen), blobs clustered at top like clouds
+  // Globe large at bottom (half off-screen), blobs clustered off to the side like clouds
   sky: {
     id: 'sky',
     globe: {
-      position: [0, -4, 0],        // Way down (half off screen)
+      position: [0, -6.5, 0],      // Way down (mostly off screen, just peek at top)
       scale: 2.5,                  // Much larger
     },
     blobs: {
       positionMode: 'clustered',   // Grouped together
-      centerOffset: { x: 0, y: -200 }, // Shifted up
-      clusterRadius: 200,           // How tight the cluster is
-      spreadMultiplier: 0.5,
-      scaleMultiplier: 1.3,
+      centerOffset: { x: -250, y: -200 }, // Shifted up and to the left (like clouds off to the side)
+      clusterRadius: 180,           // How tight the cluster is
+      spreadMultiplier: 0.6,
+      scaleMultiplier: 1.8,         // Larger clouds
     }
   },
 
@@ -113,6 +113,22 @@ export const COMPOSITION_STATES = {
       spreadMultiplier: 0.6,        // Moderate spread
       scaleMultiplier: 3.0,         // Large and prominent
     }
+  },
+
+  // Warp - blobs create tunnel effect with depth
+  warp: {
+    id: 'warp',
+    globe: {
+      position: [0, 0, 0],
+      scale: 0.35,                  // Much smaller globe - like it's far away in tunnel
+    },
+    blobs: {
+      positionMode: 'tunnel',       // Blobs all centered with different scales
+      centerOffset: { x: 0, y: 0 },
+      tunnelDepth: 3,               // Number of depth layers (small, med, large)
+      spreadMultiplier: 0.1,        // Minimal spread - keep centered
+      scaleMultiplier: 1.0,         // Base multiplier, each blob scales differently
+    }
   }
 }
 
@@ -159,6 +175,19 @@ export const calculateBlobPosition = (compositionState, seed1, seed2, seed3, blo
       return {
         x: Math.cos(angle) * randomRadius + chaosX + (centerOffset.x || 0),
         y: Math.sin(angle) * randomRadius + chaosY + (centerOffset.y || 0)
+      }
+    }
+
+    case 'tunnel': {
+      // Blobs all centered but at different scales to create depth illusion
+      // All blobs are at center (0,0) - the depth comes from scale differences
+
+      // Minimal variation to keep them centered
+      const centerVariation = Math.sin(seed1) * 10 // Very small variation
+
+      return {
+        x: centerVariation + (centerOffset.x || 0),
+        y: centerVariation + (centerOffset.y || 0)
       }
     }
 
