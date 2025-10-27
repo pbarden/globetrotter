@@ -11,7 +11,6 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, subdivision = 2, 
   const rotationVelocity = useRef(0)
   const entryAnimationRef = useRef(0)
   const exitAnimationRef = useRef(0)
-  const hasEnteredRef = useRef(false)
   const idleRotationRef = useRef({ x: 0, y: 0 })
   const lastColorUpdateTime = useRef(0)
 
