@@ -169,6 +169,43 @@ const contentPoints = [
     paragraph: 'Creating delightful experiences that captivate audiences.',
     rotation: { x: -Math.PI / 6, y: -Math.PI * 0.6 },
     colorIndex: 5
+  },
+  // Row 4
+  {
+    id: 16,
+    iconName: 'Sword',
+    heading: 'Combat',
+    subheading: 'Battle System',
+    paragraph: 'Engage in dynamic battles with strategic depth and skill-based mechanics.',
+    rotation: { x: Math.PI / 3, y: Math.PI / 3 },
+    colorIndex: 6
+  },
+  {
+    id: 17,
+    iconName: 'Crown',
+    heading: 'Conquest',
+    subheading: 'Victory Awaits',
+    paragraph: 'Rise through the ranks and claim your place among legends.',
+    rotation: { x: -Math.PI / 3, y: -Math.PI / 3 },
+    colorIndex: 7
+  },
+  {
+    id: 18,
+    iconName: 'Map',
+    heading: 'Exploration',
+    subheading: 'Vast Worlds',
+    paragraph: 'Discover hidden secrets and treasures across expansive realms.',
+    rotation: { x: Math.PI * 0.4, y: -Math.PI * 0.5 },
+    colorIndex: 8
+  },
+  {
+    id: 19,
+    iconName: 'Coins',
+    heading: 'Rewards',
+    subheading: 'Epic Loot',
+    paragraph: 'Collect powerful items and unlock rare achievements on your journey.',
+    rotation: { x: -Math.PI * 0.4, y: Math.PI * 0.5 },
+    colorIndex: 9
   }
 ]
 
@@ -247,7 +284,7 @@ function App() {
       let flyOutDir = ''
       let flyInDirection = ''
 
-      // 4x4 matrix navigation
+      // 5x4 matrix navigation (5 rows, 4 columns)
       const currentRow = Math.floor(currentPoint / 4)
       const currentCol = currentPoint % 4
 
@@ -256,13 +293,13 @@ function App() {
         // Vertical scrolling (moves between rows, same column)
         if (scrollAccumulator.current.x > 0) {
           // Scrolling down - move to next row
-          const nextRow = (currentRow + 1) % 4
+          const nextRow = (currentRow + 1) % 5
           nextPoint = nextRow * 4 + currentCol
           flyOutDir = 'fly-out-bottom'
           flyInDirection = 'fly-from-top'
         } else {
           // Scrolling up - move to previous row
-          const nextRow = (currentRow - 1 + 4) % 4
+          const nextRow = (currentRow - 1 + 5) % 5
           nextPoint = nextRow * 4 + currentCol
           flyOutDir = 'fly-out-top'
           flyInDirection = 'fly-from-bottom'
@@ -332,14 +369,14 @@ function App() {
     switch (e.key) {
       case 'ArrowUp':
         // Swipe up = next row
-        const nextRowUp = (currentRow + 1) % 4
+        const nextRowUp = (currentRow + 1) % 5
         nextPoint = nextRowUp * 4 + currentCol
         flyOutDir = 'fly-out-bottom'
         flyInDirection = 'fly-from-top'
         break
       case 'ArrowDown':
         // Swipe down = previous row
-        const nextRowDown = (currentRow - 1 + 4) % 4
+        const nextRowDown = (currentRow - 1 + 5) % 5
         nextPoint = nextRowDown * 4 + currentCol
         flyOutDir = 'fly-out-top'
         flyInDirection = 'fly-from-bottom'

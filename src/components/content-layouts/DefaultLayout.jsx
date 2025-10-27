@@ -157,7 +157,7 @@ export function DefaultLayout({ content, currentScheme }) {
 
         <div className="grid-item primary-button-area">
           <button className="tech-button">
-            <span className="button-text">Learn More</span>
+            <span className="button-text">Play Now</span>
             <Icons.ArrowRight className="button-icon" size={18} strokeWidth={2} />
             <div
               className="heading-underline"
