@@ -1,4 +1,4 @@
-import { useRef, useMemo, memo } from 'react'
+import { useRef, useMemo, memo, useState, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GLOBE_CONFIG, ANIMATION_TIMINGS } from '../config/animations'
@@ -21,6 +21,17 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, position = [0, 0,
   const targetPosition = useRef([0, 0, 0])
   const currentScale = useRef(1)
   const targetScale = useRef(1)
+
+  // Page visibility - pause rotation when tab is inactive
+  const isPageVisibleRef = useRef(!document.hidden)
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isPageVisibleRef.current = !document.hidden
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
 
   // Create icosahedron geometry with random hue offsets for each vertex
   const { geometry, hueOffsets } = useMemo(() => {
@@ -112,53 +123,56 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, position = [0, 0,
       groupRef.current.scale.setScalar(currentScale.current)
     }
 
-    // Idle rotation - slow continuous spin (only after entry animation completes)
-    // Scale inversely affects rotation speed: larger = slower (more majestic)
-    if (entryAnimationRef.current >= 1) {
+    // Only update rotation and colors when page is visible
+    if (isPageVisibleRef.current) {
+      // Idle rotation - slow continuous spin (only after entry animation completes)
+      // Scale inversely affects rotation speed: larger = slower (more majestic)
+      if (entryAnimationRef.current >= 1) {
+        const scaleInverseFactor = 1 / currentScale.current
+        idleRotationRef.current.y += delta * GLOBE_CONFIG.ROTATION_SPEED.IDLE_Y * scaleInverseFactor
+        idleRotationRef.current.x += delta * GLOBE_CONFIG.ROTATION_SPEED.IDLE_X * scaleInverseFactor
+      }
+
+      // Calculate rotation velocity and target rotation with idle rotation (optimization: calculate once)
+      const effectiveTarget = targetRotation || { x: 0, y: 0 }
+      const targetWithIdle = {
+        x: effectiveTarget.x + idleRotationRef.current.x,
+        y: effectiveTarget.y + idleRotationRef.current.y
+      }
+
+      if (meshRef.current) {
+        const currentRotX = meshRef.current.rotation.x
+        const currentRotY = meshRef.current.rotation.y
+
+        const deltaX = targetWithIdle.x - currentRotX
+        const deltaY = targetWithIdle.y - currentRotY
+        rotationVelocity.current = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+
+        // Apply scale-based rotation damping: larger globe rotates slower
+        const scaleInverseFactor = 1 / currentScale.current
+        const rotationSpeed = 0.05 * scaleInverseFactor
+
+        meshRef.current.rotation.x += deltaX * rotationSpeed
+        meshRef.current.rotation.y += deltaY * rotationSpeed
+      }
+
+      if (edgesRef.current) {
+        // Apply same scale-based rotation to wireframe
+        const scaleInverseFactor = 1 / currentScale.current
+        const rotationSpeed = 0.05 * scaleInverseFactor
+
+        edgesRef.current.rotation.x += (targetWithIdle.x - edgesRef.current.rotation.x) * rotationSpeed
+        edgesRef.current.rotation.y += (targetWithIdle.y - edgesRef.current.rotation.y) * rotationSpeed
+      }
+
+      // Update time for color cycling
+      // Scale inversely affects color cycling: larger globe = slower color shifts
+      const isRotating = Math.abs(rotationVelocity.current) > 0.01
+      const baseTimeSpeed = isRotating ? GLOBE_CONFIG.ROTATION_SPEED.COLOR_FAST : GLOBE_CONFIG.ROTATION_SPEED.COLOR_SLOW
       const scaleInverseFactor = 1 / currentScale.current
-      idleRotationRef.current.y += delta * GLOBE_CONFIG.ROTATION_SPEED.IDLE_Y * scaleInverseFactor
-      idleRotationRef.current.x += delta * GLOBE_CONFIG.ROTATION_SPEED.IDLE_X * scaleInverseFactor
+      const timeSpeed = baseTimeSpeed * scaleInverseFactor
+      timeRef.current += delta * timeSpeed
     }
-
-    // Calculate rotation velocity and target rotation with idle rotation (optimization: calculate once)
-    const effectiveTarget = targetRotation || { x: 0, y: 0 }
-    const targetWithIdle = {
-      x: effectiveTarget.x + idleRotationRef.current.x,
-      y: effectiveTarget.y + idleRotationRef.current.y
-    }
-
-    if (meshRef.current) {
-      const currentRotX = meshRef.current.rotation.x
-      const currentRotY = meshRef.current.rotation.y
-
-      const deltaX = targetWithIdle.x - currentRotX
-      const deltaY = targetWithIdle.y - currentRotY
-      rotationVelocity.current = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-
-      // Apply scale-based rotation damping: larger globe rotates slower
-      const scaleInverseFactor = 1 / currentScale.current
-      const rotationSpeed = 0.05 * scaleInverseFactor
-
-      meshRef.current.rotation.x += deltaX * rotationSpeed
-      meshRef.current.rotation.y += deltaY * rotationSpeed
-    }
-
-    if (edgesRef.current) {
-      // Apply same scale-based rotation to wireframe
-      const scaleInverseFactor = 1 / currentScale.current
-      const rotationSpeed = 0.05 * scaleInverseFactor
-
-      edgesRef.current.rotation.x += (targetWithIdle.x - edgesRef.current.rotation.x) * rotationSpeed
-      edgesRef.current.rotation.y += (targetWithIdle.y - edgesRef.current.rotation.y) * rotationSpeed
-    }
-
-    // Update time for color cycling
-    // Scale inversely affects color cycling: larger globe = slower color shifts
-    const isRotating = Math.abs(rotationVelocity.current) > 0.01
-    const baseTimeSpeed = isRotating ? GLOBE_CONFIG.ROTATION_SPEED.COLOR_FAST : GLOBE_CONFIG.ROTATION_SPEED.COLOR_SLOW
-    const scaleInverseFactor = 1 / currentScale.current
-    const timeSpeed = baseTimeSpeed * scaleInverseFactor
-    timeRef.current += delta * timeSpeed
 
     // Update vertex colors with rainbow cycling (Optimizations #1 & #10: Throttled updates + reusable color object)
     const now = state.clock.elapsedTime
