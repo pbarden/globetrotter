@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import * as Icons from 'lucide-react'
+import { useUserPreferences } from '../../hooks/useUserPreferences'
 import './TADRadioLayout.css'
 
 /**
@@ -9,26 +10,17 @@ export function TADRadioLayout({ content, currentScheme }) {
   // Use gold/yellow/orange color scheme (index 0) for this layout
   const goldScheme = { primary: '#ffd700', secondary: '#ff8c00', accent: '#ffaa00' }
 
-  // State to track selected genres
-  const [selectedGenres, setSelectedGenres] = useState([])
+  // Get user preferences
+  const { genres, toggleGenre } = useUserPreferences()
 
   // Genre icons - can be customized
   const genreIcons = [
-    { icon: Icons.Music2, label: 'Lofi' },
-    { icon: Icons.Piano, label: 'Piano' },
-    { icon: Icons.Radio, label: 'Electronic' },
-    { icon: Icons.Headphones, label: 'Hip-hop' },
-    { icon: Icons.Sparkles, label: 'Epic' }
+    { icon: Icons.Music2, label: 'Lofi', key: 'lofi' },
+    { icon: Icons.Piano, label: 'Piano', key: 'piano' },
+    { icon: Icons.Radio, label: 'Electronic', key: 'electronic' },
+    { icon: Icons.Headphones, label: 'Hip-hop', key: 'hiphop' },
+    { icon: Icons.Sparkles, label: 'Epic', key: 'epic' }
   ]
-
-  // Toggle genre selection
-  const toggleGenre = (index) => {
-    setSelectedGenres(prev =>
-      prev.includes(index)
-        ? prev.filter(i => i !== index)
-        : [...prev, index]
-    )
-  }
 
   return (
     <div className="tad-radio-layout">
@@ -67,7 +59,7 @@ export function TADRadioLayout({ content, currentScheme }) {
         <div className="genre-icons-row">
           {genreIcons.map((genre, index) => {
             const IconComponent = genre.icon
-            const isSelected = selectedGenres.includes(index)
+            const isSelected = genres[genre.key]
             const borderColor = isSelected ? goldScheme.primary : 'rgba(100, 150, 255, 0.25)'
             const iconColor = isSelected ? goldScheme.primary : 'rgba(100, 150, 255, 0.5)'
 
@@ -76,7 +68,7 @@ export function TADRadioLayout({ content, currentScheme }) {
                 <div
                   className={`genre-icon-box floating-card ${isSelected ? 'selected' : ''}`}
                   style={{ borderColor }}
-                  onClick={() => toggleGenre(index)}
+                  onClick={() => toggleGenre(genre.key)}
                 >
                   <div
                     className="genre-icon-placeholder"
