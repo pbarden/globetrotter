@@ -184,6 +184,7 @@ const getSquareToCirclePath = (t) => {
 function LoadingScreenComponent({ onLoadComplete }) {
   const [progress, setProgress] = useState(0)
   const [isReady, setIsReady] = useState(false)
+  const [showTapToContinue, setShowTapToContinue] = useState(false)
   const [, forceUpdate] = useState({})
   const animationTimeRef = useRef(0)
   const lastFrameTimeRef = useRef(performance.now())
@@ -213,18 +214,8 @@ function LoadingScreenComponent({ onLoadComplete }) {
     return () => cancelAnimationFrame(animationFrameId)
   }, [])
 
-  // Play boot audio when loading screen initializes
+  // Cleanup audio on unmount
   useEffect(() => {
-    const audio = new Audio('/audio/Boot.mp3')
-    audioRef.current = audio
-
-    // Attempt to play audio (may be blocked by browser autoplay policy)
-    audio.play().catch((error) => {
-      console.log('Audio autoplay prevented:', error.message)
-      // Silently fail - some browsers block autoplay without user interaction
-    })
-
-    // Cleanup: stop and remove audio when component unmounts
     return () => {
       if (audioRef.current) {
         audioRef.current.pause()
@@ -269,8 +260,7 @@ function LoadingScreenComponent({ onLoadComplete }) {
 
         setProgress((prev) => {
           if (loadingComplete && prev >= 100) {
-            setIsReady(true)
-            setTimeout(() => onLoadComplete(), 500)
+            setShowTapToContinue(true)
             shouldContinue = false
             return 100
           }
@@ -293,8 +283,23 @@ function LoadingScreenComponent({ onLoadComplete }) {
     }
   }, [onLoadComplete])
 
+  // Handle tap to continue
+  const handleContinue = () => {
+    if (showTapToContinue) {
+      // Play boot sound on user interaction
+      const audio = new Audio('/audio/Boot.mp3')
+      audioRef.current = audio
+      audio.play().catch((error) => {
+        console.log('Audio playback failed:', error.message)
+      })
+
+      setIsReady(true)
+      setTimeout(() => onLoadComplete(), 1500)
+    }
+  }
+
   return (
-    <div className={`loading-screen ${progress === 100 ? 'fade-out' : ''}`}>
+    <div className={`loading-screen ${isReady ? 'fade-out' : ''}`} onClick={handleContinue}>
       <div className="loading-content">
         <div className="loading-globe">
           {/* Morphing shape animation - loops infinitely */}
@@ -368,7 +373,11 @@ function LoadingScreenComponent({ onLoadComplete }) {
         <div className="loading-bar">
           <div className="loading-progress" style={{ width: `${progress}%` }}></div>
         </div>
-        <p className="loading-text">{progress}%</p>
+        {showTapToContinue ? (
+          <p className="tap-to-continue">tap to continue</p>
+        ) : (
+          <p className="loading-text">{progress}%</p>
+        )}
       </div>
     </div>
   )

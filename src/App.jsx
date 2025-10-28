@@ -28,6 +28,8 @@ function App() {
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
   const touchStartPos = useRef({ x: 0, y: 0 })
+  const navigationTimeouts = useRef({ out: null, in: null })
+  const radioNavigationTimeouts = useRef({ out: null, in: null })
 
   // Get user genre preferences
   const { genres } = useUserPreferences()
@@ -35,6 +37,10 @@ function App() {
   // Navigate to a specific direction
   const navigateToDirection = useCallback((direction) => {
     if (isTransitioning) return
+
+    // Clear any pending navigation timeouts
+    if (navigationTimeouts.current.out) clearTimeout(navigationTimeouts.current.out)
+    if (navigationTimeouts.current.in) clearTimeout(navigationTimeouts.current.in)
 
     const currentRow = Math.floor(currentPoint / SCROLL_CONFIG.GRID_COLS)
     const currentCol = currentPoint % SCROLL_CONFIG.GRID_COLS
@@ -169,10 +175,11 @@ function App() {
     setIsTransitioning(true)
     setFlyOutDirection(flyOutDir)
 
-    setTimeout(() => {
+    navigationTimeouts.current.out = setTimeout(() => {
       // Safety check before transitioning
       if (!CONTENT_POINTS[nextPoint]) {
         setIsTransitioning(false)
+        navigationTimeouts.current.out = null
         return
       }
 
@@ -184,9 +191,11 @@ function App() {
       setAnimationKey(prev => prev + 1)
       setFlyOutDirection('')
       setRandomSeed(Math.random() * 1000)
+      navigationTimeouts.current.out = null
 
-      setTimeout(() => {
+      navigationTimeouts.current.in = setTimeout(() => {
         setIsTransitioning(false)
+        navigationTimeouts.current.in = null
       }, ANIMATION_TIMINGS.CARD_FLY_IN_DURATION)
     }, ANIMATION_TIMINGS.CARD_FLY_OUT_DURATION)
   }, [currentPoint, isTransitioning, genres])
@@ -315,21 +324,27 @@ function App() {
   const handleRadioButtonClick = useCallback(() => {
     if (currentPoint === 0) return // Already on radio card
 
+    // Clear any pending radio navigation timeouts
+    if (radioNavigationTimeouts.current.out) clearTimeout(radioNavigationTimeouts.current.out)
+    if (radioNavigationTimeouts.current.in) clearTimeout(radioNavigationTimeouts.current.in)
+
     // Set flag to skip audio update
     setSkipAudioUpdate(true)
     setIsTransitioning(true)
     setFlyOutDirection('fly-out-top')
 
-    setTimeout(() => {
+    radioNavigationTimeouts.current.out = setTimeout(() => {
       setCurrentPoint(0)
       setTargetRotation(CONTENT_POINTS[0].rotation)
       setAnimationDirection('fly-from-bottom')
       setAnimationKey(prev => prev + 1)
       setRandomSeed(Math.random() * 1000)
+      radioNavigationTimeouts.current.out = null
 
-      setTimeout(() => {
+      radioNavigationTimeouts.current.in = setTimeout(() => {
         setIsTransitioning(false)
         setFlyOutDirection('')
+        radioNavigationTimeouts.current.in = null
       }, ANIMATION_TIMINGS.CARD_FLY_IN_DURATION)
     }, ANIMATION_TIMINGS.CARD_FLY_OUT_DURATION)
   }, [currentPoint])
@@ -450,6 +465,16 @@ function App() {
       window.removeEventListener('touchend', handleTouchEnd)
     }
   }, [isLoading, handleWheel, handleKeyDown, handleTouchStart, handleTouchEnd])
+
+  // Cleanup navigation timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (navigationTimeouts.current.out) clearTimeout(navigationTimeouts.current.out)
+      if (navigationTimeouts.current.in) clearTimeout(navigationTimeouts.current.in)
+      if (radioNavigationTimeouts.current.out) clearTimeout(radioNavigationTimeouts.current.out)
+      if (radioNavigationTimeouts.current.in) clearTimeout(radioNavigationTimeouts.current.in)
+    }
+  }, [])
 
   // Initialize rotation and first card animation
   useEffect(() => {

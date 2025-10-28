@@ -21,11 +21,18 @@ export function useAudioPlayer(fadeTime = 1500, onSongEnd = null) {
     }
 
     if (currentAudioRef.current) {
+      // Remove event listener before cleanup
+      if (currentAudioRef.current._endedListener) {
+        currentAudioRef.current.removeEventListener('ended', currentAudioRef.current._endedListener)
+      }
       currentAudioRef.current.pause()
       currentAudioRef.current = null
     }
 
     if (nextAudioRef.current) {
+      if (nextAudioRef.current._endedListener) {
+        nextAudioRef.current.removeEventListener('ended', nextAudioRef.current._endedListener)
+      }
       nextAudioRef.current.pause()
       nextAudioRef.current = null
     }
@@ -103,9 +110,17 @@ export function useAudioPlayer(fadeTime = 1500, onSongEnd = null) {
     if (!audioUrl) {
       // Fade out current track if playing
       if (currentAudioRef.current && !currentAudioRef.current.paused) {
-        fadeOut(currentAudioRef.current, fadeTime, () => {
-          if (currentAudioRef.current) {
-            currentAudioRef.current.pause()
+        const audioToStop = currentAudioRef.current
+        fadeOut(audioToStop, fadeTime, () => {
+          if (audioToStop) {
+            // Remove event listener before stopping
+            if (audioToStop._endedListener) {
+              audioToStop.removeEventListener('ended', audioToStop._endedListener)
+              audioToStop._endedListener = null
+            }
+            audioToStop.pause()
+          }
+          if (currentAudioRef.current === audioToStop) {
             currentAudioRef.current = null
           }
         })
@@ -119,17 +134,26 @@ export function useAudioPlayer(fadeTime = 1500, onSongEnd = null) {
     nextAudio.volume = 0
 
     // Add ended event listener for auto-advance
-    nextAudio.addEventListener('ended', () => {
+    const onAudioEnded = () => {
       if (onSongEndRef.current) {
         onSongEndRef.current()
       }
-    })
+    }
+    nextAudio.addEventListener('ended', onAudioEnded)
+    // Store listener reference for cleanup
+    nextAudio._endedListener = onAudioEnded
 
     const oldAudio = currentAudioRef.current
 
     // Update current ref immediately
     currentAudioRef.current = nextAudio
     currentTrackUrl.current = audioUrl
+
+    // Cleanup old audio's event listener
+    if (oldAudio && oldAudio._endedListener) {
+      oldAudio.removeEventListener('ended', oldAudio._endedListener)
+      oldAudio._endedListener = null
+    }
 
     // Start crossfade
     if (oldAudio && !oldAudio.paused) {
@@ -153,9 +177,17 @@ export function useAudioPlayer(fadeTime = 1500, onSongEnd = null) {
    */
   const stop = useCallback(() => {
     if (currentAudioRef.current && !currentAudioRef.current.paused) {
-      fadeOut(currentAudioRef.current, fadeTime, () => {
-        if (currentAudioRef.current) {
-          currentAudioRef.current.pause()
+      const audioToStop = currentAudioRef.current
+      fadeOut(audioToStop, fadeTime, () => {
+        if (audioToStop) {
+          // Remove event listener before stopping
+          if (audioToStop._endedListener) {
+            audioToStop.removeEventListener('ended', audioToStop._endedListener)
+            audioToStop._endedListener = null
+          }
+          audioToStop.pause()
+        }
+        if (currentAudioRef.current === audioToStop) {
           currentAudioRef.current = null
         }
       })
