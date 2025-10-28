@@ -80,10 +80,31 @@ const songTracks = [
     genres: { lofi: true, piano: true, electronic: false, chill: true, epic: false }
   },
   {
+    title: 'The End',
+    file: 'The_End_8-bit_Version',
+    colorIndex: 9,
+    composition: 'rings',
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'The End',
+    file: 'The_End_Piano_Version',
+    colorIndex: 8,
+    composition: 'portal',
+    genres: { lofi: false, piano: true, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'The First Snowfall',
+    file: 'The_First_Snowfall',
+    colorIndex: 9,
+    composition: 'meteor',
+    genres: { lofi: true, piano: true, electronic: false, chill: true, epic: false }
+  },
+  {
     title: 'Florist',
     file: 'Florist',
     colorIndex: 2,
-    composition: 'rings',
+    composition: 'atom',
     genres: { lofi: true, piano: true, electronic: false, chill: true, epic: false }
   },
   {
@@ -136,6 +157,13 @@ const songTracks = [
     genres: { lofi: false, piano: true, electronic: false, chill: true, epic: false }
   },
   {
+    title: 'The Lobster',
+    file: 'The_Lobster',
+    colorIndex: 3,
+    composition: 'comet',
+    genres: { lofi: false, piano: true, electronic: false, chill: false, epic: false }
+  },
+  {
     title: 'Morning Rain',
     file: 'Morning_Rain',
     colorIndex: 6,
@@ -171,42 +199,145 @@ const songTracks = [
     genres: { lofi: false, piano: false, electronic: false, chill: false, epic: true }
   },
   {
+    title: 'The Past',
+    file: 'The_Past_8-bit_Version',
+    colorIndex: 5,
+    composition: 'default',
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'The Past',
+    file: 'The_Past_Piano_Version',
+    colorIndex: 5,
+    composition: 'default',
+    genres: { lofi: false, piano: true, electronic: false, chill: true, epic: false }
+  },
+  {
     title: 'Peaceful 1am in May',
     file: 'Peaceful_1am_in_May',
-    colorIndex: 8,
+    colorIndex: 1,
     composition: 'atmosphere',
     genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
   },
   {
     title: 'Planet Explorer',
     file: 'Planet_Explorer',
-    colorIndex: 7,
+    colorIndex: 5,
     composition: 'sky',
     genres: { lofi: false, piano: true, electronic: false, chill: true, epic: true }
   },
-  { title: 'Project 2', file: 'Project_2' },
-  { title: 'Rainy City', file: 'Rainy_City' },
-  { title: 'Rainy Forest', file: 'Rainy_Forest' },
-  { title: 'Rainy Village', file: 'Rainy_Village' },
-  { title: 'Remnants of the Festival', file: 'Remnants_of_the_Festival' },
-  { title: 'Revenge', file: 'Revenge' },
-  { title: 'Sadness and Solo', file: 'Sadness_and_Solo' },
-  { title: 'Settlement of the Frontier', file: 'Settlement_of_the_Frontier' },
-  { title: 'Since 2am', file: 'Since_2am' },
-  { title: 'Sky Run', file: 'Sky_Run' },
-  { title: 'Solved', file: 'Solved' },
-  { title: 'Suicidal Moon', file: 'Suicidal_Moon' },
-  { title: 'Thawing Village', file: 'Thawing_Village' },
-  { title: 'The End (8-bit Version)', file: 'The_End_8-bit_Version' },
-  { title: 'The End (Piano Version)', file: 'The_End_Piano_Version' },
-  { title: 'The First Snowfall', file: 'The_First_Snowfall' },
-  { title: 'The Lobster', file: 'The_Lobster' },
-  { title: 'The Past (8-bit Version)', file: 'The_Past_8-bit_Version' },
-  { title: 'The Past (Piano Version)', file: 'The_Past_Piano_Version' },
-  { title: 'Unbounded Daydream', file: 'Unbounded_Daydream' },
-  { title: 'Underground', file: 'Underground' },
-  { title: 'Vampires Piano', file: 'Vampires_Piano' },
-  { title: 'Wind Run', file: 'Wind_Run' }
+  {
+    title: 'Project 2',
+    file: 'Project_2',
+    colorIndex: 7,
+    composition: 'default',
+    genres: { lofi: false, piano: false, electronic: true, chill: false, epic: false }
+  },
+  {
+    title: 'Rainy City',
+    file: 'Rainy_City',
+    colorIndex: 8,
+    composition: 'rings',
+    genres: { lofi: true, piano: false, electronic: true, chill: true, epic: false }
+  },
+  {
+    title: 'Rainy Forest',
+    file: 'Rainy_Forest',
+    colorIndex: 7,
+    composition: 'atom',
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Rainy Village',
+    file: 'Rainy_Village',
+    colorIndex: 1,
+    composition: 'sky',
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Remnants of the Festival',
+    file: 'Remnants_of_the_Festival',
+    colorIndex: 8,
+    composition: 'portal',
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Revenge',
+    file: 'Revenge',
+    colorIndex: 3,
+    composition: 'atmosphere',
+    genres: { lofi: false, piano: false, electronic: false, chill: false, epic: true }
+  },
+  {
+    title: 'Sadness and Solo',
+    file: 'Sadness_and_Solo',
+    colorIndex: 2,
+    composition: 'meteor',
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Settlement of the Frontier',
+    file: 'Settlement_of_the_Frontier',
+    colorIndex: 6,
+    composition: 'rings',
+    genres: { lofi: false, piano: true, electronic: false, chill: false, epic: true }
+  },
+  {
+    title: 'Since 2am',
+    file: 'Since_2am',
+    colorIndex: 5,
+    composition: 'comet',
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Sky Run',
+    file: 'Sky_Run',
+    colorIndex: 0,
+    composition: 'default',
+    genres: { lofi: false, piano: false, electronic: true, chill: false, epic: false }
+  },
+  {
+    title: 'Solved',
+    file: 'Solved',
+    colorIndex: 4,
+    composition: 'atom',
+    genres: { lofi: false, piano: true, electronic: false, chill: false, epic: false }
+  },
+  {
+    title: 'Suicidal Moon',
+    file: 'Suicidal_Moon',
+    colorIndex: 9,
+    composition: 'warp',
+    genres: { lofi: true, piano: false, electronic: true, chill: true, epic: false }
+  },
+  {
+    title: 'Unbounded Daydream',
+    file: 'Unbounded_Daydream',
+    colorIndex: 0,
+    composition: 'sky',
+    genres: { lofi: false, piano: true, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Underground',
+    file: 'Underground',
+    colorIndex: 8,
+    composition: 'atmosphere',
+    genres: { lofi: false, piano: false, electronic: true, chill: false, epic: false }
+  },
+  {
+    title: 'Vampires Piano',
+    file: 'Vampires_Piano',
+    colorIndex: 3,
+    composition: 'portal',
+    genres: { lofi: false, piano: true, electronic: false, chill: false, epic: false }
+  },
+  {
+    title: 'Wind Run',
+    file: 'Wind_Run',
+    colorIndex: 8,
+    composition: 'comet',
+    genres: { lofi: false, piano: false, electronic: false, chill: false, epic: true }
+  }
 ]
 
 // Helper function to generate rotation based on grid position
