@@ -115,8 +115,10 @@ function App() {
       }
     ]
 
-    // Filter out last visited card
-    const validCards = adjacentCards.filter(card => card.point !== lastVisitedCard)
+    // Filter out last visited card and radio card (card 0 has no songs)
+    const validCards = adjacentCards.filter(card =>
+      card.point !== lastVisitedCard && card.point !== 0
+    )
 
     // Check if user has any genre preferences selected
     const selectedGenres = Object.keys(genres).filter(genre => genres[genre])
