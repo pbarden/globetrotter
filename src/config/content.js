@@ -54,7 +54,7 @@ const songTracks = [
   {
     title: 'Ceasefire',
     file: 'Ceasefire',
-    colorIndex: 0,
+    colorIndex: 9,
     composition: 'comet',
     genres: { lofi: false, piano: false, electronic: false, chill: false, epic: true }
   },
@@ -65,23 +65,125 @@ const songTracks = [
     composition: 'atmosphere',
     genres: { lofi: true, piano: true, electronic: true, chill: false, epic: false }
   },
-  { title: 'Countryside', file: 'Countryside' },
-  { title: 'Cue', file: 'Cue' },
-  { title: 'Florist', file: 'Florist' },
-  { title: 'Flying Above the Ocean', file: 'Flying_Above_the_Ocean' },
-  { title: 'Forward Operating Base', file: 'Forward_Operating_Base' },
-  { title: 'Free Fall', file: 'Free_Fall' },
-  { title: 'GBL Medley', file: 'GBL_Medley' },
-  { title: 'Ice Cave', file: 'Ice_Cave' },
-  { title: 'Iced Village (8-bit Version)', file: 'Iced_Village_8-bit_Version' },
-  { title: 'Iced Village (Piano Version)', file: 'Iced_Village_Piano_Version' },
-  { title: 'Morning Rain', file: 'Morning_Rain' },
-  { title: 'Motion', file: 'Motion' },
-  { title: 'Oceanside', file: 'Oceanside' },
-  { title: 'Ooame', file: 'Ooame' },
-  { title: 'Orchestra Music', file: 'Orchestra_Music' },
-  { title: 'Peaceful 1am in May', file: 'Peaceful_1am_in_May' },
-  { title: 'Planet Explorer', file: 'Planet_Explorer' },
+  {
+    title: 'Countryside',
+    file: 'Countryside',
+    colorIndex: 0,
+    composition: 'sky',
+    genres: { lofi: false, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Cue',
+    file: 'Cue',
+    colorIndex: 4,
+    composition: 'atmosphere',
+    genres: { lofi: true, piano: true, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Florist',
+    file: 'Florist',
+    colorIndex: 2,
+    composition: 'rings',
+    genres: { lofi: true, piano: true, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Flying Above the Ocean',
+    file: 'Flying_Above_the_Ocean',
+    colorIndex: 5,
+    composition: 'sky',
+    genres: { lofi: false, piano: true, electronic: true, chill: true, epic: false }
+  },
+  {
+    title: 'Forward Operating Base',
+    file: 'Forward_Operating_Base',
+    colorIndex: 6,
+    composition: 'warp',
+    genres: { lofi: false, piano: false, electronic: false, chill: false, epic: true }
+  },
+  {
+    title: 'Free Fall',
+    file: 'Free_Fall',
+    colorIndex: 8,
+    composition: 'portal',
+    genres: { lofi: false, piano: false, electronic: true, chill: false, epic: false }
+  },
+  {
+    title: 'GBL Medley',
+    file: 'GBL_Medley',
+    colorIndex: 7,
+    composition: 'atom',
+    genres: { lofi: false, piano: false, electronic: true, chill: false, epic: false }
+  },
+  {
+    title: 'Ice Cave',
+    file: 'Ice_Cave',
+    colorIndex: 5,
+    composition: 'sky',
+    genres: { lofi: true, piano: false, electronic: true, chill: true, epic: false }
+  },
+  {
+    title: 'Iced Village',
+    file: 'Iced_Village_8-bit_Version',
+    colorIndex: 9,
+    composition: 'atmosphere',
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Iced Village',
+    file: 'Iced_Village_Piano_Version',
+    colorIndex: 1,
+    composition: 'default',
+    genres: { lofi: false, piano: true, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Morning Rain',
+    file: 'Morning_Rain',
+    colorIndex: 6,
+    composition: 'atom',
+    genres: { lofi: false, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Motion',
+    file: 'Motion',
+    colorIndex: 2,
+    composition: 'rings',
+    genres: { lofi: false, piano: false, electronic: true, chill: true, epic: false }
+  },
+  {
+    title: 'Oceanside',
+    file: 'Oceanside',
+    colorIndex: 3,
+    composition: 'meteor',
+    genres: { lofi: false, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Ooame',
+    file: 'Ooame',
+    colorIndex: 4,
+    composition: 'comet',
+    genres: { lofi: true, piano: false, electronic: true, chill: true, epic: false }
+  },
+  {
+    title: 'Orchestra Music',
+    file: 'Orchestra_Music',
+    colorIndex: 9,
+    composition: 'portal',
+    genres: { lofi: false, piano: false, electronic: false, chill: false, epic: true }
+  },
+  {
+    title: 'Peaceful 1am in May',
+    file: 'Peaceful_1am_in_May',
+    colorIndex: 8,
+    composition: 'atmosphere',
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Planet Explorer',
+    file: 'Planet_Explorer',
+    colorIndex: 7,
+    composition: 'sky',
+    genres: { lofi: false, piano: true, electronic: false, chill: true, epic: true }
+  },
   { title: 'Project 2', file: 'Project_2' },
   { title: 'Rainy City', file: 'Rainy_City' },
   { title: 'Rainy Forest', file: 'Rainy_Forest' },
