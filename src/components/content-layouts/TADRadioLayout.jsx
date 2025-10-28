@@ -52,7 +52,7 @@ export function TADRadioLayout({ content, currentScheme }) {
 
         {/* Subheading */}
         <p className="tad-radio-subtitle">
-          Pick the styles you're in the mood to hear.
+          Pick the styles you're in the mood to hear. Then, scroll or swipe in any direction to start listening. You can navigate back to this screen and change your preferences at any time.
         </p>
 
         {/* Genre Icons Row (5 icons in 9-column grid) */}
