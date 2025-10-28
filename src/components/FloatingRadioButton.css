@@ -67,6 +67,17 @@
     width: 64px;
     height: 64px;
     right: 1rem;
+    top: auto;
+    bottom: 1rem;
+    transform: translateY(0);
+  }
+
+  .floating-radio-button:hover {
+    transform: scale(1.1);
+  }
+
+  .floating-radio-button:active {
+    transform: scale(1.05);
   }
 
   .floating-radio-logo {
