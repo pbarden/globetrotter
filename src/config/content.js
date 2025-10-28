@@ -7,22 +7,64 @@ const songTracks = [
     file: '6am_Riverside',
     colorIndex: 5,
     composition: 'atmosphere',
-    genres: { lofi: true, piano: false, electronic: false, hiphop: false, epic: false }
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
   },
   {
     title: 'A Cup of Tea',
     file: 'A_Cup_of_Tea',
-    colorIndex: 6,
-    composition: 'sky',
-    genres: { lofi: true, piano: false, electronic: false, hiphop: false, epic: false }
+    colorIndex: 2,
+    composition: 'portal',
+    genres: { lofi: true, piano: true, electronic: false, chill: true, epic: false }
   },
-  { title: 'Abandoned Metropolis', file: 'Abandoned_Metropolis' },
-  { title: 'Anti Entity', file: 'Anti_Entity' },
-  { title: 'Arukas Bloom', file: 'Arukas_Bloom' },
-  { title: 'Bartender', file: 'Bartender' },
-  { title: 'Cat Caffe', file: 'Cat_Caffe' },
-  { title: 'Ceasefire', file: 'Ceasefire' },
-  { title: 'Cold Lake', file: 'Cold_Lake' },
+  {
+    title: 'Abandoned Metropolis',
+    file: 'Abandoned_Metropolis',
+    colorIndex: 4,
+    composition: 'sky',
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Anti Entity',
+    file: 'Anti_Entity',
+    colorIndex: 6,
+    composition: 'comet',
+    genres: { lofi: false, piano: true, electronic: false, chill: false, epic: true }
+  },
+  {
+    title: 'Arukas Bloom',
+    file: 'Arukas_Bloom',
+    colorIndex: 8,
+    composition: 'comet',
+    genres: { lofi: true, piano: false, electronic: false, chill: false, epic: true }
+  },
+  {
+    title: 'Bartender',
+    file: 'Bartender',
+    colorIndex: 7,
+    composition: 'rings',
+    genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Cat Caffe',
+    file: 'Cat_Caffe',
+    colorIndex: 3,
+    composition: 'default',
+    genres: { lofi: false, piano: true, electronic: false, chill: true, epic: false }
+  },
+  {
+    title: 'Ceasefire',
+    file: 'Ceasefire',
+    colorIndex: 0,
+    composition: 'comet',
+    genres: { lofi: false, piano: false, electronic: false, chill: false, epic: true }
+  },
+  {
+    title: 'Cold Lake',
+    file: 'Cold_Lake',
+    colorIndex: 5,
+    composition: 'atmosphere',
+    genres: { lofi: true, piano: true, electronic: true, chill: false, epic: false }
+  },
   { title: 'Countryside', file: 'Countryside' },
   { title: 'Cue', file: 'Cue' },
   { title: 'Florist', file: 'Florist' },
@@ -111,7 +153,7 @@ export const CONTENT_POINTS = [
       lofi: false,
       piano: false,
       electronic: false,
-      hiphop: false,
+      chill: false,
       epic: false
     }
   }))

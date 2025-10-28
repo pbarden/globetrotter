@@ -18,7 +18,7 @@ export function TADRadioLayout({ content, currentScheme }) {
     { icon: Icons.Music2, label: 'Lofi', key: 'lofi' },
     { icon: Icons.Piano, label: 'Piano', key: 'piano' },
     { icon: Icons.Radio, label: 'Electronic', key: 'electronic' },
-    { icon: Icons.Headphones, label: 'Hip-hop', key: 'hiphop' },
+    { icon: Icons.Headphones, label: 'Chill', key: 'chill' },
     { icon: Icons.Sparkles, label: 'Epic', key: 'epic' }
   ]
 
