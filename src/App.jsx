@@ -27,6 +27,7 @@ function App() {
   const [lastVisitedCard, setLastVisitedCard] = useState(null)
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
+  const touchStartPos = useRef({ x: 0, y: 0 })
 
   // Get user genre preferences
   const { genres } = useUserPreferences()
@@ -299,16 +300,54 @@ function App() {
     navigateToDirection(directionMap[e.key])
   }, [isTransitioning, navigateToDirection])
 
+  // Touch handlers for mobile swipe
+  const handleTouchStart = useCallback((e) => {
+    touchStartPos.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY
+    }
+  }, [])
+
+  const handleTouchEnd = useCallback((e) => {
+    if (isTransitioning) return
+
+    const touchEndX = e.changedTouches[0].clientX
+    const touchEndY = e.changedTouches[0].clientY
+
+    const deltaX = touchEndX - touchStartPos.current.x
+    const deltaY = touchEndY - touchStartPos.current.y
+
+    const minSwipeDistance = 50
+
+    if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+      return
+    }
+
+    let direction = ''
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      direction = deltaX > 0 ? 'right' : 'left'
+    } else {
+      direction = deltaY > 0 ? 'down' : 'up'
+    }
+
+    navigateToDirection(direction)
+  }, [isTransitioning, navigateToDirection])
+
   useEffect(() => {
     if (isLoading) return
 
     window.addEventListener('wheel', handleWheel, { passive: false })
     window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('touchstart', handleTouchStart, { passive: true })
+    window.addEventListener('touchend', handleTouchEnd, { passive: true })
     return () => {
       window.removeEventListener('wheel', handleWheel)
       window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [isLoading, handleWheel, handleKeyDown])
+  }, [isLoading, handleWheel, handleKeyDown, handleTouchStart, handleTouchEnd])
 
   // Initialize rotation and first card animation
   useEffect(() => {
