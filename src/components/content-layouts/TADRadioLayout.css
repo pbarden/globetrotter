@@ -1,0 +1,260 @@
+.tad-radio-layout {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.tad-radio-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Header Section */
+.tad-radio-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.tad-logo-header {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 20px rgba(255, 215, 0, 0.4));
+}
+
+.tad-radio-title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin: 0;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 30px currentColor,
+    0 4px 12px rgba(0, 0, 0, 0.6);
+  line-height: 1.1;
+}
+
+/* Subtitle */
+.tad-radio-subtitle {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #d0e0f8;
+  letter-spacing: 0.05em;
+  margin: 0;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Genre Icons Row - 9-column grid like DefaultLayout */
+.genre-icons-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.genre-icon-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Position icons in 9-column grid: columns 1, 3, 5, 7, 9 */
+.genre-icon-1 { grid-column: 1 / 2; }
+.genre-icon-2 { grid-column: 3 / 4; }
+.genre-icon-3 { grid-column: 5 / 6; }
+.genre-icon-4 { grid-column: 7 / 8; }
+.genre-icon-5 { grid-column: 9 / 10; }
+
+.genre-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  background: linear-gradient(135deg,
+    rgba(15, 22, 35, 0.95) 0%,
+    rgba(10, 16, 28, 0.98) 100%
+  );
+  border: 1px solid rgba(100, 150, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.genre-icon-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.3);
+  border-color: rgba(255, 215, 0, 0.5);
+}
+
+.genre-icon-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Genre Labels Row - aligned with 9-column grid */
+.genre-labels-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.genre-label-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Position labels in same columns as icons: 1, 3, 5, 7, 9 */
+.genre-label-1 { grid-column: 1 / 2; }
+.genre-label-2 { grid-column: 3 / 4; }
+.genre-label-3 { grid-column: 5 / 6; }
+.genre-label-4 { grid-column: 7 / 8; }
+.genre-label-5 { grid-column: 9 / 10; }
+
+.genre-label-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffd700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Footer Section */
+.tad-radio-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(100, 150, 255, 0.2);
+}
+
+.mm-logo-footer {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+}
+
+.mm-credits {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #b0b0d0;
+  letter-spacing: 0.03em;
+  margin: 0;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tad-radio-layout {
+    padding: 1.5rem;
+  }
+
+  .tad-radio-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .tad-logo-header {
+    width: 64px;
+    height: 64px;
+  }
+
+  .tad-radio-title {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .tad-radio-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .genre-icons-row {
+    gap: 0.5rem;
+  }
+
+  .genre-icon-box {
+    width: 48px;
+    height: 48px;
+    padding: 6px;
+  }
+
+  .genre-icon-placeholder svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .genre-labels-row {
+    gap: 0.5rem;
+  }
+
+  .genre-label-text {
+    font-size: 0.65rem;
+  }
+
+  .tad-radio-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .mm-logo-footer {
+    width: 36px;
+    height: 36px;
+  }
+
+  .mm-credits {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .tad-radio-title {
+    font-size: 1.75rem;
+  }
+
+  .genre-icon-box {
+    width: 40px;
+    height: 40px;
+    padding: 4px;
+  }
+
+  .genre-icon-placeholder svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .genre-label-text {
+    font-size: 0.6rem;
+  }
+}

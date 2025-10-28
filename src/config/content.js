@@ -141,7 +141,8 @@ export const CONTENT_POINTS = [
     subheading: 'Luxury Design',
     paragraph: 'Crafting high-end experiences with sophistication.',
     rotation: { x: Math.PI * 0.75, y: Math.PI / 6 },
-    colorIndex: 3
+    colorIndex: 3,
+    layoutType: 'tadRadio'
   },
   {
     id: 14,
@@ -150,7 +151,8 @@ export const CONTENT_POINTS = [
     subheading: 'Clear Vision',
     paragraph: 'Guiding projects with strategic thinking and clarity.',
     rotation: { x: Math.PI / 6, y: Math.PI * 0.6 },
-    colorIndex: 4
+    colorIndex: 4,
+    layoutType: 'tadSong'
   },
   {
     id: 15,
