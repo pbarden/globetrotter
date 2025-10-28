@@ -10,6 +10,7 @@ import { getColorScheme } from './config/colors'
 import { ANIMATION_TIMINGS, SCROLL_CONFIG } from './config/animations'
 import { getCompositionState } from './config/compositions'
 import { useAudioPlayer } from './hooks/useAudioPlayer'
+import { useUserPreferences } from './hooks/useUserPreferences'
 import './App.css'
 
 function App() {
@@ -26,6 +27,9 @@ function App() {
   const [lastVisitedCard, setLastVisitedCard] = useState(null)
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
+
+  // Get user genre preferences
+  const { genres } = useUserPreferences()
 
   // Navigate to a specific direction
   const navigateToDirection = useCallback((direction) => {
@@ -84,41 +88,68 @@ function App() {
     }, ANIMATION_TIMINGS.CARD_FLY_OUT_DURATION)
   }, [currentPoint, isTransitioning])
 
-  // Handle song end - auto-advance to random adjacent card
+  // Handle song end - auto-advance to random adjacent card with genre preferences
   const handleSongEnd = useCallback(() => {
     if (currentPoint === 0) return
 
-    const directions = ['up', 'down', 'left', 'right']
-    const shuffled = directions.sort(() => Math.random() - 0.5)
+    const currentRow = Math.floor(currentPoint / SCROLL_CONFIG.GRID_COLS)
+    const currentCol = currentPoint % SCROLL_CONFIG.GRID_COLS
 
-    for (const direction of shuffled) {
-      const currentRow = Math.floor(currentPoint / SCROLL_CONFIG.GRID_COLS)
-      const currentCol = currentPoint % SCROLL_CONFIG.GRID_COLS
-
-      let candidatePoint = null
-      switch (direction) {
-        case 'up':
-          candidatePoint = ((currentRow + 1) % SCROLL_CONFIG.GRID_ROWS) * SCROLL_CONFIG.GRID_COLS + currentCol
-          break
-        case 'down':
-          candidatePoint = ((currentRow - 1 + SCROLL_CONFIG.GRID_ROWS) % SCROLL_CONFIG.GRID_ROWS) * SCROLL_CONFIG.GRID_COLS + currentCol
-          break
-        case 'left':
-          candidatePoint = currentRow * SCROLL_CONFIG.GRID_COLS + ((currentCol + 1) % SCROLL_CONFIG.GRID_COLS)
-          break
-        case 'right':
-          candidatePoint = currentRow * SCROLL_CONFIG.GRID_COLS + ((currentCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS)
-          break
+    // Build list of adjacent cards with their directions
+    const adjacentCards = [
+      {
+        direction: 'up',
+        point: ((currentRow + 1) % SCROLL_CONFIG.GRID_ROWS) * SCROLL_CONFIG.GRID_COLS + currentCol
+      },
+      {
+        direction: 'down',
+        point: ((currentRow - 1 + SCROLL_CONFIG.GRID_ROWS) % SCROLL_CONFIG.GRID_ROWS) * SCROLL_CONFIG.GRID_COLS + currentCol
+      },
+      {
+        direction: 'left',
+        point: currentRow * SCROLL_CONFIG.GRID_COLS + ((currentCol + 1) % SCROLL_CONFIG.GRID_COLS)
+      },
+      {
+        direction: 'right',
+        point: currentRow * SCROLL_CONFIG.GRID_COLS + ((currentCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS)
       }
+    ]
 
-      if (candidatePoint !== lastVisitedCard) {
-        navigateToDirection(direction)
-        return
+    // Filter out last visited card
+    const validCards = adjacentCards.filter(card => card.point !== lastVisitedCard)
+
+    // Check if user has any genre preferences selected
+    const selectedGenres = Object.keys(genres).filter(genre => genres[genre])
+
+    let chosenCard = null
+
+    if (selectedGenres.length > 0) {
+      // Try to find cards matching user preferences
+      const preferredCards = validCards.filter(card => {
+        const content = CONTENT_POINTS[card.point]
+        if (!content?.genres) return false
+        // Check if any selected genre matches
+        return selectedGenres.some(genre => content.genres[genre])
+      })
+
+      if (preferredCards.length > 0) {
+        // Pick random from preferred cards
+        chosenCard = preferredCards[Math.floor(Math.random() * preferredCards.length)]
       }
     }
 
-    navigateToDirection('up')
-  }, [currentPoint, lastVisitedCard, navigateToDirection])
+    // If no preferred cards found or no genres selected, pick any valid card
+    if (!chosenCard && validCards.length > 0) {
+      chosenCard = validCards[Math.floor(Math.random() * validCards.length)]
+    }
+
+    // Fallback if all directions were last visited (shouldn't happen with 4 directions)
+    if (!chosenCard) {
+      chosenCard = adjacentCards[0]
+    }
+
+    navigateToDirection(chosenCard.direction)
+  }, [currentPoint, lastVisitedCard, navigateToDirection, genres])
 
   // Audio player with 1.5 second crossfade
   const { playTrack } = useAudioPlayer(1500, handleSongEnd)
