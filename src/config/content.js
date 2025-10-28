@@ -2,8 +2,20 @@
 // 7x8 matrix (49 songs + 1 radio = 50 points total, filling 50/56 positions)
 
 const songTracks = [
-  { title: '6am Riverside', file: '6am_Riverside' },
-  { title: 'A Cup of Tea', file: 'A_Cup_of_Tea' },
+  {
+    title: '6am Riverside',
+    file: '6am_Riverside',
+    colorIndex: 5,
+    composition: 'atmosphere',
+    genres: { lofi: true, piano: false, electronic: false, hiphop: false, epic: false }
+  },
+  {
+    title: 'A Cup of Tea',
+    file: 'A_Cup_of_Tea',
+    colorIndex: 6,
+    composition: 'sky',
+    genres: { lofi: true, piano: false, electronic: false, hiphop: false, epic: false }
+  },
   { title: 'Abandoned Metropolis', file: 'Abandoned_Metropolis' },
   { title: 'Anti Entity', file: 'Anti_Entity' },
   { title: 'Arukas Bloom', file: 'Arukas_Bloom' },
@@ -91,11 +103,11 @@ export const CONTENT_POINTS = [
     subheading: 'by Tad Miller',
     paragraph: `Listen to ${song.title} by Tad Miller.`,
     rotation: getRotation(index + 1),
-    colorIndex: (index + 1) % 10,
+    colorIndex: song.colorIndex !== undefined ? song.colorIndex : (index + 1) % 10,
     layoutType: 'tadSong',
-    composition: compositions[(index + 1) % compositions.length],
+    composition: song.composition || compositions[(index + 1) % compositions.length],
     audioFile: `/audio/tracks/${song.file}.mp3`,
-    genres: {
+    genres: song.genres || {
       lofi: false,
       piano: false,
       electronic: false,

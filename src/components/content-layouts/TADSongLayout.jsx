@@ -8,11 +8,11 @@ import './TADSongLayout.css'
 export function TADSongLayout({ content, currentScheme }) {
   // Genre icons - same as TADRadioLayout
   const genreIcons = [
-    { icon: Icons.Music2, label: 'Lofi' },
-    { icon: Icons.Piano, label: 'Piano' },
-    { icon: Icons.Radio, label: 'Electronic' },
-    { icon: Icons.Headphones, label: 'Hip-hop' },
-    { icon: Icons.Sparkles, label: 'Epic' }
+    { icon: Icons.Music2, label: 'Lofi', key: 'lofi' },
+    { icon: Icons.Piano, label: 'Piano', key: 'piano' },
+    { icon: Icons.Radio, label: 'Electronic', key: 'electronic' },
+    { icon: Icons.Headphones, label: 'Hip-hop', key: 'hiphop' },
+    { icon: Icons.Sparkles, label: 'Epic', key: 'epic' }
   ]
 
   return (
@@ -70,26 +70,38 @@ export function TADSongLayout({ content, currentScheme }) {
         <div className="song-genre-icons-row">
           {genreIcons.map((genre, index) => {
             const IconComponent = genre.icon
+            const isActive = content.genres?.[genre.key] || false
+
             return (
               <div key={index} className={`song-genre-icon-area song-genre-icon-${index + 1}`}>
                 <div className="song-genre-icon-box">
                   <div
                     className="song-genre-icon-placeholder"
                     style={{
-                      background: `linear-gradient(135deg, ${currentScheme.primary}22 0%, ${currentScheme.secondary}22 100%)`,
-                      border: `1px solid ${currentScheme.primary}44`
+                      background: isActive
+                        ? `linear-gradient(135deg, ${currentScheme.primary}22 0%, ${currentScheme.secondary}22 100%)`
+                        : 'linear-gradient(135deg, #444444 0%, #333333 100%)',
+                      border: isActive
+                        ? `1px solid ${currentScheme.primary}44`
+                        : '1px solid #555555'
                     }}
                   >
                     <IconComponent
                       size={24}
                       strokeWidth={1.5}
-                      style={{ color: currentScheme.primary, opacity: 0.8 }}
+                      style={{
+                        color: isActive ? currentScheme.primary : '#666666',
+                        opacity: isActive ? 0.8 : 0.4
+                      }}
                     />
                   </div>
                 </div>
                 <span
                   className="song-genre-label-text"
-                  style={{ color: currentScheme.primary }}
+                  style={{
+                    color: isActive ? currentScheme.primary : '#666666',
+                    opacity: isActive ? 1 : 0.5
+                  }}
                 >
                   {genre.label}
                 </span>
