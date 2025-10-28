@@ -24,8 +24,8 @@ export const ANIMATION_TIMINGS = {
 
 export const SCROLL_CONFIG = {
   THRESHOLD: 120,              // Scroll accumulation threshold for switching
-  GRID_ROWS: 5,
-  GRID_COLS: 4,
+  GRID_ROWS: 6,
+  GRID_COLS: 7,
 }
 
 // Globe configuration

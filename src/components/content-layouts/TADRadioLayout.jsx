@@ -72,18 +72,10 @@ export function TADRadioLayout({ content, currentScheme }) {
                     />
                   </div>
                 </div>
+                <span className="genre-label-text">{genre.label}</span>
               </div>
             )
           })}
-        </div>
-
-        {/* Genre Labels Row (aligned with icons) */}
-        <div className="genre-labels-row">
-          {genreIcons.map((genre, index) => (
-            <div key={index} className={`genre-label-area genre-label-${index + 1}`}>
-              <span className="genre-label-text">{genre.label}</span>
-            </div>
-          ))}
         </div>
 
         {/* Footer with Moon Man Digital */}

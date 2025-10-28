@@ -72,7 +72,7 @@ export function TADSongLayout({ content, currentScheme }) {
             const IconComponent = genre.icon
             return (
               <div key={index} className={`song-genre-icon-area song-genre-icon-${index + 1}`}>
-                <div className="song-genre-icon-box floating-card">
+                <div className="song-genre-icon-box">
                   <div
                     className="song-genre-icon-placeholder"
                     style={{
@@ -87,23 +87,15 @@ export function TADSongLayout({ content, currentScheme }) {
                     />
                   </div>
                 </div>
+                <span
+                  className="song-genre-label-text"
+                  style={{ color: currentScheme.primary }}
+                >
+                  {genre.label}
+                </span>
               </div>
             )
           })}
-        </div>
-
-        {/* Genre Labels Row (aligned with icons) */}
-        <div className="song-genre-labels-row">
-          {genreIcons.map((genre, index) => (
-            <div key={index} className={`song-genre-label-area song-genre-label-${index + 1}`}>
-              <span
-                className="song-genre-label-text"
-                style={{ color: currentScheme.primary }}
-              >
-                {genre.label}
-              </span>
-            </div>
-          ))}
         </div>
 
       </div>
