@@ -188,6 +188,7 @@ function LoadingScreenComponent({ onLoadComplete }) {
   const animationTimeRef = useRef(0)
   const lastFrameTimeRef = useRef(performance.now())
   const svgRef = useRef(null)
+  const audioRef = useRef(null)
 
   // Optimized animation loop for morphing shape
   useEffect(() => {
@@ -210,6 +211,27 @@ function LoadingScreenComponent({ onLoadComplete }) {
 
     animationFrameId = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(animationFrameId)
+  }, [])
+
+  // Play boot audio when loading screen initializes
+  useEffect(() => {
+    const audio = new Audio('/audio/Boot.mp3')
+    audioRef.current = audio
+
+    // Attempt to play audio (may be blocked by browser autoplay policy)
+    audio.play().catch((error) => {
+      console.log('Audio autoplay prevented:', error.message)
+      // Silently fail - some browsers block autoplay without user interaction
+    })
+
+    // Cleanup: stop and remove audio when component unmounts
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+        audioRef.current = null
+      }
+    }
   }, [])
 
   useEffect(() => {
