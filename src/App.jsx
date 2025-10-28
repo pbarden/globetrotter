@@ -23,11 +23,105 @@ function App() {
   const [flyOutDirection, setFlyOutDirection] = useState('')
   const [randomSeed, setRandomSeed] = useState(Math.random() * 1000)
   const [skipAudioUpdate, setSkipAudioUpdate] = useState(false)
+  const [lastVisitedCard, setLastVisitedCard] = useState(null)
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
 
+  // Navigate to a specific direction
+  const navigateToDirection = useCallback((direction) => {
+    if (isTransitioning) return
+
+    const currentRow = Math.floor(currentPoint / SCROLL_CONFIG.GRID_COLS)
+    const currentCol = currentPoint % SCROLL_CONFIG.GRID_COLS
+
+    let nextPoint = currentPoint
+    let flyOutDir = ''
+    let flyInDirection = ''
+
+    switch (direction) {
+      case 'up':
+        const nextRowUp = (currentRow + 1) % SCROLL_CONFIG.GRID_ROWS
+        nextPoint = nextRowUp * SCROLL_CONFIG.GRID_COLS + currentCol
+        flyOutDir = 'fly-out-bottom'
+        flyInDirection = 'fly-from-top'
+        break
+      case 'down':
+        const nextRowDown = (currentRow - 1 + SCROLL_CONFIG.GRID_ROWS) % SCROLL_CONFIG.GRID_ROWS
+        nextPoint = nextRowDown * SCROLL_CONFIG.GRID_COLS + currentCol
+        flyOutDir = 'fly-out-top'
+        flyInDirection = 'fly-from-bottom'
+        break
+      case 'left':
+        const nextColLeft = (currentCol + 1) % SCROLL_CONFIG.GRID_COLS
+        nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextColLeft
+        flyOutDir = 'fly-out-left'
+        flyInDirection = 'fly-from-right'
+        break
+      case 'right':
+        const nextColRight = (currentCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS
+        nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextColRight
+        flyOutDir = 'fly-out-right'
+        flyInDirection = 'fly-from-left'
+        break
+    }
+
+    setIsTransitioning(true)
+    setFlyOutDirection(flyOutDir)
+
+    setTimeout(() => {
+      setLastVisitedCard(currentPoint)
+      setCurrentPoint(nextPoint)
+      const newRotation = CONTENT_POINTS[nextPoint].rotation
+      setTargetRotation({ x: newRotation.x, y: newRotation.y })
+      setAnimationDirection(flyInDirection)
+      setAnimationKey(prev => prev + 1)
+      setFlyOutDirection('')
+      setRandomSeed(Math.random() * 1000)
+
+      setTimeout(() => {
+        setIsTransitioning(false)
+      }, ANIMATION_TIMINGS.CARD_FLY_IN_DURATION)
+    }, ANIMATION_TIMINGS.CARD_FLY_OUT_DURATION)
+  }, [currentPoint, isTransitioning])
+
+  // Handle song end - auto-advance to random adjacent card
+  const handleSongEnd = useCallback(() => {
+    if (currentPoint === 0) return
+
+    const directions = ['up', 'down', 'left', 'right']
+    const shuffled = directions.sort(() => Math.random() - 0.5)
+
+    for (const direction of shuffled) {
+      const currentRow = Math.floor(currentPoint / SCROLL_CONFIG.GRID_COLS)
+      const currentCol = currentPoint % SCROLL_CONFIG.GRID_COLS
+
+      let candidatePoint = null
+      switch (direction) {
+        case 'up':
+          candidatePoint = ((currentRow + 1) % SCROLL_CONFIG.GRID_ROWS) * SCROLL_CONFIG.GRID_COLS + currentCol
+          break
+        case 'down':
+          candidatePoint = ((currentRow - 1 + SCROLL_CONFIG.GRID_ROWS) % SCROLL_CONFIG.GRID_ROWS) * SCROLL_CONFIG.GRID_COLS + currentCol
+          break
+        case 'left':
+          candidatePoint = currentRow * SCROLL_CONFIG.GRID_COLS + ((currentCol + 1) % SCROLL_CONFIG.GRID_COLS)
+          break
+        case 'right':
+          candidatePoint = currentRow * SCROLL_CONFIG.GRID_COLS + ((currentCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS)
+          break
+      }
+
+      if (candidatePoint !== lastVisitedCard) {
+        navigateToDirection(direction)
+        return
+      }
+    }
+
+    navigateToDirection('up')
+  }, [currentPoint, lastVisitedCard, navigateToDirection])
+
   // Audio player with 1.5 second crossfade
-  const { playTrack } = useAudioPlayer(1500)
+  const { playTrack } = useAudioPlayer(1500, handleSongEnd)
 
   // Play audio when navigating to a new card
   useEffect(() => {
@@ -132,72 +226,23 @@ function App() {
     if (Math.abs(scrollAccumulator.current.x) > threshold ||
         Math.abs(scrollAccumulator.current.y) > threshold) {
 
-      let nextPoint = currentPoint
-      let flyOutDir = ''
-      let flyInDirection = ''
+      let direction = ''
 
-      // Grid navigation
-      const currentRow = Math.floor(currentPoint / SCROLL_CONFIG.GRID_COLS)
-      const currentCol = currentPoint % SCROLL_CONFIG.GRID_COLS
-
-      // Determine direction and switch point
+      // Determine direction
       if (Math.abs(scrollAccumulator.current.x) > Math.abs(scrollAccumulator.current.y)) {
         // Vertical scrolling (moves between rows, same column)
-        if (scrollAccumulator.current.x > 0) {
-          // Scrolling down - move to next row
-          const nextRow = (currentRow + 1) % SCROLL_CONFIG.GRID_ROWS
-          nextPoint = nextRow * SCROLL_CONFIG.GRID_COLS + currentCol
-          flyOutDir = 'fly-out-bottom'
-          flyInDirection = 'fly-from-top'
-        } else {
-          // Scrolling up - move to previous row
-          const nextRow = (currentRow - 1 + SCROLL_CONFIG.GRID_ROWS) % SCROLL_CONFIG.GRID_ROWS
-          nextPoint = nextRow * SCROLL_CONFIG.GRID_COLS + currentCol
-          flyOutDir = 'fly-out-top'
-          flyInDirection = 'fly-from-bottom'
-        }
+        direction = scrollAccumulator.current.x > 0 ? 'up' : 'down'
       } else {
         // Horizontal scrolling (moves between columns, same row)
-        if (scrollAccumulator.current.y > 0) {
-          // Scrolling left - move to next column
-          const nextCol = (currentCol + 1) % SCROLL_CONFIG.GRID_COLS
-          nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextCol
-          flyOutDir = 'fly-out-left'
-          flyInDirection = 'fly-from-right'
-        } else {
-          // Scrolling right - move to previous column
-          const nextCol = (currentCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS
-          nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextCol
-          flyOutDir = 'fly-out-right'
-          flyInDirection = 'fly-from-left'
-        }
+        direction = scrollAccumulator.current.y > 0 ? 'left' : 'right'
       }
 
       // Reset accumulator immediately
       scrollAccumulator.current = { x: 0, y: 0 }
 
-      // Stage 1: Trigger fly-out animation
-      setIsTransitioning(true)
-      setFlyOutDirection(flyOutDir)
-
-      // Stage 2: Wait for fly-out to complete, then switch content and fly-in
-      setTimeout(() => {
-        setCurrentPoint(nextPoint)
-        const newRotation = CONTENT_POINTS[nextPoint].rotation
-        setTargetRotation({ x: newRotation.x, y: newRotation.y })
-        setAnimationDirection(flyInDirection)
-        setAnimationKey(prev => prev + 1)
-        setFlyOutDirection('')
-        // Randomize positions on each scroll
-        setRandomSeed(Math.random() * 1000)
-
-        // Allow new transitions after fly-in completes
-        setTimeout(() => {
-          setIsTransitioning(false)
-        }, ANIMATION_TIMINGS.CARD_FLY_IN_DURATION)
-      }, ANIMATION_TIMINGS.CARD_FLY_OUT_DURATION)
+      navigateToDirection(direction)
     }
-  }, [currentPoint, isTransitioning])
+  }, [currentPoint, isTransitioning, navigateToDirection])
 
   // Arrow key handler - matches swipe behavior
   const handleKeyDown = useCallback((e) => {
@@ -211,61 +256,15 @@ function App() {
       return
     }
 
-    let nextPoint = currentPoint
-    let flyOutDir = ''
-    let flyInDirection = ''
-
-    const currentRow = Math.floor(currentPoint / SCROLL_CONFIG.GRID_COLS)
-    const currentCol = currentPoint % SCROLL_CONFIG.GRID_COLS
-
-    switch (e.key) {
-      case 'ArrowUp':
-        // Swipe up = next row
-        const nextRowUp = (currentRow + 1) % SCROLL_CONFIG.GRID_ROWS
-        nextPoint = nextRowUp * SCROLL_CONFIG.GRID_COLS + currentCol
-        flyOutDir = 'fly-out-bottom'
-        flyInDirection = 'fly-from-top'
-        break
-      case 'ArrowDown':
-        // Swipe down = previous row
-        const nextRowDown = (currentRow - 1 + SCROLL_CONFIG.GRID_ROWS) % SCROLL_CONFIG.GRID_ROWS
-        nextPoint = nextRowDown * SCROLL_CONFIG.GRID_COLS + currentCol
-        flyOutDir = 'fly-out-top'
-        flyInDirection = 'fly-from-bottom'
-        break
-      case 'ArrowLeft':
-        // Swipe left = next column
-        const nextColLeft = (currentCol + 1) % SCROLL_CONFIG.GRID_COLS
-        nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextColLeft
-        flyOutDir = 'fly-out-left'
-        flyInDirection = 'fly-from-right'
-        break
-      case 'ArrowRight':
-        // Swipe right = previous column
-        const nextColRight = (currentCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS
-        nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextColRight
-        flyOutDir = 'fly-out-right'
-        flyInDirection = 'fly-from-left'
-        break
+    const directionMap = {
+      'ArrowUp': 'up',
+      'ArrowDown': 'down',
+      'ArrowLeft': 'left',
+      'ArrowRight': 'right'
     }
 
-    setIsTransitioning(true)
-    setFlyOutDirection(flyOutDir)
-
-    setTimeout(() => {
-      setCurrentPoint(nextPoint)
-      const newRotation = CONTENT_POINTS[nextPoint].rotation
-      setTargetRotation({ x: newRotation.x, y: newRotation.y })
-      setAnimationDirection(flyInDirection)
-      setAnimationKey(prev => prev + 1)
-      setFlyOutDirection('')
-      setRandomSeed(Math.random() * 1000)
-
-      setTimeout(() => {
-        setIsTransitioning(false)
-      }, ANIMATION_TIMINGS.CARD_FLY_IN_DURATION)
-    }, ANIMATION_TIMINGS.CARD_FLY_OUT_DURATION)
-  }, [currentPoint, isTransitioning])
+    navigateToDirection(directionMap[e.key])
+  }, [isTransitioning, navigateToDirection])
 
   useEffect(() => {
     if (isLoading) return

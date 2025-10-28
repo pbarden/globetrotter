@@ -3,13 +3,15 @@ import { useRef, useEffect, useCallback } from 'react'
 /**
  * Custom hook for managing audio playback with crossfade transitions
  * @param {number} fadeTime - Duration of fade in/out in milliseconds (default: 1500ms)
+ * @param {function} onSongEnd - Callback when a song finishes playing
  * @returns {object} Audio player controls
  */
-export function useAudioPlayer(fadeTime = 1500) {
+export function useAudioPlayer(fadeTime = 1500, onSongEnd = null) {
   const currentAudioRef = useRef(null)
   const nextAudioRef = useRef(null)
   const currentFadeInterval = useRef(null)
   const currentTrackUrl = useRef(null)
+  const onSongEndRef = useRef(onSongEnd)
 
   // Cleanup function to stop all audio and clear intervals
   const cleanup = useCallback(() => {
@@ -114,8 +116,14 @@ export function useAudioPlayer(fadeTime = 1500) {
 
     // Create new audio element for next track
     const nextAudio = new Audio(audioUrl)
-    nextAudio.loop = true
     nextAudio.volume = 0
+
+    // Add ended event listener for auto-advance
+    nextAudio.addEventListener('ended', () => {
+      if (onSongEndRef.current) {
+        onSongEndRef.current()
+      }
+    })
 
     const oldAudio = currentAudioRef.current
 
@@ -172,6 +180,11 @@ export function useAudioPlayer(fadeTime = 1500) {
       fadeIn(currentAudioRef.current, fadeTime / 2, 1.0) // Faster fade for resume
     }
   }, [fadeTime, fadeIn])
+
+  // Keep onSongEnd ref updated
+  useEffect(() => {
+    onSongEndRef.current = onSongEnd
+  }, [onSongEnd])
 
   // Cleanup on unmount
   useEffect(() => {
