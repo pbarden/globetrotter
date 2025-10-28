@@ -135,8 +135,11 @@ function App() {
           break
       }
 
-      // Skip radio card if we landed on it
-      if (nextPoint === 0) {
+      // Skip radio card and empty cells - keep going in the same direction
+      let attempts = 0
+      const maxAttempts = SCROLL_CONFIG.GRID_ROWS * SCROLL_CONFIG.GRID_COLS
+
+      while ((nextPoint === 0 || nextPoint === currentPoint || !CONTENT_POINTS[nextPoint]) && attempts < maxAttempts) {
         const skipRow = Math.floor(nextPoint / SCROLL_CONFIG.GRID_COLS)
         const skipCol = nextPoint % SCROLL_CONFIG.GRID_COLS
 
@@ -154,6 +157,12 @@ function App() {
             nextPoint = skipRow * SCROLL_CONFIG.GRID_COLS + ((skipCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS)
             break
         }
+        attempts++
+      }
+
+      // Final safety check - if still invalid, find first valid card
+      if (!CONTENT_POINTS[nextPoint] || nextPoint === 0 || nextPoint === currentPoint) {
+        nextPoint = 1
       }
     }
 
@@ -161,6 +170,12 @@ function App() {
     setFlyOutDirection(flyOutDir)
 
     setTimeout(() => {
+      // Safety check before transitioning
+      if (!CONTENT_POINTS[nextPoint]) {
+        setIsTransitioning(false)
+        return
+      }
+
       setLastVisitedCard(currentPoint)
       setCurrentPoint(nextPoint)
       const newRotation = CONTENT_POINTS[nextPoint].rotation
@@ -262,10 +277,10 @@ function App() {
   }, [currentPoint, playTrack, skipAudioUpdate])
 
   // Get current color index and composition from content point
-  const currentColorIndex = CONTENT_POINTS[currentPoint].colorIndex
+  const currentColorIndex = CONTENT_POINTS[currentPoint]?.colorIndex || 0
   const currentColorScheme = useMemo(() => getColorScheme(currentColorIndex), [currentColorIndex])
   const currentComposition = useMemo(() => {
-    const compositionId = CONTENT_POINTS[currentPoint].composition || 'default'
+    const compositionId = CONTENT_POINTS[currentPoint]?.composition || 'default'
     return getCompositionState(compositionId)
   }, [currentPoint])
 
@@ -456,6 +471,7 @@ function App() {
   // Determine if card needs reorientation (when it would be upside down or sideways)
   const needsReorientation = () => {
     const point = CONTENT_POINTS[currentPoint]
+    if (!point?.rotation) return false
     return Math.abs(point.rotation.x) > Math.PI / 4 || Math.abs(point.rotation.y) > Math.PI / 4
   }
 
@@ -495,7 +511,7 @@ function App() {
         </Canvas>
 
         {/* Blob Lasso */}
-        {!isLoading && (
+        {!isLoading && CONTENT_POINTS[currentPoint] && (
           <BlobLasso
             content={CONTENT_POINTS[currentPoint]}
             isActive={true}
@@ -506,14 +522,16 @@ function App() {
         )}
 
         {/* Content Cards */}
-        <ContentCard
-          key={animationKey}
-          content={CONTENT_POINTS[currentPoint]}
-          isActive={!isLoading && hasShownFirstContent}
-          needsReorientation={needsReorientation()}
-          animationDirection={flyOutDirection || animationDirection}
-          colorIndex={currentColorIndex}
-        />
+        {CONTENT_POINTS[currentPoint] && (
+          <ContentCard
+            key={animationKey}
+            content={CONTENT_POINTS[currentPoint]}
+            isActive={!isLoading && hasShownFirstContent}
+            needsReorientation={needsReorientation()}
+            animationDirection={flyOutDirection || animationDirection}
+            colorIndex={currentColorIndex}
+          />
+        )}
 
         {/* Floating Radio Button */}
         <FloatingRadioButton
