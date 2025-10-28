@@ -4,6 +4,7 @@ import { Globe } from './components/Globe'
 import { ContentCard } from './components/ContentCard'
 import { BlobLasso } from './components/BlobLasso'
 import { LoadingScreen } from './components/LoadingScreen'
+import { FloatingRadioButton } from './components/FloatingRadioButton'
 import { CONTENT_POINTS } from './config/content'
 import { getColorScheme } from './config/colors'
 import { ANIMATION_TIMINGS, SCROLL_CONFIG } from './config/animations'
@@ -21,6 +22,7 @@ function App() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [flyOutDirection, setFlyOutDirection] = useState('')
   const [randomSeed, setRandomSeed] = useState(Math.random() * 1000)
+  const [skipAudioUpdate, setSkipAudioUpdate] = useState(false)
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
 
@@ -29,6 +31,12 @@ function App() {
 
   // Play audio when navigating to a new card
   useEffect(() => {
+    // Skip audio update if flag is set (e.g., when opening radio card via button)
+    if (skipAudioUpdate) {
+      setSkipAudioUpdate(false)
+      return
+    }
+
     const currentContent = CONTENT_POINTS[currentPoint]
     if (currentContent?.audioFile) {
       playTrack(currentContent.audioFile)
@@ -36,7 +44,7 @@ function App() {
       // No audio file (like the radio card), stop playback
       playTrack(null)
     }
-  }, [currentPoint, playTrack])
+  }, [currentPoint, playTrack, skipAudioUpdate])
 
   // Get current color index and composition from content point
   const currentColorIndex = CONTENT_POINTS[currentPoint].colorIndex
@@ -72,6 +80,29 @@ function App() {
     () => getBlobLightPosition(currentPoint),
     [currentPoint, randomSeed]
   )
+
+  // Handle floating radio button click
+  const handleRadioButtonClick = useCallback(() => {
+    if (currentPoint === 0) return // Already on radio card
+
+    // Set flag to skip audio update
+    setSkipAudioUpdate(true)
+    setIsTransitioning(true)
+    setFlyOutDirection('fly-out-top')
+
+    setTimeout(() => {
+      setCurrentPoint(0)
+      setTargetRotation(CONTENT_POINTS[0].rotation)
+      setAnimationDirection('fly-from-bottom')
+      setAnimationKey(prev => prev + 1)
+      setRandomSeed(Math.random() * 1000)
+
+      setTimeout(() => {
+        setIsTransitioning(false)
+        setFlyOutDirection('')
+      }, ANIMATION_TIMINGS.CARD_FLY_IN_DURATION)
+    }, ANIMATION_TIMINGS.CARD_FLY_OUT_DURATION)
+  }, [currentPoint])
 
   // Memoize wheel handler to prevent recreation on every render
   const handleWheel = useCallback((e) => {
@@ -324,6 +355,12 @@ function App() {
           needsReorientation={needsReorientation()}
           animationDirection={flyOutDirection || animationDirection}
           colorIndex={currentColorIndex}
+        />
+
+        {/* Floating Radio Button */}
+        <FloatingRadioButton
+          isVisible={!isLoading && hasShownFirstContent && currentPoint !== 0}
+          onClick={handleRadioButtonClick}
         />
 
         {/* Scroll hint */}
