@@ -64,11 +64,10 @@ const compositions = [
 ]
 
 export const CONTENT_POINTS = [
-  // First card - TAD Radio (genre selection)
   {
     id: 0,
     iconName: 'Radio',
-    heading: 'TAD Radio',
+    heading: 'Radio Free Moon',
     subheading: 'Pick the styles you\'re in the mood to hear.',
     paragraph: 'Select your favorite music genres and explore the collection.',
     rotation: { x: 0, y: 0 },

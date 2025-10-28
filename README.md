@@ -1,12 +1,14 @@
-# Globe Site
+# Radio Free Moon
 
-An innovative 3D interactive website featuring a low-poly wireframe globe with scroll-based navigation.
+An interactive 3D music exploration experience featuring a low-poly wireframe globe with scroll-based navigation through a collection of Tad Miller's music.
 
 ## Features
 
 - **3D Wireframe Globe**: Low-poly PlayStation-style sphere with shading effects
-- **Scroll Navigation**: Scroll vertically or horizontally to rotate the globe to different points
-- **Dynamic Content Cards**: 6 content points positioned like a cube/die around the globe
+- **Scroll Navigation**: Scroll vertically or horizontally to rotate the globe to different music tracks
+- **Music Collection**: 42 points in a 7x6 grid - 1 genre selection card and 41 song cards
+- **Genre Selection**: Interactive TAD Radio card for browsing music by genre (Lofi, Piano, Electronic, Hip-hop, Epic)
+- **Dynamic Song Cards**: Each song displays with album art, artist info, and YouTube link
 - **Wavy Blob Effect**: Cards that need reorientation get an animated blob outline with gradient glow
 - **Dithering Filter**: Retro-style dithering overlay for visual enhancement
 - **Loading Screen**: Animated 3D cube loading screen
@@ -72,10 +74,10 @@ globesite/
 
 ### Globe Navigation
 
-The globe has 6 content points positioned like a cube:
-- **Front/Back**: Scroll up/down
-- **Left/Right**: Scroll horizontally
-- **Top/Bottom**: Scroll at angles
+The globe has 42 content points in a 7x6 grid:
+- **First point**: Radio Free Moon - Genre selection card
+- **Points 1-41**: Individual song cards featuring Tad Miller's music
+- Navigate by scrolling in any direction to explore the collection
 
 ### Scroll Interaction
 

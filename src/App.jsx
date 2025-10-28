@@ -10,7 +10,7 @@ import { ANIMATION_TIMINGS, SCROLL_CONFIG } from './config/animations'
 import { getCompositionState } from './config/compositions'
 import './App.css'
 
-const STORAGE_KEY = 'globetrotter_current_point'
+const STORAGE_KEY = 'radio_free_moon_current_point'
 
 // Load saved position from localStorage
 const getSavedPosition = () => {

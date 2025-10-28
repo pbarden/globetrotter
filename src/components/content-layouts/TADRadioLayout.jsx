@@ -1,13 +1,16 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import * as Icons from 'lucide-react'
 import './TADRadioLayout.css'
 
 /**
- * TADRadioLayout - Radio/Genre selection layout for TAD Radio
+ * TADRadioLayout - Radio/Genre selection layout for Radio Free Moon
  */
 export function TADRadioLayout({ content, currentScheme }) {
   // Use gold/yellow/orange color scheme (index 0) for this layout
   const goldScheme = { primary: '#ffd700', secondary: '#ff8c00', accent: '#ffaa00' }
+
+  // State to track selected genres
+  const [selectedGenres, setSelectedGenres] = useState([])
 
   // Genre icons - can be customized
   const genreIcons = [
@@ -17,6 +20,15 @@ export function TADRadioLayout({ content, currentScheme }) {
     { icon: Icons.Headphones, label: 'Hip-hop' },
     { icon: Icons.Sparkles, label: 'Epic' }
   ]
+
+  // Toggle genre selection
+  const toggleGenre = (index) => {
+    setSelectedGenres(prev =>
+      prev.includes(index)
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    )
+  }
 
   return (
     <div className="tad-radio-layout">
@@ -29,8 +41,8 @@ export function TADRadioLayout({ content, currentScheme }) {
         {/* Header Section with Logo and Title */}
         <div className="tad-radio-header">
           <img
-            src="/images/tadlogo.png"
-            alt="TAD Logo"
+            src="/images/mmlogo.png"
+            alt="Moon Man Digital Logo"
             className="tad-logo-header"
           />
           <h1
@@ -42,7 +54,7 @@ export function TADRadioLayout({ content, currentScheme }) {
               backgroundClip: 'text'
             }}
           >
-            TAD Radio
+            Radio Free Moon
           </h1>
         </div>
 
@@ -55,24 +67,40 @@ export function TADRadioLayout({ content, currentScheme }) {
         <div className="genre-icons-row">
           {genreIcons.map((genre, index) => {
             const IconComponent = genre.icon
+            const isSelected = selectedGenres.includes(index)
+            const borderColor = isSelected ? goldScheme.primary : 'rgba(100, 150, 255, 0.25)'
+            const iconColor = isSelected ? goldScheme.primary : 'rgba(100, 150, 255, 0.5)'
+
             return (
               <div key={index} className={`genre-icon-area genre-icon-${index + 1}`}>
-                <div className="genre-icon-box floating-card">
+                <div
+                  className={`genre-icon-box floating-card ${isSelected ? 'selected' : ''}`}
+                  style={{ borderColor }}
+                  onClick={() => toggleGenre(index)}
+                >
                   <div
                     className="genre-icon-placeholder"
                     style={{
                       background: `linear-gradient(135deg, ${goldScheme.primary}22 0%, ${goldScheme.secondary}22 100%)`,
-                      border: `1px solid ${goldScheme.primary}44`
+                      border: `1px solid ${isSelected ? goldScheme.primary + '44' : 'rgba(100, 150, 255, 0.15)'}`
                     }}
                   >
                     <IconComponent
                       size={24}
                       strokeWidth={1.5}
-                      style={{ color: goldScheme.primary, opacity: 0.8 }}
+                      style={{ color: iconColor, opacity: isSelected ? 1 : 0.6 }}
                     />
                   </div>
                 </div>
-                <span className="genre-label-text">{genre.label}</span>
+                <span
+                  className="genre-label-text"
+                  style={{
+                    color: isSelected ? goldScheme.primary : 'rgba(192, 216, 255, 0.6)',
+                    opacity: isSelected ? 1 : 0.7
+                  }}
+                >
+                  {genre.label}
+                </span>
               </div>
             )
           })}
@@ -80,11 +108,6 @@ export function TADRadioLayout({ content, currentScheme }) {
 
         {/* Footer with Moon Man Digital */}
         <div className="tad-radio-footer">
-          <img
-            src="/images/mmlogo.png"
-            alt="Moon Man Digital"
-            className="mm-logo-footer"
-          />
           <p className="mm-credits">
             Presented by moon man digital, all rights reserved.
           </p>

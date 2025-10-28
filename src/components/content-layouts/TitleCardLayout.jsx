@@ -27,7 +27,7 @@ export function TitleCardLayout({ content, currentScheme }) {
               backgroundClip: 'text'
             }}
           >
-            {content.heading || 'Globetrotter'}
+            {content.heading || 'Radio Free Moon'}
           </h1>
           <p className="game-subtitle">{content.subheading || 'An Interactive Journey'}</p>
         </div>
