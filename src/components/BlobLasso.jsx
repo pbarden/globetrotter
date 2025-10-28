@@ -20,6 +20,12 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, composi
   const hasCalledComplete = useRef(false)
   const hasStartedAnimation = useRef(false)
 
+  // Position transition tracking
+  const previousPositionRef = useRef(null)
+  const isTransitioningRef = useRef(false)
+  const transitionStartTimeRef = useRef(0)
+  const transitionDuration = 0.5 // 500ms transition time
+
   // Generate random positions using composition state
   const seed1 = content.id * 3.7 + randomSeed
   const seed2 = content.id * 7.3 + randomSeed * 1.3
@@ -117,6 +123,19 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, composi
     return colors
   }, [previousColors, colorTransition, colors])
 
+  // Detect position changes and trigger transition
+  useEffect(() => {
+    const currentPos = JSON.stringify({ x: blobPosition.x, y: blobPosition.y, x2: blob2Position.x, y2: blob2Position.y, x3: blob3Position.x, y3: blob3Position.y })
+
+    if (previousPositionRef.current && previousPositionRef.current !== currentPos) {
+      // Position changed - start transition
+      isTransitioningRef.current = true
+      transitionStartTimeRef.current = performance.now()
+    }
+
+    previousPositionRef.current = currentPos
+  }, [blobPosition, blob2Position, blob3Position])
+
   // Reset exit progress when exiting starts
   useEffect(() => {
     if (isExiting) {
@@ -194,8 +213,17 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, composi
         }
       }
 
-      // Update blob paths - PAUSE during exit
-      if (!isExiting || exitProgressRef.current >= 1) {
+      // Check if position transition has completed
+      if (isTransitioningRef.current) {
+        const transitionElapsed = (timestamp - transitionStartTimeRef.current) / 1000
+        if (transitionElapsed >= transitionDuration) {
+          isTransitioningRef.current = false
+        }
+      }
+
+      // Update blob paths - PAUSE during exit OR position transition
+      const shouldAnimateMorph = !isExiting && !isTransitioningRef.current
+      if (shouldAnimateMorph || exitProgressRef.current >= 1) {
         const path = generateBlobPath(elapsed)
         const path2 = generateBlobPath(elapsed + 1.5)
         const path3 = generateBlobPath(elapsed + 2.8)

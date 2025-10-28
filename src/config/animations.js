@@ -18,7 +18,7 @@ export const ANIMATION_TIMINGS = {
   LOADING_MIN_DURATION: 2000,  // ms
 
   // Performance throttling
-  BLOB_FPS: 30,                // Target FPS for blob updates
+  BLOB_FPS: 60,                // Target FPS for blob updates
   COLOR_UPDATE_FPS: 30,        // Target FPS for color cycling
 }
 
