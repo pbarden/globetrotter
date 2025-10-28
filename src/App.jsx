@@ -43,31 +43,118 @@ function App() {
     let flyOutDir = ''
     let flyInDirection = ''
 
-    switch (direction) {
-      case 'up':
-        const nextRowUp = (currentRow + 1) % SCROLL_CONFIG.GRID_ROWS
-        nextPoint = nextRowUp * SCROLL_CONFIG.GRID_COLS + currentCol
-        flyOutDir = 'fly-out-bottom'
-        flyInDirection = 'fly-from-top'
-        break
-      case 'down':
-        const nextRowDown = (currentRow - 1 + SCROLL_CONFIG.GRID_ROWS) % SCROLL_CONFIG.GRID_ROWS
-        nextPoint = nextRowDown * SCROLL_CONFIG.GRID_COLS + currentCol
-        flyOutDir = 'fly-out-top'
-        flyInDirection = 'fly-from-bottom'
-        break
-      case 'left':
-        const nextColLeft = (currentCol + 1) % SCROLL_CONFIG.GRID_COLS
-        nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextColLeft
-        flyOutDir = 'fly-out-left'
-        flyInDirection = 'fly-from-right'
-        break
-      case 'right':
-        const nextColRight = (currentCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS
-        nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextColRight
-        flyOutDir = 'fly-out-right'
-        flyInDirection = 'fly-from-left'
-        break
+    // Special logic when navigating FROM radio card (card 0)
+    if (currentPoint === 0) {
+      const selectedGenres = Object.keys(genres).filter(genre => genres[genre])
+
+      // Search in the direction for matching songs
+      let foundPoint = null
+
+      switch (direction) {
+        case 'up':
+          flyOutDir = 'fly-out-bottom'
+          flyInDirection = 'fly-from-top'
+          // Search down the column
+          for (let r = 1; r < SCROLL_CONFIG.GRID_ROWS; r++) {
+            const candidatePoint = r * SCROLL_CONFIG.GRID_COLS + currentCol
+            const content = CONTENT_POINTS[candidatePoint]
+            if (selectedGenres.length === 0 || selectedGenres.some(genre => content?.genres?.[genre])) {
+              foundPoint = candidatePoint
+              break
+            }
+          }
+          break
+        case 'down':
+          flyOutDir = 'fly-out-top'
+          flyInDirection = 'fly-from-bottom'
+          // Search up the column
+          for (let r = SCROLL_CONFIG.GRID_ROWS - 1; r >= 1; r--) {
+            const candidatePoint = r * SCROLL_CONFIG.GRID_COLS + currentCol
+            const content = CONTENT_POINTS[candidatePoint]
+            if (selectedGenres.length === 0 || selectedGenres.some(genre => content?.genres?.[genre])) {
+              foundPoint = candidatePoint
+              break
+            }
+          }
+          break
+        case 'left':
+          flyOutDir = 'fly-out-left'
+          flyInDirection = 'fly-from-right'
+          // Search right across the row
+          for (let c = 1; c < SCROLL_CONFIG.GRID_COLS; c++) {
+            const candidatePoint = currentRow * SCROLL_CONFIG.GRID_COLS + c
+            const content = CONTENT_POINTS[candidatePoint]
+            if (selectedGenres.length === 0 || selectedGenres.some(genre => content?.genres?.[genre])) {
+              foundPoint = candidatePoint
+              break
+            }
+          }
+          break
+        case 'right':
+          flyOutDir = 'fly-out-right'
+          flyInDirection = 'fly-from-left'
+          // Search left across the row
+          for (let c = SCROLL_CONFIG.GRID_COLS - 1; c >= 1; c--) {
+            const candidatePoint = currentRow * SCROLL_CONFIG.GRID_COLS + c
+            const content = CONTENT_POINTS[candidatePoint]
+            if (selectedGenres.length === 0 || selectedGenres.some(genre => content?.genres?.[genre])) {
+              foundPoint = candidatePoint
+              break
+            }
+          }
+          break
+      }
+
+      nextPoint = foundPoint !== null ? foundPoint : 1 // Fallback to card 1
+    } else {
+      // Normal navigation - calculate next card and skip radio card if needed
+      switch (direction) {
+        case 'up':
+          const nextRowUp = (currentRow + 1) % SCROLL_CONFIG.GRID_ROWS
+          nextPoint = nextRowUp * SCROLL_CONFIG.GRID_COLS + currentCol
+          flyOutDir = 'fly-out-bottom'
+          flyInDirection = 'fly-from-top'
+          break
+        case 'down':
+          const nextRowDown = (currentRow - 1 + SCROLL_CONFIG.GRID_ROWS) % SCROLL_CONFIG.GRID_ROWS
+          nextPoint = nextRowDown * SCROLL_CONFIG.GRID_COLS + currentCol
+          flyOutDir = 'fly-out-top'
+          flyInDirection = 'fly-from-bottom'
+          break
+        case 'left':
+          const nextColLeft = (currentCol + 1) % SCROLL_CONFIG.GRID_COLS
+          nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextColLeft
+          flyOutDir = 'fly-out-left'
+          flyInDirection = 'fly-from-right'
+          break
+        case 'right':
+          const nextColRight = (currentCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS
+          nextPoint = currentRow * SCROLL_CONFIG.GRID_COLS + nextColRight
+          flyOutDir = 'fly-out-right'
+          flyInDirection = 'fly-from-left'
+          break
+      }
+
+      // Skip radio card if we landed on it
+      if (nextPoint === 0) {
+        const skipRow = Math.floor(nextPoint / SCROLL_CONFIG.GRID_COLS)
+        const skipCol = nextPoint % SCROLL_CONFIG.GRID_COLS
+
+        switch (direction) {
+          case 'up':
+            nextPoint = ((skipRow + 1) % SCROLL_CONFIG.GRID_ROWS) * SCROLL_CONFIG.GRID_COLS + skipCol
+            break
+          case 'down':
+            nextPoint = ((skipRow - 1 + SCROLL_CONFIG.GRID_ROWS) % SCROLL_CONFIG.GRID_ROWS) * SCROLL_CONFIG.GRID_COLS + skipCol
+            break
+          case 'left':
+            nextPoint = skipRow * SCROLL_CONFIG.GRID_COLS + ((skipCol + 1) % SCROLL_CONFIG.GRID_COLS)
+            break
+          case 'right':
+            nextPoint = skipRow * SCROLL_CONFIG.GRID_COLS + ((skipCol - 1 + SCROLL_CONFIG.GRID_COLS) % SCROLL_CONFIG.GRID_COLS)
+            break
+        }
+      }
     }
 
     setIsTransitioning(true)
@@ -87,7 +174,7 @@ function App() {
         setIsTransitioning(false)
       }, ANIMATION_TIMINGS.CARD_FLY_IN_DURATION)
     }, ANIMATION_TIMINGS.CARD_FLY_OUT_DURATION)
-  }, [currentPoint, isTransitioning])
+  }, [currentPoint, isTransitioning, genres])
 
   // Handle song end - auto-advance to random adjacent card with genre preferences
   const handleSongEnd = useCallback(() => {
