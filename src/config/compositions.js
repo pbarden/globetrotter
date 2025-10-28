@@ -8,6 +8,7 @@ export const COMPOSITION_STATES = {
     globe: {
       position: [0, 0, 0],        // x, y, z in 3D space
       scale: 1,
+      complexity: 'high',          // 'high' = icosahedron, 'low' = dodecahedron
     },
     blobs: {
       positionMode: 'scattered',   // How blobs are distributed
@@ -23,6 +24,7 @@ export const COMPOSITION_STATES = {
     globe: {
       position: [0, 0, 0],
       scale: 1,
+      complexity: 'low',            // Simpler globe for large, complex blobs
     },
     blobs: {
       positionMode: 'orbital',     // Blobs orbit around center
@@ -40,6 +42,7 @@ export const COMPOSITION_STATES = {
     globe: {
       position: [-1.5, -1.5, 0],   // Down and left in 3D space
       scale: 0.9,
+      complexity: 'high',           // Detailed globe for smaller blobs
     },
     blobs: {
       positionMode: 'trailing',     // Blobs follow in a trail
@@ -57,6 +60,7 @@ export const COMPOSITION_STATES = {
     globe: {
       position: [0, -6.5, 0],      // Way down (mostly off screen, just peek at top)
       scale: 2.5,                  // Much larger
+      complexity: 'high',           // Detailed globe for smaller blobs
     },
     blobs: {
       positionMode: 'clustered',   // Grouped together
@@ -73,6 +77,7 @@ export const COMPOSITION_STATES = {
     globe: {
       position: [0, 0, 0],
       scale: 1,
+      complexity: 'low',            // Simpler globe for large, complex blobs
     },
     blobs: {
       positionMode: 'orbital',
@@ -90,6 +95,7 @@ export const COMPOSITION_STATES = {
     globe: {
       position: [2, 2, -2],        // Small, in corner, further back
       scale: 0.5,
+      complexity: 'low',            // Simpler globe for large, complex blobs
     },
     blobs: {
       positionMode: 'scattered',
@@ -105,6 +111,7 @@ export const COMPOSITION_STATES = {
     globe: {
       position: [0, 0, 0],
       scale: 1,
+      complexity: 'low',            // Simpler globe for large, complex blobs
     },
     blobs: {
       positionMode: 'erratic',     // Random clustering around center
@@ -122,6 +129,7 @@ export const COMPOSITION_STATES = {
     globe: {
       position: [0, 0, 0],
       scale: 0.35,                  // Much smaller globe - like it's far away in tunnel
+      complexity: 'high',           // Detailed globe for smaller blobs
     },
     blobs: {
       positionMode: 'tunnel',       // Blobs all centered with different scales
@@ -138,6 +146,7 @@ export const COMPOSITION_STATES = {
     globe: {
       position: [1.5, 1.5, 0],      // Up and right in 3D space
       scale: 0.9,
+      complexity: 'high',           // Detailed globe for smaller blobs
     },
     blobs: {
       positionMode: 'trailing',     // Blobs follow in a trail

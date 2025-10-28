@@ -312,6 +312,7 @@ function App() {
               targetRotation={targetRotation}
               position={currentComposition.globe.position}
               scale={currentComposition.globe.scale}
+              complexity={currentComposition.globe.complexity || 'high'}
             />
           </Suspense>
         </Canvas>

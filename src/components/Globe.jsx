@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GLOBE_CONFIG, ANIMATION_TIMINGS } from '../config/animations'
 
-function GlobeComponent({ rotation, targetRotation, scale = 1, position = [0, 0, 0], subdivision = GLOBE_CONFIG.SUBDIVISION, isExiting = false }) {
+function GlobeComponent({ rotation, targetRotation, scale = 1, position = [0, 0, 0], subdivision = GLOBE_CONFIG.SUBDIVISION, isExiting = false, complexity = 'high' }) {
   const meshRef = useRef()
   const materialRef = useRef()
   const edgesRef = useRef()
@@ -15,6 +15,8 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, position = [0, 0,
   const idleRotationRef = useRef({ x: 0, y: 0 })
   const lastColorUpdateTime = useRef(0)
   const basePosition = useMemo(() => position, [position[0], position[1], position[2]])
+  const complexityTransitionRef = useRef(complexity === 'high' ? 1 : 0)
+  const [complexityTransition, setComplexityTransition] = useState(complexity === 'high' ? 1 : 0)
 
   // Smooth position interpolation - the "sexy" movement
   const currentPosition = useRef([0, 0, 0])
@@ -33,22 +35,81 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, position = [0, 0,
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
-  // Create icosahedron geometry with random hue offsets for each vertex
-  const { geometry, hueOffsets } = useMemo(() => {
-    const geo = new THREE.IcosahedronGeometry(GLOBE_CONFIG.SIZE, subdivision)
+  // Create both geometries (high and low complexity icosahedrons) for morphing
+  const { geometry, hueOffsets, highComplexityPositions, lowComplexityPositions } = useMemo(() => {
+    // High complexity: Icosahedron with subdivision (more detailed)
+    const highGeo = new THREE.IcosahedronGeometry(GLOBE_CONFIG.SIZE, 2)
+
+    // Low complexity: Icosahedron with no subdivision (simpler, 20 faces)
+    const lowGeo = new THREE.IcosahedronGeometry(GLOBE_CONFIG.SIZE, 0)
+
+    // Use high complexity as base geometry (more vertices)
+    const geo = highGeo.clone()
     const offsets = []
     const colors = []
+
+    // Store high complexity positions
+    const highPositionArray = new Float32Array(highGeo.attributes.position.array)
+
+    // Map low complexity vertices to high complexity vertex count
+    const lowPositionArray = new Float32Array(highPositionArray.length)
+    const lowVertexCount = lowGeo.attributes.position.count
+    const highVertexCount = highGeo.attributes.position.count
+
+    // Distribute low-complexity vertices across high-complexity vertex positions
+    for (let i = 0; i < highVertexCount; i++) {
+      // Find nearest low-complexity vertex for this high-complexity vertex
+      const highX = highGeo.attributes.position.array[i * 3]
+      const highY = highGeo.attributes.position.array[i * 3 + 1]
+      const highZ = highGeo.attributes.position.array[i * 3 + 2]
+
+      // Normalize to get direction
+      const length = Math.sqrt(highX * highX + highY * highY + highZ * highZ)
+      const dirX = highX / length
+      const dirY = highY / length
+      const dirZ = highZ / length
+
+      // Find closest low-complexity vertex by comparing directions
+      let closestDist = Infinity
+      let closestIdx = 0
+
+      for (let j = 0; j < lowVertexCount; j++) {
+        const lowX = lowGeo.attributes.position.array[j * 3]
+        const lowY = lowGeo.attributes.position.array[j * 3 + 1]
+        const lowZ = lowGeo.attributes.position.array[j * 3 + 2]
+        const lowLen = Math.sqrt(lowX * lowX + lowY * lowY + lowZ * lowZ)
+        const lowDirX = lowX / lowLen
+        const lowDirY = lowY / lowLen
+        const lowDirZ = lowZ / lowLen
+
+        const dist = (dirX - lowDirX) ** 2 + (dirY - lowDirY) ** 2 + (dirZ - lowDirZ) ** 2
+
+        if (dist < closestDist) {
+          closestDist = dist
+          closestIdx = j
+        }
+      }
+
+      // Use the closest low-complexity vertex position
+      lowPositionArray[i * 3] = lowGeo.attributes.position.array[closestIdx * 3]
+      lowPositionArray[i * 3 + 1] = lowGeo.attributes.position.array[closestIdx * 3 + 1]
+      lowPositionArray[i * 3 + 2] = lowGeo.attributes.position.array[closestIdx * 3 + 2]
+    }
 
     // Assign random hue offsets to each vertex for rainbow crystal effect
     for (let i = 0; i < geo.attributes.position.count; i++) {
       offsets.push(Math.random() * 360)
-      // Initialize with a color
       colors.push(1, 1, 1)
     }
 
     geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
 
-    return { geometry: geo, hueOffsets: offsets }
+    return {
+      geometry: geo,
+      hueOffsets: offsets,
+      highComplexityPositions: highPositionArray,
+      lowComplexityPositions: lowPositionArray
+    }
   }, [subdivision])
 
   // Create edges geometry for wireframe
@@ -64,6 +125,13 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, position = [0, 0,
     targetPosition.current = [...basePosition]
     targetScale.current = scale
   }, [basePosition, scale])
+
+  // Animate complexity transition when prop changes
+  useEffect(() => {
+    const targetComplexity = complexity === 'high' ? 1 : 0
+    complexityTransitionRef.current = targetComplexity
+    setComplexityTransition(targetComplexity)
+  }, [complexity])
 
   // Animate rotation and colors
   useFrame((state, delta) => {
@@ -172,6 +240,32 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, position = [0, 0,
       const scaleInverseFactor = 1 / currentScale.current
       const timeSpeed = baseTimeSpeed * scaleInverseFactor
       timeRef.current += delta * timeSpeed
+    }
+
+    // Morph geometry between icosahedron and dodecahedron
+    if (geometry.attributes.position) {
+      const positions = geometry.attributes.position.array
+      const targetComplexity = complexity === 'high' ? 1 : 0
+
+      // Smooth transition over time
+      const transitionSpeed = 2.0 // Higher = faster transition
+      if (Math.abs(complexityTransitionRef.current - targetComplexity) > 0.01) {
+        if (complexityTransitionRef.current < targetComplexity) {
+          complexityTransitionRef.current = Math.min(complexityTransitionRef.current + delta * transitionSpeed, targetComplexity)
+        } else {
+          complexityTransitionRef.current = Math.max(complexityTransitionRef.current - delta * transitionSpeed, targetComplexity)
+        }
+      }
+
+      const t = complexityTransitionRef.current // 0 = low complexity, 1 = high complexity
+
+      // Interpolate vertex positions
+      for (let i = 0; i < positions.length; i++) {
+        positions[i] = lowComplexityPositions[i] + (highComplexityPositions[i] - lowComplexityPositions[i]) * t
+      }
+
+      geometry.attributes.position.needsUpdate = true
+      geometry.computeVertexNormals() // Recompute normals for proper lighting
     }
 
     // Update vertex colors with rainbow cycling (Optimizations #1 & #10: Throttled updates + reusable color object)
