@@ -8,30 +8,13 @@ import { CONTENT_POINTS } from './config/content'
 import { getColorScheme } from './config/colors'
 import { ANIMATION_TIMINGS, SCROLL_CONFIG } from './config/animations'
 import { getCompositionState } from './config/compositions'
+import { useAudioPlayer } from './hooks/useAudioPlayer'
 import './App.css'
-
-const STORAGE_KEY = 'radio_free_moon_current_point'
-
-// Load saved position from localStorage
-const getSavedPosition = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved !== null) {
-      const position = parseInt(saved, 10)
-      if (position >= 0 && position < CONTENT_POINTS.length) {
-        return position
-      }
-    }
-  } catch (error) {
-    console.warn('Failed to load saved position:', error)
-  }
-  return 0
-}
 
 function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [hasShownFirstContent, setHasShownFirstContent] = useState(false)
-  const [currentPoint, setCurrentPoint] = useState(getSavedPosition)
+  const [currentPoint, setCurrentPoint] = useState(0)
   const [targetRotation, setTargetRotation] = useState(null)
   const [animationDirection, setAnimationDirection] = useState('')
   const [animationKey, setAnimationKey] = useState(0)
@@ -40,6 +23,20 @@ function App() {
   const [randomSeed, setRandomSeed] = useState(Math.random() * 1000)
   const scrollAccumulator = useRef({ x: 0, y: 0 })
   const lastScrollTime = useRef(Date.now())
+
+  // Audio player with 1.5 second crossfade
+  const { playTrack } = useAudioPlayer(1500)
+
+  // Play audio when navigating to a new card
+  useEffect(() => {
+    const currentContent = CONTENT_POINTS[currentPoint]
+    if (currentContent?.audioFile) {
+      playTrack(currentContent.audioFile)
+    } else {
+      // No audio file (like the radio card), stop playback
+      playTrack(null)
+    }
+  }, [currentPoint, playTrack])
 
   // Get current color index and composition from content point
   const currentColorIndex = CONTENT_POINTS[currentPoint].colorIndex
@@ -249,15 +246,6 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [isLoading, handleWheel, handleKeyDown])
-
-  // Save current position to localStorage whenever it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, currentPoint.toString())
-    } catch (error) {
-      console.warn('Failed to save position:', error)
-    }
-  }, [currentPoint])
 
   // Initialize rotation and first card animation
   useEffect(() => {

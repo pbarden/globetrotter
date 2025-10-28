@@ -7,7 +7,8 @@ An interactive 3D music exploration experience featuring a low-poly wireframe gl
 - **3D Wireframe Globe**: Low-poly PlayStation-style sphere with shading effects
 - **Scroll Navigation**: Scroll vertically or horizontally to rotate the globe to different music tracks
 - **Music Collection**: 42 points in a 7x6 grid - 1 genre selection card and 41 song cards
-- **Genre Selection**: Interactive TAD Radio card for browsing music by genre (Lofi, Piano, Electronic, Hip-hop, Epic)
+- **Audio Playback**: Automatic music playback with smooth 1.5s crossfade transitions between tracks
+- **Genre Selection**: Interactive Radio Free Moon card for browsing music by genre (Lofi, Piano, Electronic, Hip-hop, Epic)
 - **Dynamic Song Cards**: Each song displays with album art, artist info, and YouTube link
 - **Wavy Blob Effect**: Cards that need reorientation get an animated blob outline with gradient glow
 - **Dithering Filter**: Retro-style dithering overlay for visual enhancement
