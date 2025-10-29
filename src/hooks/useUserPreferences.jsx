@@ -9,7 +9,8 @@ const DEFAULT_PREFERENCES = {
     electronic: false,
     chill: false,
     epic: false
-  }
+  },
+  activeGenre: null // Track most recently clicked genre
 }
 
 // Create context for shared preferences
@@ -45,13 +46,18 @@ export function UserPreferencesProvider({ children }) {
    * @param {string} genre - Genre key (lofi, piano, electronic, chill, epic)
    */
   const toggleGenre = useCallback((genre) => {
-    setPreferences(prev => ({
-      ...prev,
-      genres: {
-        ...prev.genres,
-        [genre]: !prev.genres[genre]
+    setPreferences(prev => {
+      const newValue = !prev.genres[genre]
+      return {
+        ...prev,
+        genres: {
+          ...prev.genres,
+          [genre]: newValue
+        },
+        // When toggling ON, set as active genre
+        activeGenre: newValue ? genre : prev.activeGenre
       }
-    }))
+    })
   }, [])
 
   /**
@@ -88,6 +94,7 @@ export function UserPreferencesProvider({ children }) {
   const value = {
     preferences,
     genres: preferences.genres,
+    activeGenre: preferences.activeGenre,
     toggleGenre,
     setGenre,
     clearGenres

@@ -32,7 +32,7 @@ function App() {
   const radioNavigationTimeouts = useRef({ out: null, in: null })
 
   // Get user genre preferences
-  const { genres } = useUserPreferences()
+  const { genres, activeGenre } = useUserPreferences()
 
   // Navigate to a specific direction
   const navigateToDirection = useCallback((direction) => {
@@ -315,7 +315,28 @@ function App() {
   }, [currentPoint, playTrack, skipAudioUpdate])
 
   // Get current color index and composition from content point
-  const currentColorIndex = CONTENT_POINTS[currentPoint]?.colorIndex || 0
+  // For Radio Free Moon card (point 0), dynamically determine color based on most recently clicked genre
+  const currentColorIndex = useMemo(() => {
+    if (currentPoint === 0) {
+      // Map genres to their corresponding color indices
+      const genreToColorIndex = {
+        lofi: 2,        // Green/Mint
+        piano: 4,       // Purple/Violet
+        electronic: 0,  // Gold/Orange/Yellow
+        chill: 5,       // Cyan/Aqua
+        epic: 3         // Red/Crimson
+      }
+
+      if (activeGenre && genreToColorIndex[activeGenre] !== undefined) {
+        return genreToColorIndex[activeGenre]
+      }
+
+      return 1 // Default gold when no genre selected
+    }
+
+    return CONTENT_POINTS[currentPoint]?.colorIndex || 0
+  }, [currentPoint, activeGenre])
+
   const currentColorScheme = useMemo(() => getColorScheme(currentColorIndex), [currentColorIndex])
   const currentComposition = useMemo(() => {
     const compositionId = CONTENT_POINTS[currentPoint]?.composition || 'default'

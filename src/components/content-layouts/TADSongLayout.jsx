@@ -74,28 +74,16 @@ export function TADSongLayout({ content, currentScheme }) {
 
             return (
               <div key={index} className={`song-genre-icon-area song-genre-icon-${index + 1}`}>
-                <div className="song-genre-icon-box">
-                  <div
-                    className="song-genre-icon-placeholder"
-                    style={{
-                      background: isActive
-                        ? `linear-gradient(135deg, ${currentScheme.primary}22 0%, ${currentScheme.secondary}22 100%)`
-                        : 'linear-gradient(135deg, #444444 0%, #333333 100%)',
-                      border: isActive
-                        ? `1px solid ${currentScheme.primary}44`
-                        : '1px solid #555555'
-                    }}
-                  >
-                    <IconComponent
-                      size={24}
-                      strokeWidth={1.5}
-                      style={{
-                        color: isActive ? currentScheme.primary : '#666666',
-                        opacity: isActive ? 0.8 : 0.4
-                      }}
-                    />
-                  </div>
-                </div>
+                <IconComponent
+                  size={48}
+                  strokeWidth={2.5}
+                  fill={isActive ? `url(#song-gradient-${index})` : 'none'}
+                  style={{
+                    color: isActive ? currentScheme.primary : '#666666',
+                    opacity: isActive ? 1 : 0.4,
+                    transition: 'all 0.3s ease'
+                  }}
+                />
                 <span
                   className="song-genre-label-text"
                   style={{
@@ -105,6 +93,19 @@ export function TADSongLayout({ content, currentScheme }) {
                 >
                   {genre.label}
                 </span>
+
+                {/* SVG gradient definition for active state */}
+                {isActive && (
+                  <svg width="0" height="0" style={{ position: 'absolute' }}>
+                    <defs>
+                      <linearGradient id={`song-gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style={{ stopColor: currentScheme.primary, stopOpacity: 1 }} />
+                        <stop offset="50%" style={{ stopColor: currentScheme.secondary, stopOpacity: 1 }} />
+                        <stop offset="100%" style={{ stopColor: currentScheme.accent, stopOpacity: 1 }} />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                )}
               </div>
             )
           })}

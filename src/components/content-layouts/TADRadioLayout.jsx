@@ -7,11 +7,23 @@ import './TADRadioLayout.css'
  * TADRadioLayout - Radio/Genre selection layout for Radio Free Moon
  */
 export function TADRadioLayout({ content, currentScheme }) {
-  // Use gold/yellow/orange color scheme (index 0) for this layout
-  const goldScheme = { primary: '#ffd700', secondary: '#ff8c00', accent: '#ffaa00' }
-
   // Get user preferences
   const { genres, toggleGenre } = useUserPreferences()
+
+  // Map genres to color schemes
+  const genreColorSchemes = {
+    lofi: { primary: '#00ffaa', secondary: '#00ff88', accent: '#88ff00' }, // Green/Mint (2)
+    piano: { primary: '#b388ff', secondary: '#8844ff', accent: '#cc99ff' }, // Purple/Violet (4)
+    electronic: { primary: '#ffd700', secondary: '#ff8c00', accent: '#ffaa00' }, // Gold/Orange/Yellow (0)
+    chill: { primary: '#00ffff', secondary: '#00ccff', accent: '#66ffff' }, // Cyan/Aqua (5)
+    epic: { primary: '#ff6b6b', secondary: '#ff3333', accent: '#ff9999' }  // Red/Crimson (3)
+  }
+
+  // Determine active color scheme based on selected genres
+  const selectedGenres = Object.keys(genres).filter(genre => genres[genre])
+  const activeScheme = selectedGenres.length > 0 && genreColorSchemes[selectedGenres[0]]
+    ? genreColorSchemes[selectedGenres[0]]
+    : { primary: '#ffd700', secondary: '#ff8c00', accent: '#ffaa00' } // Default gold
 
   // Genre icons - can be customized
   const genreIcons = [
@@ -40,7 +52,7 @@ export function TADRadioLayout({ content, currentScheme }) {
           <h1
             className="tad-radio-title"
             style={{
-              background: `linear-gradient(135deg, ${goldScheme.primary} 0%, ${goldScheme.secondary} 50%, ${goldScheme.accent} 100%)`,
+              background: `linear-gradient(135deg, #ffd700 0%, #ff8c00 50%, #ffaa00 100%)`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
@@ -52,7 +64,7 @@ export function TADRadioLayout({ content, currentScheme }) {
 
         {/* Subheading */}
         <p className="tad-radio-subtitle">
-          Pick the styles you're in the mood to hear. Then, scroll or swipe in any direction to start listening. You can navigate back to this screen and change your preferences at any time.
+          Pick the styles you're in the mood to hear. Then, scroll or swipe in any direction to start listening. You can change your preferences at any time.
         </p>
 
         {/* Genre Icons Row (5 icons in 9-column grid) */}
@@ -60,39 +72,47 @@ export function TADRadioLayout({ content, currentScheme }) {
           {genreIcons.map((genre, index) => {
             const IconComponent = genre.icon
             const isSelected = genres[genre.key]
-            const borderColor = isSelected ? goldScheme.primary : 'rgba(100, 150, 255, 0.25)'
-            const iconColor = isSelected ? goldScheme.primary : 'rgba(100, 150, 255, 0.5)'
+            const genreScheme = genreColorSchemes[genre.key] || { primary: '#ffd700', secondary: '#ff8c00', accent: '#ffaa00' }
 
             return (
-              <div key={index} className={`genre-icon-area genre-icon-${index + 1}`}>
-                <div
-                  className={`genre-icon-box floating-card ${isSelected ? 'selected' : ''}`}
-                  style={{ borderColor }}
-                  onClick={() => toggleGenre(genre.key)}
-                >
-                  <div
-                    className="genre-icon-placeholder"
-                    style={{
-                      background: `linear-gradient(135deg, ${goldScheme.primary}22 0%, ${goldScheme.secondary}22 100%)`,
-                      border: `1px solid ${isSelected ? goldScheme.primary + '44' : 'rgba(100, 150, 255, 0.15)'}`
-                    }}
-                  >
-                    <IconComponent
-                      size={24}
-                      strokeWidth={1.5}
-                      style={{ color: iconColor, opacity: isSelected ? 1 : 0.6 }}
-                    />
-                  </div>
-                </div>
+              <div
+                key={index}
+                className={`genre-icon-area genre-icon-${index + 1}`}
+                onClick={() => toggleGenre(genre.key)}
+                style={{ cursor: 'pointer' }}
+              >
+                <IconComponent
+                  size={48}
+                  strokeWidth={2.5}
+                  fill={isSelected ? `url(#genre-gradient-${index})` : 'none'}
+                  style={{
+                    color: isSelected ? genreScheme.primary : 'rgba(100, 150, 255, 0.4)',
+                    opacity: isSelected ? 1 : 0.5,
+                    transition: 'all 0.3s ease'
+                  }}
+                />
                 <span
                   className="genre-label-text"
                   style={{
-                    color: isSelected ? goldScheme.primary : 'rgba(192, 216, 255, 0.6)',
+                    color: isSelected ? genreScheme.primary : 'rgba(192, 216, 255, 0.6)',
                     opacity: isSelected ? 1 : 0.7
                   }}
                 >
                   {genre.label}
                 </span>
+
+                {/* SVG gradient definition for this genre */}
+                {isSelected && (
+                  <svg width="0" height="0" style={{ position: 'absolute' }}>
+                    <defs>
+                      <linearGradient id={`genre-gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style={{ stopColor: genreScheme.primary, stopOpacity: 1 }} />
+                        <stop offset="50%" style={{ stopColor: genreScheme.secondary, stopOpacity: 1 }} />
+                        <stop offset="100%" style={{ stopColor: genreScheme.accent, stopOpacity: 1 }} />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                )}
               </div>
             )
           })}
