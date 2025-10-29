@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, createContext, useContext } from 'react'
 
 const STORAGE_KEY = 'radio_free_moon_preferences'
 
@@ -7,16 +7,18 @@ const DEFAULT_PREFERENCES = {
     lofi: false,
     piano: false,
     electronic: false,
-    hiphop: false,
+    chill: false,
     epic: false
   }
 }
 
+// Create context for shared preferences
+const UserPreferencesContext = createContext(null)
+
 /**
- * Hook for managing user preferences
- * @returns {object} Preferences and control functions
+ * Provider component for user preferences
  */
-export function useUserPreferences() {
+export function UserPreferencesProvider({ children }) {
   const [preferences, setPreferences] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
@@ -40,7 +42,7 @@ export function useUserPreferences() {
 
   /**
    * Toggle a genre preference
-   * @param {string} genre - Genre key (lofi, piano, electronic, hiphop, epic)
+   * @param {string} genre - Genre key (lofi, piano, electronic, chill, epic)
    */
   const toggleGenre = useCallback((genre) => {
     setPreferences(prev => ({
@@ -77,17 +79,35 @@ export function useUserPreferences() {
         lofi: false,
         piano: false,
         electronic: false,
-        hiphop: false,
+        chill: false,
         epic: false
       }
     }))
   }, [])
 
-  return {
+  const value = {
     preferences,
     genres: preferences.genres,
     toggleGenre,
     setGenre,
     clearGenres
   }
+
+  return (
+    <UserPreferencesContext.Provider value={value}>
+      {children}
+    </UserPreferencesContext.Provider>
+  )
+}
+
+/**
+ * Hook for accessing user preferences
+ * @returns {object} Preferences and control functions
+ */
+export function useUserPreferences() {
+  const context = useContext(UserPreferencesContext)
+  if (!context) {
+    throw new Error('useUserPreferences must be used within UserPreferencesProvider')
+  }
+  return context
 }

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import * as Icons from 'lucide-react'
-import { useUserPreferences } from '../../hooks/useUserPreferences'
+import { useUserPreferences } from '../../hooks/useUserPreferences.jsx'
 import './TADRadioLayout.css'
 
 /**

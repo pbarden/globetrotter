@@ -10,7 +10,7 @@ import { getColorScheme } from './config/colors'
 import { ANIMATION_TIMINGS, SCROLL_CONFIG } from './config/animations'
 import { getCompositionState } from './config/compositions'
 import { useAudioPlayer } from './hooks/useAudioPlayer'
-import { useUserPreferences } from './hooks/useUserPreferences'
+import { useUserPreferences } from './hooks/useUserPreferences.jsx'
 import './App.css'
 
 function App() {
@@ -113,7 +113,10 @@ function App() {
 
       nextPoint = foundPoint !== null ? foundPoint : 1 // Fallback to card 1
     } else {
-      // Normal navigation - calculate next card and skip radio card if needed
+      // Normal navigation - calculate next card and respect genre preferences
+      const selectedGenres = Object.keys(genres).filter(genre => genres[genre])
+      const hasPreferences = selectedGenres.length > 0
+
       switch (direction) {
         case 'up':
           const nextRowUp = (currentRow + 1) % SCROLL_CONFIG.GRID_ROWS
@@ -141,11 +144,24 @@ function App() {
           break
       }
 
-      // Skip radio card and empty cells - keep going in the same direction
+      // Skip radio card, empty cells, and songs that don't match genre preferences
       let attempts = 0
       const maxAttempts = SCROLL_CONFIG.GRID_ROWS * SCROLL_CONFIG.GRID_COLS
 
-      while ((nextPoint === 0 || nextPoint === currentPoint || !CONTENT_POINTS[nextPoint]) && attempts < maxAttempts) {
+      const shouldSkipPoint = (point) => {
+        if (point === 0 || point === currentPoint || !CONTENT_POINTS[point]) {
+          return true
+        }
+        // If user has genre preferences, check if this song matches
+        if (hasPreferences) {
+          const content = CONTENT_POINTS[point]
+          const matchesPreference = selectedGenres.some(genre => content?.genres?.[genre])
+          return !matchesPreference
+        }
+        return false
+      }
+
+      while (shouldSkipPoint(nextPoint) && attempts < maxAttempts) {
         const skipRow = Math.floor(nextPoint / SCROLL_CONFIG.GRID_COLS)
         const skipCol = nextPoint % SCROLL_CONFIG.GRID_COLS
 
@@ -166,9 +182,22 @@ function App() {
         attempts++
       }
 
-      // Final safety check - if still invalid, find first valid card
+      // Final safety check - if still invalid, find first valid card (respecting preferences if set)
       if (!CONTENT_POINTS[nextPoint] || nextPoint === 0 || nextPoint === currentPoint) {
-        nextPoint = 1
+        // Try to find a valid song that matches preferences
+        let foundValid = false
+        for (let i = 1; i < CONTENT_POINTS.length && !foundValid; i++) {
+          if (CONTENT_POINTS[i] && i !== currentPoint) {
+            if (!hasPreferences || selectedGenres.some(genre => CONTENT_POINTS[i]?.genres?.[genre])) {
+              nextPoint = i
+              foundValid = true
+            }
+          }
+        }
+        // Ultimate fallback - just go to card 1
+        if (!foundValid) {
+          nextPoint = 1
+        }
       }
     }
 
