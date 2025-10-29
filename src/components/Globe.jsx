@@ -133,6 +133,21 @@ function GlobeComponent({ rotation, targetRotation, scale = 1, position = [0, 0,
     setComplexityTransition(targetComplexity)
   }, [complexity])
 
+  // Cleanup Three.js resources on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (geometry) {
+        geometry.dispose()
+      }
+      if (edges) {
+        edges.dispose()
+      }
+      if (materialRef.current) {
+        materialRef.current.dispose()
+      }
+    }
+  }, [geometry, edges])
+
   // Animate rotation and colors
   useFrame((state, delta) => {
     // Smooth position and scale interpolation - slow and sexy

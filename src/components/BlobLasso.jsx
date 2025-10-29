@@ -20,6 +20,9 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, composi
   const hasCalledComplete = useRef(false)
   const hasStartedAnimation = useRef(false)
 
+  // Reusable array for path generation to reduce memory allocations
+  const pathPartsArrayRef = useRef(new Array(10))
+
   // Position transition tracking
   const previousPositionRef = useRef(null)
   const isTransitioningRef = useRef(false)
@@ -252,8 +255,8 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, composi
     const centerY = 200
     const speed = 0.8 // Faster animation speed
 
-    // Optimization #2: Pre-allocate array (1 M command + 8 Q commands + 1 Z)
-    const pathParts = new Array(points + 2)
+    // Reuse array to reduce memory allocations
+    const pathParts = pathPartsArrayRef.current
     let idx = 0
 
     // Pre-calculate first point

@@ -157,7 +157,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .tad-radio-layout {
-    padding: 1.5rem;
+    padding: 1rem;
   }
 
   .tad-radio-header {
@@ -183,19 +183,9 @@
     gap: 0.5rem;
   }
 
-  .genre-icon-box {
-    width: 48px;
-    height: 48px;
-    padding: 6px;
-  }
-
-  .genre-icon-placeholder svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .genre-labels-row {
-    gap: 0.5rem;
+  .genre-icon-area svg {
+    width: 42px !important;
+    height: 42px !important;
   }
 
   .genre-label-text {
@@ -204,26 +194,5 @@
 
   .mm-credits {
     font-size: 0.7rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .tad-radio-title {
-    font-size: 1.75rem;
-  }
-
-  .genre-icon-box {
-    width: 40px;
-    height: 40px;
-    padding: 4px;
-  }
-
-  .genre-icon-placeholder svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .genre-label-text {
-    font-size: 0.6rem;
   }
 }
