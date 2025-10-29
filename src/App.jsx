@@ -614,8 +614,8 @@ function App() {
           onClick={handleRadioButtonClick}
         />
 
-        {/* Scroll hint */}
-        {!isLoading && hasShownFirstContent && (
+        {/* Scroll hint - only show on radio card */}
+        {!isLoading && hasShownFirstContent && currentPoint === 0 && (
           <div className="scroll-hint">
             <p>Scroll or swipe to explore</p>
             <div className="scroll-indicator">↕ ↔</div>
