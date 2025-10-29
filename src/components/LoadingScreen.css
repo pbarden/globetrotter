@@ -113,3 +113,16 @@
     transform: scale(1.05);
   }
 }
+
+/* Trace animation for the morphing shape */
+.trace-animation {
+  stroke-dasharray: 500;
+  stroke-dashoffset: 0;
+  animation: trace 1.5s ease-out forwards;
+}
+
+@keyframes trace {
+  to {
+    stroke-dashoffset: 500;
+  }
+}

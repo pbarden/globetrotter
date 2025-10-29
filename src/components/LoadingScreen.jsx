@@ -185,6 +185,7 @@ function LoadingScreenComponent({ onLoadComplete }) {
   const [progress, setProgress] = useState(0)
   const [isReady, setIsReady] = useState(false)
   const [showTapToContinue, setShowTapToContinue] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
   const [, forceUpdate] = useState({})
   const animationTimeRef = useRef(0)
   const lastFrameTimeRef = useRef(performance.now())
@@ -199,12 +200,14 @@ function LoadingScreenComponent({ onLoadComplete }) {
       const deltaTime = currentTime - lastFrameTimeRef.current
       lastFrameTimeRef.current = currentTime
 
-      // Update animation time using ref (no re-render)
-      animationTimeRef.current += deltaTime
+      // Only update animation time if not paused
+      if (!isPaused) {
+        animationTimeRef.current += deltaTime
 
-      // Force update only every 2 frames (30fps instead of 60fps for better performance)
-      if (Math.floor(animationTimeRef.current / 33) !== Math.floor((animationTimeRef.current - deltaTime) / 33)) {
-        forceUpdate({})
+        // Force update only every 2 frames (30fps instead of 60fps for better performance)
+        if (Math.floor(animationTimeRef.current / 33) !== Math.floor((animationTimeRef.current - deltaTime) / 33)) {
+          forceUpdate({})
+        }
       }
 
       animationFrameId = requestAnimationFrame(animate)
@@ -212,7 +215,7 @@ function LoadingScreenComponent({ onLoadComplete }) {
 
     animationFrameId = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(animationFrameId)
-  }, [])
+  }, [isPaused])
 
   // Cleanup audio on unmount
   useEffect(() => {
@@ -261,6 +264,7 @@ function LoadingScreenComponent({ onLoadComplete }) {
         setProgress((prev) => {
           if (loadingComplete && prev >= 100) {
             setShowTapToContinue(true)
+            setIsPaused(true) // Pause the morphing animation
             shouldContinue = false
             return 100
           }
@@ -324,46 +328,34 @@ function LoadingScreenComponent({ onLoadComplete }) {
                 const pausePercentage = 10 // 10% of each phase is pause
                 const morphPercentage = 100 - pausePercentage
 
+                let pathData
                 if (phase < 33) {
                   // Circle to Triangle morph (0-33%)
                   const phaseProgress = (phase / 33) * 100
                   const t = phaseProgress <= morphPercentage ? (phaseProgress / morphPercentage) : 1
-                  return (
-                    <path
-                      d={getCircleToTrianglePath(t)}
-                      fill="none"
-                      stroke="#6a5acd"
-                      strokeWidth="3"
-                      filter="url(#neon-glow)"
-                    />
-                  )
+                  pathData = getCircleToTrianglePath(t)
                 } else if (phase < 66) {
                   // Triangle to Square morph (33-66%)
                   const phaseProgress = ((phase - 33) / 33) * 100
                   const t = phaseProgress <= morphPercentage ? (phaseProgress / morphPercentage) : 1
-                  return (
-                    <path
-                      d={getTriangleToSquarePath(t)}
-                      fill="none"
-                      stroke="#6a5acd"
-                      strokeWidth="3"
-                      filter="url(#neon-glow)"
-                    />
-                  )
+                  pathData = getTriangleToSquarePath(t)
                 } else {
                   // Square to Circle morph (66-100%)
                   const phaseProgress = ((phase - 66) / 34) * 100
                   const t = phaseProgress <= morphPercentage ? (phaseProgress / morphPercentage) : 1
-                  return (
-                    <path
-                      d={getSquareToCirclePath(t)}
-                      fill="none"
-                      stroke="#6a5acd"
-                      strokeWidth="3"
-                      filter="url(#neon-glow)"
-                    />
-                  )
+                  pathData = getSquareToCirclePath(t)
                 }
+
+                return (
+                  <path
+                    d={pathData}
+                    fill="none"
+                    stroke="#6a5acd"
+                    strokeWidth="3"
+                    filter="url(#neon-glow)"
+                    className={isPaused ? 'trace-animation' : ''}
+                  />
+                )
               })()}
             </svg>
           </div>
