@@ -33,7 +33,7 @@
   lofi: true/false,        // Lofi/chill beats
   piano: true/false,       // Piano-focused
   electronic: true/false,  // Electronic/synth
-  hiphop: true/false,      // Hip-hop beats
+  chill: true/false,       // Chill/ambient music
   epic: true/false         // Epic/orchestral
 }
 ```
@@ -55,7 +55,7 @@
     lofi: false,
     piano: false,
     electronic: false,
-    hiphop: false,
+    chill: false,
     epic: false
   }
 }
@@ -66,7 +66,7 @@
 **Lofi tracks** - Set `lofi: true`
 **Piano-heavy** - Set `piano: true`
 **Electronic/synth** - Set `electronic: true`
-**Hip-hop beats** - Set `hiphop: true`
+**Chill/ambient** - Set `chill: true`
 **Epic/orchestral** - Set `epic: true`
 
 Multiple genres? Set multiple to true!
@@ -89,6 +89,6 @@ Multiple genres? Set multiple to true!
 - Colors: 5 (Cyan), 4 (Purple), 0 (Gold)
 - Compositions: default, atmosphere
 
-**Hip-hop:**
-- Colors: 3 (Red), 6 (Orange), 1 (Magenta)
-- Compositions: meteor, comet, atom
+**Chill/Ambient:**
+- Colors: 5 (Cyan), 2 (Green), 4 (Purple)
+- Compositions: atmosphere, default, sky

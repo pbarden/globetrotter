@@ -213,7 +213,7 @@ Each song can be tagged with one or more of **5 genres**. These are boolean flag
 - **lofi**: Lofi/chill beats
 - **piano**: Piano-focused tracks
 - **electronic**: Electronic/synth music
-- **hiphop**: Hip-hop beats
+- **chill**: Chill/ambient music
 - **epic**: Epic/orchestral music
 
 ### Genre Structure:
@@ -222,7 +222,7 @@ genres: {
   lofi: true,        // This song IS lofi
   piano: false,      // This song is NOT piano-focused
   electronic: false,
-  hiphop: false,
+  chill: false,
   epic: false
 }
 ```
@@ -234,7 +234,7 @@ genres: {
   lofi: true,        // Both lofi AND piano
   piano: true,
   electronic: false,
-  hiphop: false,
+  chill: false,
   epic: false
 }
 ```
@@ -260,7 +260,7 @@ genres: {
     lofi: true,               // Tagged as lofi
     piano: false,
     electronic: false,
-    hiphop: false,
+    chill: false,
     epic: false
   }
 }
@@ -283,13 +283,13 @@ genres: {
     lofi: false,
     piano: true,              // Tagged as both
     electronic: false,
-    hiphop: false,
+    chill: false,
     epic: true                // piano and epic
   }
 }
 ```
 
-### Example 3: Electronic Hip-Hop
+### Example 3: Electronic Chill
 ```javascript
 {
   id: 18,
@@ -306,7 +306,7 @@ genres: {
     lofi: false,
     piano: false,
     electronic: true,         // Both electronic
-    hiphop: true,             // and hip-hop
+    chill: true,              // and chill
     epic: false
   }
 }
@@ -329,7 +329,7 @@ genres: {
     lofi: true,               // Lofi piano
     piano: true,
     electronic: false,
-    hiphop: false,
+    chill: false,
     epic: false
   }
 }
@@ -358,7 +358,7 @@ genres: {
   lofi: true,      // Change to true/false
   piano: false,    // Change to true/false
   electronic: false,
-  hiphop: false,
+  chill: false,
   epic: false
 }
 ```

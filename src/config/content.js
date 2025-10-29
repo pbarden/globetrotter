@@ -145,7 +145,7 @@ const songTracks = [
   {
     title: 'Iced Village',
     file: 'Iced_Village_8-bit_Version',
-    colorIndex: 9,
+    colorIndex: 0,
     composition: 'atmosphere',
     genres: { lofi: true, piano: false, electronic: false, chill: true, epic: false }
   },
@@ -301,7 +301,7 @@ const songTracks = [
     file: 'Solved',
     colorIndex: 4,
     composition: 'atom',
-    genres: { lofi: false, piano: true, electronic: false, chill: false, epic: false }
+    genres: { lofi: false, piano: false, electronic: true, chill: false, epic: false }
   },
   {
     title: 'Suicidal Moon',
