@@ -250,7 +250,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, composi
 
   const generateBlobPath = (time) => {
     const points = 8
-    const radius = 180
+    const radius = 200
     const centerX = 200
     const centerY = 200
     const speed = 0.8 // Faster animation speed
@@ -368,7 +368,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, composi
           d=""
           fill="none"
           stroke={`url(#gradient3-${content.id})`}
-          strokeWidth="2"
+          strokeWidth="4"
           filter={`url(#glow3-${content.id})`}
         />
       </svg>
@@ -402,7 +402,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, composi
           d=""
           fill="none"
           stroke={`url(#gradient2-${content.id})`}
-          strokeWidth="2.5"
+          strokeWidth="5"
           filter={`url(#glow2-${content.id})`}
         />
       </svg>
@@ -435,7 +435,7 @@ function BlobLassoComponent({ content, isActive, randomSeed, colorIndex, composi
           d=""
           fill="none"
           stroke={`url(#gradient-${content.id})`}
-          strokeWidth="3"
+          strokeWidth="6"
           filter={`url(#glow-${content.id})`}
         />
       </svg>

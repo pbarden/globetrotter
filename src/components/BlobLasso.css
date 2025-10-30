@@ -14,6 +14,14 @@
   backface-visibility: hidden;
 }
 
+/* Make blobs larger on mobile for better visibility */
+@media (max-width: 768px) {
+  .blob-lasso {
+    width: 65vw;
+    height: 65vw;
+  }
+}
+
 .blob-lasso path {
   will-change: d;
 }
