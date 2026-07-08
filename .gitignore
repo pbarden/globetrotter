@@ -25,3 +25,8 @@ dist-ssr
 .claude
 
 globesite
+
+# Android signing
+android/keystore.properties
+android/app/*.keystore
+*.keystore
